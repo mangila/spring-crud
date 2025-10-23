@@ -5,3 +5,12 @@ spring:
     compose:
       enabled: true
       file: ${user.dir}/infrastructure/local/compose.yaml
+      skip:
+        in-tests: true
+  jpa:
+    properties:
+      hibernate.generate_statistics: false
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
