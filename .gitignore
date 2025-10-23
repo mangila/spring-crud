@@ -115,6 +115,9 @@ terraform.rc
 # GENERAL
 # =========================================
 
+key
+key.pub
+
 # OS files
 .DS_Store
 Thumbs.db

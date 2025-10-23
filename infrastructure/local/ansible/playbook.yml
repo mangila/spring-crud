@@ -1,0 +1,41 @@
+# bootstrap remove later
+---
+- name: Deploy and start NGINX web server
+  hosts: webservers
+  become: yes # run tasks with sudo privileges
+  vars:
+    nginx_port: 80
+
+  tasks:
+    - name: Ensure apt cache is up to date
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install NGINX
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    - name: Start and enable NGINX service
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Create custom index.html
+      ansible.builtin.copy:
+        dest: /var/www/html/index.html
+        content: |
+          <html>
+          <head><title>Welcome</title></head>
+          <body>
+            <h1>NGINX is running on {{ inventory_hostname }}</h1>
+          </body>
+          </html>
+
+    - name: Allow HTTP traffic in UFW
+      ansible.builtin.ufw:
+        rule: allow
+        port: "{{ nginx_port }}"
+        proto: tcp
