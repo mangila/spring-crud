@@ -4,6 +4,7 @@ import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
 import com.github.mangila.app.model.employee.dto.EmployeeDto;
 import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
 import com.github.mangila.app.service.EmployeeRestFacade;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -35,7 +36,7 @@ public class EmployeeController {
 
     @PostMapping
     public ResponseEntity<?> createNewEmployee(
-            @NotNull CreateNewEmployeeRequest request
+            @NotNull @Valid CreateNewEmployeeRequest request
     ) {
         restFacade.createNewEmployee(request);
         URI location = UriComponentsBuilder.fromUriString("")
@@ -47,7 +48,7 @@ public class EmployeeController {
 
     @PatchMapping
     public ResponseEntity<?> updateEmployee(
-            @NotNull UpdateEmployeeRequest request
+            @NotNull @Valid UpdateEmployeeRequest request
     ) {
         restFacade.updateEmployee(request);
         return ResponseEntity.ok().build();

@@ -9,23 +9,20 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 
+/**
+ * Entity is a coded representation of a database table.
+ */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "employee")
 @lombok.NoArgsConstructor
+@lombok.Data
 public class EmployeeEntity {
 
     @Id
-    @GeneratedValue
-    private Long id;
-
-    @Column(
-            name = "employee_id",
-            nullable = false,
-            unique = true,
-            length = 36
-    )
-    private String employeeId;
+    @Column(name = "id",
+            length = 36)
+    private String id;
 
     @Column(name = "name",
             nullable = false)
@@ -34,8 +31,7 @@ public class EmployeeEntity {
     @Column(name = "salary",
             nullable = false,
             precision = 10,
-            scale = 2
-    )
+            scale = 2)
     private BigDecimal salary;
 
     @Type(JsonBinaryType.class)
@@ -44,5 +40,5 @@ public class EmployeeEntity {
     private ObjectNode attributes;
 
     @Embedded
-    private AuditMetadata auditMetadata;
+    private AuditMetadata auditMetadata = new AuditMetadata();
 }

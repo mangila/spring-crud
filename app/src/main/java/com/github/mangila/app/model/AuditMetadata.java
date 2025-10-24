@@ -9,19 +9,16 @@ import java.time.Instant;
 
 @Embeddable
 @lombok.NoArgsConstructor
+@lombok.Data
 public class AuditMetadata {
     @CreatedDate
-    @Column(name = "created",
-            nullable = false,
-            updatable = false)
+    @Column(name = "created", updatable = false)
     private Instant created;
 
     @LastModifiedDate
-    @Column(name = "modified",
-            nullable = false)
+    @Column(name = "modified")
     private Instant modified;
 
-    @Column(name = "deleted",
-            nullable = false)
+    @Column(name = "deleted")
     private Boolean deleted = false;
 }
