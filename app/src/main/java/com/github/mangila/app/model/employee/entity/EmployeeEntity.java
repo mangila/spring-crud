@@ -10,7 +10,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.math.BigDecimal;
 
 /**
- * Entity is a coded representation of a database table.
+ * Entity is a POJO representation of a database table.
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
