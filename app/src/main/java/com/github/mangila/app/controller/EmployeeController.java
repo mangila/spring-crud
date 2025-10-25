@@ -30,9 +30,9 @@ public class EmployeeController {
 
     @GetMapping("{employeeId}")
     public ResponseEntity<EmployeeDto> findEmployeeById(
-            @PathVariable
             @NotBlank
-            @Size(min = 36, max = 36) String employeeId) {
+            @Size(min = 36, max = 36)
+            @PathVariable String employeeId) {
         return ResponseEntity.ok(restFacade.findEmployeeById(employeeId));
     }
 
