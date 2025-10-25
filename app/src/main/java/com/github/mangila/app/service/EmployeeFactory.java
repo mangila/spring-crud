@@ -14,7 +14,9 @@ public class EmployeeFactory {
     }
 
     public Employee from(CreateNewEmployeeRequest request) {
-        EmployeeId id = employeeIdGenerator.generate();
+        EmployeeId id = employeeIdGenerator.generate(
+                request.firstName(),
+                request.lastName());
         return new Employee();
     }
 }

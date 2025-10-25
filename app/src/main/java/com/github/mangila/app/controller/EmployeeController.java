@@ -4,10 +4,10 @@ import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
 import com.github.mangila.app.model.employee.dto.EmployeeDto;
 import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
 import com.github.mangila.app.service.EmployeeRestFacade;
+import com.github.mangila.app.shared.annotation.ValidEmployeeId;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -30,9 +30,10 @@ public class EmployeeController {
 
     @GetMapping("{employeeId}")
     public ResponseEntity<EmployeeDto> findEmployeeById(
+            @PathVariable
             @NotBlank
-            @Size(min = 36, max = 36)
-            @PathVariable String employeeId) {
+            @ValidEmployeeId
+            String employeeId) {
         return ResponseEntity.ok(restFacade.findEmployeeById(employeeId));
     }
 
@@ -65,7 +66,7 @@ public class EmployeeController {
     public ResponseEntity<?> softDeleteEmployeeById(
             @PathVariable
             @NotBlank
-            @Size(min = 36, max = 36) String employeeId
+            @ValidEmployeeId String employeeId
     ) {
         restFacade.softDeleteEmployeeById(employeeId);
         return ResponseEntity.noContent().build();

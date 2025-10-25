@@ -6,5 +6,8 @@ package com.github.mangila.app.model.employee.domain;
  */
 @lombok.Data
 public class Employee {
+
     private EmployeeId id;
+    private EmployeeName firstName;
+    private EmployeeName lastName;
 }
