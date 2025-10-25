@@ -8,6 +8,10 @@ Deployed to AWS and automated with IaC (Infrastructure as Code) and CM (Configur
 
 Spring RESTful service with CRUD operations for the Employee domain. (The famous Employee CRUD, great for demonstration purposes)
 
+##### Swagger
+- Swagger UI is available at http://localhost:8080/swagger-ui.html
+- Swagger JSON is available at http://localhost:8080/v3/api-docs
+
 ### Terraform
 
 In this example we use the Terraform Cloud remote state backend.

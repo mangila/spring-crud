@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -34,24 +36,29 @@ public class EmployeeController {
         return ResponseEntity.ok(restFacade.findEmployeeById(employeeId));
     }
 
+    @GetMapping
+    public ResponseEntity<Page<EmployeeDto>> findAllEmployeesByPage(Pageable pageable) {
+        return ResponseEntity.ok(restFacade.findAllEmployeesByPage(pageable));
+    }
+
     @PostMapping
     public ResponseEntity<?> createNewEmployee(
             @NotNull @Valid CreateNewEmployeeRequest request
     ) {
-        restFacade.createNewEmployee(request);
-        URI location = UriComponentsBuilder.fromUriString("")
-                .build()
-                .toUri();
+        String id = restFacade.createNewEmployee(request);
+        URI location = UriComponentsBuilder.newInstance()
+                .path("/api/v1/employee/{employeeId}")
+                .build(id);
         return ResponseEntity.created(location)
                 .build();
     }
 
-    @PatchMapping
+    @PutMapping
     public ResponseEntity<?> updateEmployee(
             @NotNull @Valid UpdateEmployeeRequest request
     ) {
         restFacade.updateEmployee(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("{employeeId}")
@@ -61,6 +68,6 @@ public class EmployeeController {
             @Size(min = 36, max = 36) String employeeId
     ) {
         restFacade.softDeleteEmployeeById(employeeId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
