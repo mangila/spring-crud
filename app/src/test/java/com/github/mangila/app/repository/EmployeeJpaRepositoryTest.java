@@ -45,10 +45,11 @@ class EmployeeJpaRepositoryTest {
 
     @Test
     void softDeleteEmployee() {
-        var id = employeeIdGenerator.generate();
+        var id = employeeIdGenerator.generate("Firstname", "Lastname");
         var e = new EmployeeEntityBuilder()
                 .employeeId(id.value())
-                .name("Name")
+                .firstName("Name")
+                .lastName("Lastname")
                 .salary(new BigDecimal("10000.00"))
                 .attributes(objectMapper.createObjectNode())
                 .build();
@@ -65,7 +66,8 @@ class EmployeeJpaRepositoryTest {
      */
     public static class EmployeeEntityBuilder {
         private String employeeId;
-        private String name;
+        private String firstName;
+        private String lastName;
         private BigDecimal salary;
         private ObjectNode attributes;
 
@@ -74,8 +76,13 @@ class EmployeeJpaRepositoryTest {
             return this;
         }
 
-        public EmployeeEntityBuilder name(String name) {
-            this.name = name;
+        public EmployeeEntityBuilder firstName(String firstName) {
+            this.firstName = firstName;
+            return this;
+        }
+
+        public EmployeeEntityBuilder lastName(String lastName) {
+            this.lastName = lastName;
             return this;
         }
 
@@ -92,7 +99,8 @@ class EmployeeJpaRepositoryTest {
         public EmployeeEntity build() {
             var e = new EmployeeEntity();
             e.setId(employeeId);
-            e.setName(name);
+            e.setFirstName(firstName);
+            e.setLastName(lastName);
             e.setSalary(salary);
             e.setAttributes(attributes);
             return e;

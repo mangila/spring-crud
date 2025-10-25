@@ -20,13 +20,16 @@ import java.math.BigDecimal;
 public class EmployeeEntity {
 
     @Id
-    @Column(name = "id",
-            length = 36)
+    @Column(name = "id")
     private String id;
 
-    @Column(name = "name",
+    @Column(name = "first_name",
             nullable = false)
-    private String name;
+    private String firstName;
+
+    @Column(name = "last_name",
+            nullable = false)
+    private String lastName;
 
     @Column(name = "salary",
             nullable = false,
