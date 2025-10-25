@@ -17,7 +17,7 @@ public class ValidEmployeeIdValidator implements ConstraintValidator<ValidEmploy
         if (value == null || value.isEmpty()) {
             return true; // Defer null/empty check to @NotBlank or @NotNull
         }
-        // EMP-<2 chars name>
+        // EMP-<2 chars first_name><2 chars last_name>
         String substring = value.substring(0, 8);
         // UUID
         String uuid = value.substring(9);
