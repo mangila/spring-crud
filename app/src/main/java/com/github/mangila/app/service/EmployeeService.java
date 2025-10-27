@@ -8,6 +8,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service layer for Employee CRUD operations.
+ * <br>
+ * Service is responsible for orchestrating the business logic.
+ *
+ */
 @Service
 public class EmployeeService {
 

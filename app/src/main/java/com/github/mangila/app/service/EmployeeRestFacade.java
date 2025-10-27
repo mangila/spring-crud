@@ -9,6 +9,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+/**
+ * Facade for REST endpoints.
+ * <p>
+ * Facade is responsible for orchestrating REST API calls.
+ */
 @Service
 public class EmployeeRestFacade {
 

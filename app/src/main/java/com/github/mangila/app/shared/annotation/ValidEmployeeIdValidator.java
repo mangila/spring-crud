@@ -18,10 +18,10 @@ public class ValidEmployeeIdValidator implements ConstraintValidator<ValidEmploy
             return true; // Defer null/empty check to @NotBlank or @NotNull
         }
         // EMP-<2 chars first_name><2 chars last_name>
-        String substring = value.substring(0, 8);
+        String prefix = value.substring(0, 8);
         // UUID
         String uuid = value.substring(9);
-        return substring.matches("^EMP-[A-Z]{4}$") && canParseUuid(uuid);
+        return prefix.matches("^EMP-[A-Z]{4}$") && canParseUuid(uuid);
     }
 
     static boolean canParseUuid(String value) {
