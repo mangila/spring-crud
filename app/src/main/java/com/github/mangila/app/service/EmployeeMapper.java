@@ -6,6 +6,12 @@ import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import org.springframework.stereotype.Component;
 
+/**
+ * Mapper class for Employee DTOs and Entities.
+ * <p>
+ * The mapper is responsible for converting between the DTO and Entity objects.
+ *
+ */
 @Component
 public class EmployeeMapper {
 
