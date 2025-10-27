@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.config.JpaConfig;
+import com.github.mangila.app.model.employee.domain.EmployeeId;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import com.github.mangila.app.service.EmployeeIdGenerator;
 import org.junit.jupiter.api.AfterEach;
@@ -45,14 +46,9 @@ class EmployeeJpaRepositoryTest {
 
     @Test
     void softDeleteEmployee() {
-        var id = employeeIdGenerator.generate("Firstname", "Lastname");
         var e = new EmployeeEntityBuilder()
-                .employeeId(id.value())
-                .firstName("Name")
-                .lastName("Lastname")
-                .salary(new BigDecimal("10000.00"))
-                .attributes(objectMapper.createObjectNode())
                 .build();
+        var id = new EmployeeId(e.getId());
         repository.save(e);
         repository.softDeleteByEmployeeId(id);
         e = repository.findById(id.value()).orElseThrow();
@@ -65,11 +61,11 @@ class EmployeeJpaRepositoryTest {
      * For testing purposes
      */
     public static class EmployeeEntityBuilder {
-        private String employeeId;
-        private String firstName;
-        private String lastName;
-        private BigDecimal salary;
-        private ObjectNode attributes;
+        private String employeeId = "EMP-EROL-00000000-0000-0000-0000-000000000000";
+        private String firstName = "Erik";
+        private String lastName = "Olsson";
+        private BigDecimal salary = new BigDecimal("10000.00");
+        private ObjectNode attributes = new ObjectMapper().createObjectNode();
 
         public EmployeeEntityBuilder employeeId(String employeeId) {
             this.employeeId = employeeId;
