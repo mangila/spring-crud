@@ -4,6 +4,7 @@ import com.github.mangila.app.model.employee.domain.Employee;
 import com.github.mangila.app.model.employee.domain.EmployeeId;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import com.github.mangila.app.repository.EmployeeJpaRepository;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -12,9 +13,9 @@ import org.springframework.stereotype.Service;
  * Service layer for Employee CRUD operations.
  * <br>
  * Service is responsible for orchestrating the business logic.
- *
  */
 @Service
+@NullMarked
 public class EmployeeService {
 
     private final EmployeeJpaRepository repository;

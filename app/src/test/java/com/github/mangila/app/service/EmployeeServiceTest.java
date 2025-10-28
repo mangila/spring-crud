@@ -4,6 +4,7 @@ import com.github.mangila.app.TestcontainersConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
@@ -12,6 +13,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class EmployeeServiceTest {
+
+    @Autowired
+    private EmployeeService service;
 
     @BeforeEach
     void setUp() {
@@ -23,6 +27,7 @@ class EmployeeServiceTest {
 
     @Test
     void findEmployeeById() {
+        service.findEmployeeById(null);
     }
 
     @Test
