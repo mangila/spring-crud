@@ -32,6 +32,9 @@ class EmployeeControllerTest {
     @Test
     void createNewEmployee() {
         var attributes = objectMapper.createObjectNode()
+                .put("purple", "rain")
+                .put("revolution", "true")
+                .put("high-heels", "TruE")
                 .put("vegan", false)
                 .put("pronouns", "prefer to not answer");
         webTestClient.post()
