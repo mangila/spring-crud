@@ -16,6 +16,9 @@ public class ValidEmployeeIdValidator implements ConstraintValidator<ValidEmploy
     public boolean isValid(String value, ConstraintValidatorContext context) {
         if (value == null || value.isEmpty()) {
             return true; // Defer null/empty check to @NotBlank or @NotNull
+        } else if (value.length() != 45) {
+            // fixed length for the id, fail fast
+            return false;
         }
         // EMP-<2 chars first_name><2 chars last_name>
         String prefix = value.substring(0, 8);
