@@ -7,6 +7,8 @@ import java.util.UUID;
 
 public class ValidEmployeeIdValidator implements ConstraintValidator<ValidEmployeeId, String> {
 
+    private static final int ID_LENGTH = 45;
+
     @Override
     public void initialize(ValidEmployeeId constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
@@ -16,7 +18,7 @@ public class ValidEmployeeIdValidator implements ConstraintValidator<ValidEmploy
     public boolean isValid(String value, ConstraintValidatorContext context) {
         if (value == null || value.isEmpty()) {
             return true; // Defer null/empty check to @NotBlank or @NotNull
-        } else if (value.length() != 45) {
+        } else if (value.length() != ID_LENGTH) {
             // fixed length for the id, fail fast
             return false;
         }
