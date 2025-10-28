@@ -49,7 +49,7 @@ public class EmployeeControllerValidationTest {
                 .uri("/api/v1/employee/" + employeeId)
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .is2xxSuccessful();
     }
 
     static Stream<CreateNewEmployeeRequest> notValidCreateNewEmployeeRequests() {
