@@ -13,4 +13,5 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: create-drop
+    # https://vladmihalcea.com/the-open-session-in-view-anti-pattern/
     open-in-view: false
