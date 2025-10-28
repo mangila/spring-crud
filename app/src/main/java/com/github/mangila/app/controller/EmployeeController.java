@@ -44,7 +44,10 @@ public class EmployeeController {
 
     @PostMapping
     public ResponseEntity<?> createNewEmployee(
-            @NotNull @Valid CreateNewEmployeeRequest request
+            @RequestBody
+            @NotNull
+            @Valid
+            CreateNewEmployeeRequest request
     ) {
         String id = restFacade.createNewEmployee(request);
         URI location = UriComponentsBuilder.newInstance()
@@ -56,7 +59,9 @@ public class EmployeeController {
 
     @PutMapping
     public ResponseEntity<?> updateEmployee(
-            @NotNull @Valid UpdateEmployeeRequest request
+            @RequestBody
+            @NotNull
+            @Valid UpdateEmployeeRequest request
     ) {
         restFacade.updateEmployee(request);
         return ResponseEntity.noContent().build();

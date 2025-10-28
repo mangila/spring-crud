@@ -67,6 +67,7 @@ public class EmployeeControllerValidationTest {
                 new CreateNewEmployeeRequest("John", "Doe", null, mapper.createObjectNode()),
                 // validate attributes
                 new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(200), null),
+                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(200), mapper.createObjectNode()),
                 new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(200), mapper.createObjectNode())
         );
     }
