@@ -50,6 +50,7 @@ public class EmployeeController {
             CreateNewEmployeeRequest request
     ) {
         String id = restFacade.createNewEmployee(request);
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Location
         URI location = UriComponentsBuilder.newInstance()
                 .path("/api/v1/employee/{employeeId}")
                 .build(id);
