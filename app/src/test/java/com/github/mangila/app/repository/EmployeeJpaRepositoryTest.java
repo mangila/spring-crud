@@ -61,9 +61,9 @@ class EmployeeJpaRepositoryTest {
      * For testing purposes
      */
     public static class EmployeeEntityBuilder {
-        private String employeeId = "EMP-EROL-00000000-0000-0000-0000-000000000000";
-        private String firstName = "Erik";
-        private String lastName = "Olsson";
+        private String employeeId = "EMP-LOSY-00000000-0000-0000-0000-000000000000";
+        private String firstName = "Love";
+        private String lastName = "Symbol";
         private BigDecimal salary = new BigDecimal("10000.00");
         private ObjectNode attributes = new ObjectMapper().createObjectNode();
 
