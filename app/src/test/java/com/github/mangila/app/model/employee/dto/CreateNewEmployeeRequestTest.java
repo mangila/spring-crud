@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test the DTO JSON serialization and deserialization.
  * Very useful if Jackson has been configured with some extras.
  * <p>
- * e.g Timestamps, Enumeration, Naming strategy, etc.
+ * e.g., Timestamps, Enumeration, Naming strategy, etc.
  */
 @JsonTest
 class CreateNewEmployeeRequestTest {
@@ -60,7 +60,11 @@ class CreateNewEmployeeRequestTest {
         var attr = new ObjectMapper().createObjectNode()
                 .put("vegan", true)
                 .put("pronouns", "she/her");
-        var request = new CreateNewEmployeeRequest("Jane", "Doe", new BigDecimal("45.33"), attr);
+        var request = new CreateNewEmployeeRequest(
+                "Jane",
+                "Doe",
+                new BigDecimal("45.33"),
+                attr);
         var jsonContent = json.write(request);
         assertThat(jsonContent)
                 .hasJsonPathStringValue("@.firstName")
@@ -68,6 +72,5 @@ class CreateNewEmployeeRequestTest {
                 .hasJsonPathNumberValue("@.salary")
                 .hasJsonPathBooleanValue("@.attributes.vegan")
                 .hasJsonPathStringValue("@.attributes.pronouns");
-
     }
 }
