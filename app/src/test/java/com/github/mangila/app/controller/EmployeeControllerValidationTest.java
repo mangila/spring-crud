@@ -44,7 +44,7 @@ public class EmployeeControllerValidationTest {
             "XXX-ABCD-550e8400-e29b-41d4-a716",   // Wrong prefix
             "EMP-abcd-550e8400-e29b-41d4-a716"    // Lowercase letters
     })
-    void validateEmployeeId(String employeeId) {
+    void shouldValidateEmployeeId(String employeeId) {
         webTestClient.get()
                 .uri("/api/v1/employee/" + employeeId)
                 .exchange()
@@ -62,19 +62,22 @@ public class EmployeeControllerValidationTest {
                 // validate lastname
                 new CreateNewEmployeeRequest("John", "", BigDecimal.valueOf(50000), mapper.createObjectNode()),
                 new CreateNewEmployeeRequest("John", "D", BigDecimal.valueOf(50000), mapper.createObjectNode()),
+                new CreateNewEmployeeRequest("John", null, BigDecimal.valueOf(50000), mapper.createObjectNode()),
                 // validate salary
                 new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(1000000), mapper.createObjectNode()),
+                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(0), mapper.createObjectNode()),
+                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(-1), mapper.createObjectNode()),
+                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(-1.00), mapper.createObjectNode()),
+                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(30.123456), mapper.createObjectNode()),
                 new CreateNewEmployeeRequest("John", "Doe", null, mapper.createObjectNode()),
                 // validate attributes
-                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(200), null),
-                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(200), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(200), mapper.createObjectNode())
+                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(200), null)
         );
     }
 
     @ParameterizedTest(name = "Employee request {0} should be invalid")
     @MethodSource("notValidCreateNewEmployeeRequests")
-    void validateEmployeeRequest(CreateNewEmployeeRequest request) {
+    void shouldValidateCreateNewEmployeeRequest(CreateNewEmployeeRequest request) {
         webTestClient.post()
                 .uri("/api/v1/employee")
                 .bodyValue(request)
@@ -82,5 +85,4 @@ public class EmployeeControllerValidationTest {
                 .expectStatus()
                 .isBadRequest();
     }
-
 }
