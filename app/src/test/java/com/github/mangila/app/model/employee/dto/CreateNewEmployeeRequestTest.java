@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test the DTO JSON serialization and deserialization.
  * Very useful if Jackson has been configured with some extras.
  * <p>
- * e.g Timestamps, Enumeration etc
+ * e.g Timestamps, Enumeration, Naming strategy, etc.
  */
 @JsonTest
 class CreateNewEmployeeRequestTest {
