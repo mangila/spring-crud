@@ -10,7 +10,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EmployeeJpaRepository extends JpaRepository<EmployeeEntity, String> {
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(
+            clearAutomatically = true,
+            flushAutomatically = true)
     @Query("""
             UPDATE EmployeeEntity e SET e.auditMetadata.deleted = true
             WHERE e.id = :#{#employeeId.value()}
