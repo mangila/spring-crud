@@ -64,8 +64,8 @@ public class EmployeeController {
             @NotNull
             @Valid UpdateEmployeeRequest request
     ) {
-        restFacade.updateEmployee(request);
-        return ResponseEntity.noContent().build();
+        EmployeeDto dto = restFacade.updateEmployee(request);
+        return ResponseEntity.ok(dto);
     }
 
     @DeleteMapping("{employeeId}")

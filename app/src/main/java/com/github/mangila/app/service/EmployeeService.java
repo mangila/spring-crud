@@ -43,9 +43,10 @@ public class EmployeeService {
         repository.save(entity);
     }
 
-    public void updateEmployee(Employee employee) {
+    public Employee updateEmployee(Employee employee) {
         EmployeeEntity entity = mapper.toEntity(employee);
-        repository.save(entity);
+        entity = repository.save(entity);
+        return mapper.toDomain(entity);
     }
 
     public void softDeleteEmployeeById(EmployeeId id) {

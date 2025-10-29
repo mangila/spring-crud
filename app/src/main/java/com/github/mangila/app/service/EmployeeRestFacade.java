@@ -49,9 +49,10 @@ public class EmployeeRestFacade {
         return employee.getId().value();
     }
 
-    public void updateEmployee(UpdateEmployeeRequest request) {
+    public EmployeeDto updateEmployee(UpdateEmployeeRequest request) {
         Employee employee = mapper.toDomain(request);
-        service.updateEmployee(employee);
+        employee = service.updateEmployee(employee);
+        return mapper.toDto(employee);
     }
 
     public void softDeleteEmployeeById(String employeeId) {
