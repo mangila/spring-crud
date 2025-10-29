@@ -38,6 +38,11 @@ public class EmployeeRestFacade {
         return mapper.toDto(employee);
     }
 
+    public Page<EmployeeDto> findAllEmployeesByPage(Pageable pageable) {
+        return service.findAllEmployeesByPage(pageable)
+                .map(mapper::toDto);
+    }
+
     public String createNewEmployee(CreateNewEmployeeRequest request) {
         Employee employee = factory.from(request);
         service.createNewEmployee(employee);
@@ -52,10 +57,5 @@ public class EmployeeRestFacade {
     public void softDeleteEmployeeById(String employeeId) {
         EmployeeId id = new EmployeeId(employeeId);
         service.softDeleteEmployeeById(id);
-    }
-
-    public Page<EmployeeDto> findAllEmployeesByPage(Pageable pageable) {
-        return service.findAllEmployeesByPage(pageable)
-                .map(mapper::toDto);
     }
 }
