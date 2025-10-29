@@ -12,6 +12,12 @@ import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Test the DTO JSON serialization and deserialization.
+ * Very useful if Jackson has been configured with some extras.
+ * <p>
+ * e.g Timestamps, Enumeration etc
+ */
 @JsonTest
 class CreateNewEmployeeRequestTest {
 
