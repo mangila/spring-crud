@@ -5,6 +5,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
 
+/**
+ * Aspect-oriented programming (AOP)
+ * Intercept method calls before or after the method execution.
+ */
 @Aspect
 @Component
 public class EnsureAspect {
