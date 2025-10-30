@@ -25,7 +25,7 @@ class JacksonConfigTest {
 
     @Test
     @DisplayName("BigDecimal should use .toPlainString() and be serialized as a JSON String")
-    void bigDecimalPlainCustomizer() throws IOException {
+    void testBigDecimalSerialization() throws IOException {
         var jsonContent = json.write(Map.of(
                 "value",
                 new BigDecimal("0.0000001"))

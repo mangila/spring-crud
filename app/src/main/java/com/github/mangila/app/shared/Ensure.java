@@ -4,7 +4,6 @@ package com.github.mangila.app.shared;
  * Ensure is (in)sanity checks to be run before any logic or after any logic.
  * <br>
  * Pre- or Post-Condition to make sure input or output is expected.
- *
  */
 public final class Ensure {
 

@@ -45,10 +45,15 @@ class UpdateEmployeeRequestTest {
         ObjectNode attr = json.parse(jsonString)
                 .getObject()
                 .attributes();
+        assertThat(attr.size()).isEqualTo(3);
         assertThat(attr.get("vegan").asBoolean())
                 .isTrue();
         assertThat(attr.get("pronouns").asText())
                 .isEqualTo("he/him");
+        assertThat(attr.get("licenses").isArray())
+                .isTrue();
+        assertThat(attr.get("licenses").size())
+                .isEqualTo(3);
     }
 
     @Test
@@ -69,6 +74,5 @@ class UpdateEmployeeRequestTest {
         assertThat(jsonContent)
                 .extractingJsonPathStringValue("@.salary")
                 .isEqualTo("20000.12");
-
     }
 }
