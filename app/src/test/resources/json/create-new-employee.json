@@ -1,0 +1,9 @@
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "salary": "20000.12",
+  "attributes": {
+    "vegan": true,
+    "pronouns": "he/him"
+  }
+}
