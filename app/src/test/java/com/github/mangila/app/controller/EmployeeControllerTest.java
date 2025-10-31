@@ -28,6 +28,23 @@ class EmployeeControllerTest {
     void crudEmployee() throws IOException {
         URI location = create();
         EmployeeDto dto = read(location.toString());
+
+    }
+
+    private URI create() throws IOException {
+        var request = ObjectFactoryUtil.createNewEmployeeRequest(objectMapper);
+        return webTestClient.post()
+                .uri("/api/v1/employee")
+                .bodyValue(request)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .exists("location")
+                .expectBody()
+                .isEmpty()
+                .getResponseHeaders()
+                .getLocation();
     }
 
     private EmployeeDto read(final String location) {
@@ -41,23 +58,6 @@ class EmployeeControllerTest {
                 .expectBody(EmployeeDto.class)
                 .returnResult()
                 .getResponseBody();
-    }
-
-    private URI create() throws IOException {
-        var request = ObjectFactoryUtil.createNewEmployeeRequest(objectMapper);
-        var location = webTestClient.post()
-                .uri("/api/v1/employee")
-                .bodyValue(request)
-                .exchange()
-                .expectStatus()
-                .isCreated()
-                .expectHeader()
-                .exists("location")
-                .expectBody()
-                .isEmpty()
-                .getResponseHeaders()
-                .getLocation();
-        return location;
     }
 
     @Test
