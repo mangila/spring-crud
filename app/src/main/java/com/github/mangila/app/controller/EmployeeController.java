@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,9 @@ public class EmployeeController {
         this.restFacade = restFacade;
     }
 
-    @GetMapping("{employeeId}")
+    @GetMapping(value = "{employeeId}",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
     public ResponseEntity<EmployeeDto> findEmployeeById(
             @PathVariable
             @NotBlank

@@ -2,6 +2,7 @@ package com.github.mangila.app.service;
 
 import com.github.mangila.app.model.employee.domain.Employee;
 import com.github.mangila.app.model.employee.domain.EmployeeId;
+import com.github.mangila.app.model.employee.domain.EmployeeName;
 import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,12 @@ public class EmployeeFactory {
         EmployeeId id = employeeIdGenerator.generate(
                 request.firstName(),
                 request.lastName());
-        return new Employee();
+        var employee = new Employee();
+        employee.setId(id);
+        employee.setFirstName(new EmployeeName(request.firstName()));
+        employee.setLastName(new EmployeeName(request.lastName()));
+        employee.setSalary(request.salary());
+        employee.setAttributes(request.attributes());
+        return employee;
     }
 }
