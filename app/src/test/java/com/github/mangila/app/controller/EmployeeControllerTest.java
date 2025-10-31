@@ -1,15 +1,18 @@
 package com.github.mangila.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.app.ObjectFactoryUtil;
 import com.github.mangila.app.TestcontainersConfiguration;
-import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
+import com.github.mangila.app.model.employee.dto.EmployeeDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import java.math.BigDecimal;
+import java.io.IOException;
+import java.net.URI;
 
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -22,7 +25,39 @@ class EmployeeControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    void findEmployeeById() {
+    void crudEmployee() throws IOException {
+        URI location = create();
+        EmployeeDto dto = read(location.toString());
+    }
+
+    private EmployeeDto read(final String location) {
+        return webTestClient.get()
+                .uri(location)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody(EmployeeDto.class)
+                .returnResult()
+                .getResponseBody();
+    }
+
+    private URI create() throws IOException {
+        var request = ObjectFactoryUtil.createNewEmployeeRequest(objectMapper);
+        var location = webTestClient.post()
+                .uri("/api/v1/employee")
+                .bodyValue(request)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .exists("location")
+                .expectBody()
+                .isEmpty()
+                .getResponseHeaders()
+                .getLocation();
+        return location;
     }
 
     @Test
@@ -30,23 +65,8 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void createNewEmployee() {
-        var attributes = objectMapper.createObjectNode()
-                .put("purple", "rain")
-                .put("revolution", "true")
-                .put("high-heels", "TruE")
-                .put("vegan", false)
-                .put("pronouns", "prefer to not answer");
-        webTestClient.post()
-                .uri("/api/v1/employee")
-                .bodyValue(new CreateNewEmployeeRequest("John", "Doe", new BigDecimal(200), attributes))
-                .exchange()
-                .expectStatus()
-                .isCreated();
-    }
-
-    @Test
     void updateEmployee() {
+
     }
 
     @Test

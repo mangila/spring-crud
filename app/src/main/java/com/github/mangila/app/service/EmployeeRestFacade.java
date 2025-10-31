@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
  * <p>
  * Facade is responsible for orchestrating REST API calls.
  * <br>
- * <br>
  * When introducing a new protocol or input to the system, this will make it easier to adapt for the service layer.
  * E.g., EmployeeGrpcFacade, EmployeeKafkaFacade, EmployeeQuantumFacade :)
  */

@@ -9,6 +9,13 @@
       "license1",
       "license2",
       "license3"
-    ]
+    ],
+    "evaluation": {
+      "medical": "FAIL",
+      "physical": "FAIL",
+      "psychological": "FAIL"
+    },
+    "substance_addiction": true,
+    "notes" : "subject is not approved for field duty, immediate suspension advised"
   }
 }
