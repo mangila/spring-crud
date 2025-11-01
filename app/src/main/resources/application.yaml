@@ -18,3 +18,8 @@ spring:
       ddl-auto: create-drop
     # https://vladmihalcea.com/the-open-session-in-view-anti-pattern/
     open-in-view: false
+  datasource:
+    hikari:
+      pool-name: spring-crud-hikari-pool
+      minimum-idle: 5
+      maximum-pool-size: 10
