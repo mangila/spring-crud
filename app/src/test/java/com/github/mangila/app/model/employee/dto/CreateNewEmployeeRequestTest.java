@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Import;
 
 import java.io.IOException;
 
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Import(JacksonConfig.class)

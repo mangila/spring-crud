@@ -38,44 +38,6 @@ class EmployeeControllerTest {
         assertEmployeeDto(dto);
     }
 
-    private void assertEmployeeDto(EmployeeDto dto) {
-        assertThat(dto)
-                .isNotNull()
-                .extracting(
-                        EmployeeDto::firstName,
-                        EmployeeDto::lastName,
-                        EmployeeDto::salary,
-                        EmployeeDto::deleted
-                )
-                .doesNotContainNull()
-                .contains("John", "Doe", new BigDecimal("20000.12"), false);
-        assertThat(dto.created())
-                .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
-        assertThat(dto.modified())
-                .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
-        // Assert the serialized JSON attributes
-        // Assert JSON root key values
-        assertThatJson(dto.attributes().toString())
-                .isObject()
-                .containsEntry("vegan", true)
-                .containsEntry("pronouns", "he/him")
-                .containsEntry("substance_addiction", true)
-                .containsEntry("notes", "subject is not approved for field duty, immediate suspension advised");
-        // Assert nested object
-        assertThatJson(dto.attributes().toString())
-                .node("evaluation")
-                .isObject()
-                .containsEntry("medical", "FAIL")
-                .containsEntry("physical", "FAIL")
-                .containsEntry("psychological", "FAIL");
-        // Assert array
-        assertThatJson(dto.attributes().toString())
-                .node("licenses")
-                .isArray()
-                .hasSize(3)
-                .contains("PP7", "Klobb", "DD44 Dostovei");
-    }
-
     private URI create() throws IOException {
         var request = ObjectFactoryUtil.createNewEmployeeRequest(objectMapper);
         return webTestClient.post()
@@ -103,6 +65,45 @@ class EmployeeControllerTest {
                 .expectBody(EmployeeDto.class)
                 .returnResult()
                 .getResponseBody();
+    }
+
+    private void assertEmployeeDto(EmployeeDto dto) {
+        assertThat(dto)
+                .isNotNull()
+                .extracting(
+                        EmployeeDto::firstName,
+                        EmployeeDto::lastName,
+                        EmployeeDto::salary,
+                        EmployeeDto::deleted
+                )
+                .doesNotContainNull()
+                .contains("John", "Doe", new BigDecimal("20000.12"), false);
+        assertThat(dto.created())
+                .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
+        assertThat(dto.modified())
+                .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
+        // Assert the serialized JSON attributes
+        // Assert JSON root key values
+        assertThatJson(dto.attributes().toString())
+                .isObject()
+                .containsEntry("vegan", true)
+                .containsEntry("pronouns", "he/him")
+                // sssssssssssssnake case
+                .containsEntry("substance_addiction", true)
+                .containsEntry("notes", "subject is not approved for field duty, immediate suspension advised");
+        // Assert nested object
+        assertThatJson(dto.attributes().toString())
+                .node("evaluation")
+                .isObject()
+                .containsEntry("medical", "FAIL")
+                .containsEntry("physical", "FAIL")
+                .containsEntry("psychological", "FAIL");
+        // Assert array
+        assertThatJson(dto.attributes().toString())
+                .node("licenses")
+                .isArray()
+                .hasSize(3)
+                .contains("PP7", "Klobb", "DD44 Dostovei");
     }
 
     @Test
