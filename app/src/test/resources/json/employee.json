@@ -5,11 +5,14 @@
   "salary": "20000.12",
   "attributes": {
     "vegan": true,
-    "pronouns": "he/him",
+    "pronouns": "she/her",
     "licenses": [
       "license1",
       "license2",
       "license3"
-    ]
+    ],
+    "chamber_of_secrets": true,
+    "favorite_book": "No country, no home",
+    "lizard_people": null
   }
 }
