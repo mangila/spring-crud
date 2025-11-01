@@ -11,8 +11,13 @@ import org.springframework.stereotype.Component;
 
 /**
  * Mapper class for Employee DTOs and Entities.
- * <p>
+ * <br>
  * The mapper is responsible for converting domain objects to DTOs and vice versa.
+ * <br>
+ * In some cases a separate mapper class can be implemented for each "layer" of the application.
+ * Or just use a "fat" mapper class for everything. This construct would be a "fat" mapper.
+ * <br>
+ * e.g., EmployeeDtoMapper.toDomain(), EmployeeEntityMapper.toDomain(), EmployeeDomainMapper.toDto() and EmployeeDomainMapper.toEntity()
  */
 @Component
 public class EmployeeMapper {
