@@ -52,7 +52,7 @@ class EmployeeJpaRepositoryTest {
         repository.save(e);
         repository.softDeleteByEmployeeId(id);
         e = repository.findById(id.value()).orElseThrow();
-        assertThat(e.getAuditMetadata().getDeleted())
+        assertThat(e.getAuditMetadata().deleted())
                 .isTrue();
     }
 

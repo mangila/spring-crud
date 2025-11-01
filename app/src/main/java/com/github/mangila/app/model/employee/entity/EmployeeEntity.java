@@ -43,5 +43,5 @@ public class EmployeeEntity {
     private ObjectNode attributes;
 
     @Embedded
-    private AuditMetadata auditMetadata = new AuditMetadata();
+    private AuditMetadata auditMetadata;
 }

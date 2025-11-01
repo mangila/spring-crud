@@ -8,17 +8,14 @@ import org.springframework.data.annotation.LastModifiedDate;
 import java.time.Instant;
 
 @Embeddable
-@lombok.NoArgsConstructor
-@lombok.Data
-public class AuditMetadata {
-    @CreatedDate
-    @Column(name = "created", updatable = false)
-    private Instant created;
-
-    @LastModifiedDate
-    @Column(name = "modified")
-    private Instant modified;
-
-    @Column(name = "deleted")
-    private Boolean deleted = false;
+public record AuditMetadata(
+        @CreatedDate
+        @Column(name = "created", updatable = false)
+        Instant created,
+        @LastModifiedDate
+        @Column(name = "modified")
+        Instant modified,
+        @Column(name = "deleted")
+        boolean deleted
+) {
 }

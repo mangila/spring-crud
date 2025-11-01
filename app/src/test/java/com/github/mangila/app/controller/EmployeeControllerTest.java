@@ -12,7 +12,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URI;
+import java.time.Duration;
+import java.time.Instant;
+
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -28,7 +35,45 @@ class EmployeeControllerTest {
     void crudEmployee() throws IOException {
         URI location = create();
         EmployeeDto dto = read(location.toString());
+        assertEmployeeDto(dto);
+    }
 
+    private void assertEmployeeDto(EmployeeDto dto) {
+        assertThat(dto)
+                .isNotNull()
+                .extracting(
+                        EmployeeDto::firstName,
+                        EmployeeDto::lastName,
+                        EmployeeDto::salary,
+                        EmployeeDto::deleted
+                )
+                .doesNotContainNull()
+                .contains("John", "Doe", new BigDecimal("20000.12"), false);
+        assertThat(dto.created())
+                .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
+        assertThat(dto.modified())
+                .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
+        // Assert the serialized JSON attributes
+        // Assert JSON root key values
+        assertThatJson(dto.attributes().toString())
+                .isObject()
+                .containsEntry("vegan", true)
+                .containsEntry("pronouns", "he/him")
+                .containsEntry("substance_addiction", true)
+                .containsEntry("notes", "subject is not approved for field duty, immediate suspension advised");
+        // Assert nested object
+        assertThatJson(dto.attributes().toString())
+                .node("evaluation")
+                .isObject()
+                .containsEntry("medical", "FAIL")
+                .containsEntry("physical", "FAIL")
+                .containsEntry("psychological", "FAIL");
+        // Assert array
+        assertThatJson(dto.attributes().toString())
+                .node("licenses")
+                .isArray()
+                .hasSize(3)
+                .contains("PP7", "Klobb", "DD44 Dostovei");
     }
 
     private URI create() throws IOException {
@@ -62,11 +107,6 @@ class EmployeeControllerTest {
 
     @Test
     void findAllEmployeesByPage() {
-    }
-
-    @Test
-    void updateEmployee() {
-
     }
 
     @Test

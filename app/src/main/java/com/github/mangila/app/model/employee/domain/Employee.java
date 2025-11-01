@@ -9,14 +9,14 @@ import java.time.Instant;
  * Domain object, the business entity.
  * This is the data object that will execute logic.
  */
-@lombok.Data
-public class Employee {
-    private EmployeeId id;
-    private EmployeeName firstName;
-    private EmployeeName lastName;
-    private BigDecimal salary;
-    private ObjectNode attributes;
-    private Instant created;
-    private Instant modified;
-    private Boolean deleted = false;
+public record Employee(
+        EmployeeId id,
+        EmployeeName firstName,
+        EmployeeName lastName,
+        BigDecimal salary,
+        ObjectNode attributes,
+        Instant created,
+        Instant modified,
+        boolean deleted
+) {
 }
