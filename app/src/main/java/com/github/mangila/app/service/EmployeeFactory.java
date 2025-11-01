@@ -24,7 +24,7 @@ public class EmployeeFactory {
         EmployeeId id = employeeIdGenerator.generate(
                 request.firstName(),
                 request.lastName());
-        var employee = new Employee(
+        return new Employee(
                 id,
                 new EmployeeName(request.firstName()),
                 new EmployeeName(request.lastName()),
@@ -34,6 +34,5 @@ public class EmployeeFactory {
                 null, // Database will generate the modified timestamp
                 false
         );
-        return employee;
     }
 }

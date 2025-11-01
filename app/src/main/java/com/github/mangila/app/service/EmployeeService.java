@@ -8,6 +8,7 @@ import org.jspecify.annotations.NullMarked;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service layer for Employee CRUD operations.
@@ -49,6 +50,7 @@ public class EmployeeService {
         return mapper.toDomain(entity);
     }
 
+    @Transactional
     public void softDeleteEmployeeById(EmployeeId id) {
         repository.softDeleteByEmployeeId(id);
     }

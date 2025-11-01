@@ -12,7 +12,8 @@ public interface EmployeeJpaRepository extends JpaRepository<EmployeeEntity, Str
 
     @Modifying(
             clearAutomatically = true,
-            flushAutomatically = true)
+            flushAutomatically = true
+    )
     @Query("""
             UPDATE EmployeeEntity e SET e.auditMetadata.deleted = true
             WHERE e.id = :#{#employeeId.value()}

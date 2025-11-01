@@ -1,9 +1,11 @@
 package com.github.mangila.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.app.ObjectFactoryUtil;
 import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.model.employee.dto.EmployeeDto;
+import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,6 +38,11 @@ class EmployeeControllerTest {
         URI location = create();
         EmployeeDto dto = read(location.toString());
         assertEmployeeDto(dto);
+        dto = update(dto);
+        assertUpdatedEmployeeDto(dto);
+        delete(dto.employeeId());
+        dto = read(location.toString());
+        assertThat(dto.deleted()).isTrue();
     }
 
     private URI create() throws IOException {
@@ -104,6 +111,50 @@ class EmployeeControllerTest {
                 .isArray()
                 .hasSize(3)
                 .contains("PP7", "Klobb", "DD44 Dostovei");
+    }
+
+    private EmployeeDto update(EmployeeDto dto) {
+        // someone got a raise ;)
+        BigDecimal raise = dto.salary().add(new BigDecimal("20.00"));
+        // and became a meat eater again :O
+        ObjectNode updatedAttributes = dto.attributes()
+                .put("vegan", false);
+        var updateRequest = new UpdateEmployeeRequest(
+                dto.employeeId(),
+                dto.firstName(),
+                dto.lastName(),
+                raise,
+                updatedAttributes
+        );
+        return webTestClient.put()
+                .uri("/api/v1/employee")
+                .bodyValue(updateRequest)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody(EmployeeDto.class)
+                .returnResult()
+                .getResponseBody();
+    }
+
+    private void assertUpdatedEmployeeDto(EmployeeDto dto) {
+        assertThat(dto)
+                .isNotNull()
+                .extracting(EmployeeDto::salary)
+                .isEqualTo(new BigDecimal("20020.12"));
+        assertThatJson(dto.attributes().toString())
+                .isObject()
+                .containsEntry("vegan", false);
+    }
+
+    private void delete(String employeeId) {
+        webTestClient.delete()
+                .uri("/api/v1/employee/{employeeId}", employeeId)
+                .exchange()
+                .expectStatus()
+                .isNoContent();
     }
 
     @Test
