@@ -19,7 +19,7 @@ public class EmployeeIdGenerator {
      * Prince (the musician) name change would be a good example. But he is in heaven with his little red corvette. RIP
      * There are alot of edge cases to consider.
      * <br>
-     * The final keyword for the strings is thinking for "design for immutability" or the Data Oriented Approach.
+     * The final keyword for the strings is a construct for "design for immutability" or the Data Oriented Approach.
      */
     public EmployeeId generate(final String firstName, final String lastName) {
         String subFirstName = firstName.substring(0, 2).toUpperCase();
