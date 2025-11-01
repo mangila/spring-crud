@@ -1,5 +1,7 @@
 package com.github.mangila.app.shared;
 
+import com.github.mangila.app.shared.exception.EnsureException;
+
 /**
  * Ensure is (in)sanity checks to be run before any logic or after any logic.
  * <br>
@@ -10,22 +12,22 @@ package com.github.mangila.app.shared;
  */
 public final class Ensure {
 
-    public static void notNull(Object value) throws IllegalArgumentException {
+    public static void notNull(Object value) throws EnsureException {
         if (value == null) {
-            throw new IllegalArgumentException("Value must not be null");
+            throw new EnsureException("Value must not be null");
         }
     }
 
-    public static void notNull(Object value, String message) throws IllegalArgumentException {
+    public static void notNull(Object value, String message) throws EnsureException {
         if (value == null) {
-            throw new IllegalArgumentException(message);
+            throw new EnsureException(message);
         }
     }
 
-    public static void notBlank(String value, String message) throws IllegalArgumentException {
+    public static void notBlank(String value, String message) throws EnsureException {
         notNull(value, message);
         if (value.isBlank()) {
-            throw new IllegalArgumentException(message);
+            throw new EnsureException(message);
         }
     }
 }

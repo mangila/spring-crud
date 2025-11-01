@@ -4,6 +4,7 @@ import com.github.mangila.app.model.employee.domain.Employee;
 import com.github.mangila.app.model.employee.domain.EmployeeId;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import com.github.mangila.app.repository.EmployeeJpaRepository;
+import com.github.mangila.app.shared.exception.EntityNotFoundException;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +32,7 @@ public class EmployeeService {
     public Employee findEmployeeById(EmployeeId id) {
         return repository.findById(id.value())
                 .map(mapper::toDomain)
-                .orElseThrow();
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Employee with id %s not found", id)));
     }
 
     public Page<Employee> findAllEmployeesByPage(Pageable pageable) {
