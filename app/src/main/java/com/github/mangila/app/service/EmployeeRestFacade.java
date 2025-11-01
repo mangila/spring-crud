@@ -46,7 +46,7 @@ public class EmployeeRestFacade {
     public String createNewEmployee(CreateNewEmployeeRequest request) {
         Employee employee = factory.from(request);
         service.createNewEmployee(employee);
-        return employee.getId().value();
+        return employee.id().value();
     }
 
     public EmployeeDto updateEmployee(UpdateEmployeeRequest request) {

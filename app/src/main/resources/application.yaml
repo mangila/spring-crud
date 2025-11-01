@@ -1,6 +1,9 @@
 spring:
   application:
     name: spring-crud
+  threads:
+    virtual:
+      enabled: true
   docker:
     compose:
       enabled: true

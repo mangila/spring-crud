@@ -24,12 +24,16 @@ public class EmployeeFactory {
         EmployeeId id = employeeIdGenerator.generate(
                 request.firstName(),
                 request.lastName());
-        var employee = new Employee();
-        employee.setId(id);
-        employee.setFirstName(new EmployeeName(request.firstName()));
-        employee.setLastName(new EmployeeName(request.lastName()));
-        employee.setSalary(request.salary());
-        employee.setAttributes(request.attributes());
+        var employee = new Employee(
+                id,
+                new EmployeeName(request.firstName()),
+                new EmployeeName(request.lastName()),
+                request.salary(),
+                request.attributes(),
+                null, // Database will generate the created timestamp
+                null, // Database will generate the modified timestamp
+                false
+        );
         return employee;
     }
 }

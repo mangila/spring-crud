@@ -12,6 +12,8 @@ import java.time.Instant;
  * DTO (Data Transfer Object) is a data transfer object often used to
  * transfer data over a network, for visual representation,
  * or delegate to another system.
+ * <br>
+ * Mostly converted to a well-known transfer protocol like JSON or XML.
  */
 public record EmployeeDto(
         @ValidEmployeeName String firstName,
@@ -20,6 +22,6 @@ public record EmployeeDto(
         @NotNull ObjectNode attributes,
         @NotNull Instant created,
         @NotNull Instant modified,
-        @NotNull Boolean deleted
+        @NotNull boolean deleted
 ) {
 }
