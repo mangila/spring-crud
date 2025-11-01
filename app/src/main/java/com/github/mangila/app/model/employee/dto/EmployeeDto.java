@@ -1,6 +1,7 @@
 package com.github.mangila.app.model.employee.dto;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.mangila.app.shared.annotation.ValidEmployeeId;
 import com.github.mangila.app.shared.annotation.ValidEmployeeName;
 import com.github.mangila.app.shared.annotation.ValidEmployeeSalary;
 import jakarta.validation.constraints.NotNull;
@@ -16,6 +17,7 @@ import java.time.Instant;
  * Mostly converted to a well-known transfer protocol like JSON or XML.
  */
 public record EmployeeDto(
+        @ValidEmployeeId String employeeId,
         @ValidEmployeeName String firstName,
         @ValidEmployeeName String lastName,
         @ValidEmployeeSalary BigDecimal salary,

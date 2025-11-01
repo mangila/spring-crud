@@ -50,19 +50,22 @@ class TestUtilTest {
     void shouldMatch_employeeJson() throws IOException {
         // language=JSON
         final String jsonString = """
-                {
+                 {
                   "employeeId": "EMP-JODO-00000000-0000-0000-0000-000000000000",
                   "firstName": "Jane",
                   "lastName": "Doe",
                   "salary": "20000.12",
                   "attributes": {
                     "vegan": true,
-                    "pronouns": "he/him",
+                    "pronouns": "she/her",
                     "licenses": [
-                      "license1",
-                      "license2",
-                      "license3"
-                    ]
+                      "PP7",
+                      "Widow Maker",
+                      "R.Y.N.O"
+                    ],
+                    "chamber_of_secrets": true,
+                    "favorite_book": "No country, no home",
+                    "lizard_people": null
                   }
                 }
                 """;

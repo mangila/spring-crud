@@ -61,8 +61,10 @@ public class EmployeeController {
                 .build();
     }
 
-    @PutMapping
-    public ResponseEntity<?> updateEmployee(
+    @PutMapping(
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<EmployeeDto> updateEmployee(
             @RequestBody
             @NotNull
             @Valid UpdateEmployeeRequest request

@@ -37,6 +37,7 @@ public class EmployeeMapper {
 
     public EmployeeDto toDto(Employee employee) {
         return new EmployeeDto(
+                employee.id().value(),
                 employee.firstName().value(),
                 employee.lastName().value(),
                 employee.salary(),
