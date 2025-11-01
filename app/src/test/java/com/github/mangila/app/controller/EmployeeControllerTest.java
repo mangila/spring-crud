@@ -144,6 +144,10 @@ class EmployeeControllerTest {
                 .isNotNull()
                 .extracting(EmployeeDto::salary)
                 .isEqualTo(new BigDecimal("20020.12"));
+        assertThat(dto.created())
+                .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
+        assertThat(dto.modified())
+                .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
         assertThatJson(dto.attributes().toString())
                 .isObject()
                 .containsEntry("vegan", false);
@@ -159,9 +163,5 @@ class EmployeeControllerTest {
 
     @Test
     void findAllEmployeesByPage() {
-    }
-
-    @Test
-    void softDeleteEmployeeById() {
     }
 }

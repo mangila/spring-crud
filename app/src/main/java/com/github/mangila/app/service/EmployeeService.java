@@ -46,8 +46,8 @@ public class EmployeeService {
 
     public Employee updateEmployee(Employee employee) {
         EmployeeEntity entity = mapper.toEntity(employee);
-        entity = repository.save(entity);
-        return mapper.toDomain(entity);
+        repository.save(entity);
+        return findEmployeeById(employee.id());
     }
 
     @Transactional

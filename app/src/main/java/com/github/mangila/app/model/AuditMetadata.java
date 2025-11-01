@@ -10,7 +10,8 @@ import java.time.Instant;
 @Embeddable
 public record AuditMetadata(
         @CreatedDate
-        @Column(name = "created", updatable = false)
+        @Column(name = "created",
+                updatable = false)
         Instant created,
         @LastModifiedDate
         @Column(name = "modified")

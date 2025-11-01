@@ -1,6 +1,7 @@
 package com.github.mangila.app.shared;
 
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,15 @@ public class EnsureAspect {
      *                  including the arguments to be verified for null values.
      */
     @Before("within(com.github.mangila.app.service.EmployeeService)")
-    public void ensureNoNullArgsEmployeeService(JoinPoint joinPoint) {
+    public void beforeEnsureNoNullArgsEmployeeService(JoinPoint joinPoint) {
+        var args = joinPoint.getArgs();
+        for (Object arg : args) {
+            Ensure.notNull(arg);
+        }
+    }
+
+    @After("within(com.github.mangila.app.service.EmployeeService)")
+    public void afterEnsureNoNullArgsEmployeeService(JoinPoint joinPoint) {
         var args = joinPoint.getArgs();
         for (Object arg : args) {
             Ensure.notNull(arg);
