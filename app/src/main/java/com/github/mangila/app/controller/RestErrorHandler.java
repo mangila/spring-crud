@@ -35,7 +35,7 @@ public class RestErrorHandler {
     public ProblemDetail handleEntityNotFoundException(EntityNotFoundException e) {
         log.error("ERR", e);
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.NOT_FOUND,
                 e.getMessage()
         );
         return problemDetail;
