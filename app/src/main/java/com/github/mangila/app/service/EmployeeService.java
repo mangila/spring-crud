@@ -4,6 +4,8 @@ import com.github.mangila.app.model.employee.domain.Employee;
 import com.github.mangila.app.model.employee.domain.EmployeeId;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import com.github.mangila.app.repository.EmployeeJpaRepository;
+import com.github.mangila.app.shared.SpringEventPublisher;
+import com.github.mangila.app.shared.event.NewEmployeeCreatedEvent;
 import com.github.mangila.app.shared.exception.EntityNotFoundException;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.data.domain.Page;
@@ -22,11 +24,14 @@ public class EmployeeService {
 
     private final EmployeeJpaRepository repository;
     private final EmployeeMapper mapper;
+    private final SpringEventPublisher publisher;
 
     public EmployeeService(EmployeeJpaRepository repository,
-                           EmployeeMapper mapper) {
+                           EmployeeMapper mapper,
+                           SpringEventPublisher publisher) {
         this.repository = repository;
         this.mapper = mapper;
+        this.publisher = publisher;
     }
 
     public Employee findEmployeeById(EmployeeId id) {
@@ -42,7 +47,8 @@ public class EmployeeService {
 
     public void createNewEmployee(Employee employee) {
         EmployeeEntity entity = mapper.toEntity(employee);
-        repository.save(entity);
+        entity = repository.save(entity);
+        publisher.publish(new NewEmployeeCreatedEvent(entity));
     }
 
     public Employee updateEmployee(Employee employee) {

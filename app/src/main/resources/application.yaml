@@ -10,6 +10,11 @@ spring:
       file: ${user.dir}/infrastructure/local/compose.yaml
       skip:
         in-tests: true
+  datasource:
+    hikari:
+      pool-name: spring-crud-hikari-pool
+      minimum-idle: 5
+      maximum-pool-size: 10
   jpa:
     properties:
       hibernate.generate_statistics: false
@@ -18,8 +23,3 @@ spring:
       ddl-auto: create-drop
     # https://vladmihalcea.com/the-open-session-in-view-anti-pattern/
     open-in-view: false
-  datasource:
-    hikari:
-      pool-name: spring-crud-hikari-pool
-      minimum-idle: 5
-      maximum-pool-size: 10
