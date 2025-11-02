@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
  * Spring's ApplicationEventPublisher is used to publish events, very convenient when want to run a side effect.
  * This is just an example of how to use Spring's ApplicationEventPublisher.
  * <br>
- * Simple use case when using event stuffs in the same JVM
+ * Simple use case when using event stuffs in the same Spring Boot application.
  */
 @Service
 public class SpringEventPublisher {
