@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
  * <br>
  * When introducing a new protocol or input to the system, this will make it easier to adapt for the service layer.
  * E.g., EmployeeGrpcFacade, EmployeeKafkaFacade, EmployeeQuantumFacade :)
+ *
+ * Bridge, Facade, Adapter... you name it.
+ *
  */
 @Service
 public class EmployeeRestFacade {
