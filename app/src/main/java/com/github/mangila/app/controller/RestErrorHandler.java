@@ -58,7 +58,7 @@ public class RestErrorHandler {
 
     /**
      * This one might be a security concern to since it might expose internal details to the client.
-     * Uncontrollable runtime exceptions not thrown by the programmer.
+     * Uncontrollable runtime exceptions not thrown by the programmer, plus the client gets its feedback from the exception message.
      */
     @ExceptionHandler(RuntimeException.class)
     public ProblemDetail handleRuntimeException(RuntimeException e) {
