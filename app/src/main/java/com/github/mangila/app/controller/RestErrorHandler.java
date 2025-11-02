@@ -45,6 +45,7 @@ public class RestErrorHandler {
      * Log this or not, that's the question. Might create a lot of noise in the logs.
      * Since we often know what it's all about.
      * Might log for some time and remove it later when the app is getting more mature.
+     * The client gets its feedback from the exception message.
      */
     @ExceptionHandler(ConstraintViolationException.class)
     public ProblemDetail handleConstraintViolationException(ConstraintViolationException e) {
@@ -58,7 +59,7 @@ public class RestErrorHandler {
 
     /**
      * This one might be a security concern to since it might expose internal details to the client.
-     * Uncontrollable runtime exceptions not thrown by the programmer, plus the client gets its feedback from the exception message.
+     * Uncontrollable runtime exceptions not thrown by the programmer
      */
     @ExceptionHandler(RuntimeException.class)
     public ProblemDetail handleRuntimeException(RuntimeException e) {
