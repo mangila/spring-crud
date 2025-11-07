@@ -1,7 +1,6 @@
 package com.github.mangila.app.shared;
 
 import com.github.mangila.app.shared.exception.EnsureException;
-import com.github.mangila.app.shared.exception.EntityNotFoundException;
 
 import java.util.function.Supplier;
 
@@ -35,7 +34,7 @@ public final class Ensure {
     }
 
     public static void isTrue(boolean expression,
-                              Supplier<EntityNotFoundException> exceptionSupplier) throws EnsureException {
+                              Supplier<RuntimeException> exceptionSupplier) throws RuntimeException {
         if (!expression) {
             throw exceptionSupplier.get();
         }

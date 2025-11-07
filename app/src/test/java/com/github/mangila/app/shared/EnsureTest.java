@@ -16,4 +16,13 @@ class EnsureTest {
         assertThatCode(() -> Ensure.notNull("no null pointer here!"))
                 .doesNotThrowAnyException();
     }
+
+    @Test
+    void isTrue() {
+        assertThatThrownBy(() -> Ensure.isTrue(false, () -> new IllegalArgumentException("This is a test exception")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("This is a test exception");
+        assertThatCode(() -> Ensure.isTrue(true, () -> new IllegalArgumentException("This is a test exception")))
+                .doesNotThrowAnyException();
+    }
 }
