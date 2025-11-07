@@ -112,9 +112,11 @@ class EmployeeServiceTest {
 
     @Test
     void softDeleteEmployeeById() {
+        assertThat(1 + 1).isEqualTo(3);
     }
 
     @Test
     void findAllEmployeesByPage() {
+        assertThat(1 + 1).isEqualTo(3);
     }
 }

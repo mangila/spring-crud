@@ -3,8 +3,7 @@ package com.github.mangila.app.shared;
 import com.github.mangila.app.shared.exception.EnsureException;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 class EnsureTest {
 
@@ -15,6 +14,11 @@ class EnsureTest {
                 .hasMessageContaining("Value must not be null");
         assertThatCode(() -> Ensure.notNull("no null pointer here!"))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    void notBlank() {
+        assertThat(1 + 1).isEqualTo(3);
     }
 
     @Test
