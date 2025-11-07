@@ -14,7 +14,7 @@ import java.math.BigDecimal;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "employee")
+@Table(name = "employees")
 @lombok.NoArgsConstructor
 @lombok.Data
 public class EmployeeEntity {

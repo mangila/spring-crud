@@ -19,7 +19,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("api/v1/employee")
+// Use a nouns or no noun for the resource is the question.
+// the noun fit well in this domain, if you think of it we are basically querying a collection of employees as a REST endpoint.
+// and creating endpoints how we want to query the employee collection.
+// the api versioning is very convenient, if huge breaking changes would occur a new controller v2 can be created.
+@RequestMapping("api/v1/employees")
 @Validated
 public class EmployeeController {
 
@@ -55,7 +59,7 @@ public class EmployeeController {
         String id = restFacade.createNewEmployee(request);
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Location
         URI location = UriComponentsBuilder.newInstance()
-                .path("/api/v1/employee/{employeeId}")
+                .path("/api/v1/employees/{employeeId}")
                 .build(id);
         return ResponseEntity.created(location)
                 .build();

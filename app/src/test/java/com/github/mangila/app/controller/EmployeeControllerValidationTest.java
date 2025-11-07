@@ -46,7 +46,7 @@ public class EmployeeControllerValidationTest {
     })
     void shouldValidateEmployeeId(String employeeId) {
         webTestClient.get()
-                .uri("/api/v1/employee/" + employeeId)
+                .uri("/api/v1/employees/" + employeeId)
                 .exchange()
                 .expectStatus()
                 .isBadRequest();
@@ -79,7 +79,7 @@ public class EmployeeControllerValidationTest {
     @MethodSource("notValidCreateNewEmployeeRequests")
     void shouldValidateCreateNewEmployeeRequest(CreateNewEmployeeRequest request) {
         webTestClient.post()
-                .uri("/api/v1/employee")
+                .uri("/api/v1/employees")
                 .bodyValue(request)
                 .exchange()
                 .expectStatus()

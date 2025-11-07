@@ -48,7 +48,7 @@ class EmployeeControllerTest {
     private URI create() throws IOException {
         var request = ObjectFactoryUtil.createNewEmployeeRequest(objectMapper);
         return webTestClient.post()
-                .uri("/api/v1/employee")
+                .uri("/api/v1/employees")
                 .bodyValue(request)
                 .exchange()
                 .expectStatus()
@@ -128,7 +128,7 @@ class EmployeeControllerTest {
                 dto.deleted()
         );
         return webTestClient.put()
-                .uri("/api/v1/employee")
+                .uri("/api/v1/employees")
                 .bodyValue(updateRequest)
                 .exchange()
                 .expectStatus()
@@ -156,7 +156,7 @@ class EmployeeControllerTest {
 
     private void delete(String employeeId) {
         webTestClient.delete()
-                .uri("/api/v1/employee/{employeeId}", employeeId)
+                .uri("/api/v1/employees/{employeeId}", employeeId)
                 .exchange()
                 .expectStatus()
                 .isNoContent();
