@@ -8,6 +8,7 @@ import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import com.github.mangila.app.repository.EmployeeJpaRepository;
 import com.github.mangila.app.shared.SpringEventPublisher;
+import com.github.mangila.app.shared.event.NewEmployeeCreatedEvent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -86,10 +87,10 @@ class EmployeeServiceTest {
         CreateNewEmployeeRequest request = ObjectFactoryUtil.createNewEmployeeRequest(objectMapper);
         Employee employee = factory.from(request);
         service.createNewEmployee(employee);
-        verify(repository, times(1)).save(any());
+        verify(repository, times(1)).save(any(EmployeeEntity.class));
         verify(mapper, times(1)).toDomain(any(EmployeeEntity.class));
         // This is a Fire And Forget mechanism, so let's just verify the invocation from the service POV
-        verify(publisher, times(1)).publish(any());
+        verify(publisher, times(1)).publish(any(NewEmployeeCreatedEvent.class));
         // With the expected log output from the received event
         assertThat(output).contains("New employee was created:");
         // Verify service returns the correct employee
