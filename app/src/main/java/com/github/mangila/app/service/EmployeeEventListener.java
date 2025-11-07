@@ -1,5 +1,6 @@
 package com.github.mangila.app.service;
 
+import com.github.mangila.app.model.employee.domain.EmployeeId;
 import com.github.mangila.app.shared.event.NewEmployeeCreatedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -20,7 +21,8 @@ public class EmployeeEventListener {
     @Async
     @EventListener
     public void listen(NewEmployeeCreatedEvent event) {
-        log.info("New employee was created: {}", event);
+        EmployeeId id = event.employeeId();
+        log.info("New employee created with ID: {}", id.value());
     }
 
 }

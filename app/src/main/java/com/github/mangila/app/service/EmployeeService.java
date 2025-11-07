@@ -52,9 +52,8 @@ public class EmployeeService {
 
     public void createNewEmployee(Employee employee) {
         EmployeeEntity entity = mapper.toEntity(employee);
-        entity = repository.save(entity);
-        Employee domain = mapper.toDomain(entity);
-        publisher.publish(new NewEmployeeCreatedEvent(domain));
+        repository.save(entity);
+        publisher.publish(new NewEmployeeCreatedEvent(employee.id()));
     }
 
     public Employee updateEmployee(Employee employee) {

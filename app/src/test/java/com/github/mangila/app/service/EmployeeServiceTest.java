@@ -86,7 +86,6 @@ class EmployeeServiceTest {
         Employee employee = factory.from(request);
         service.createNewEmployee(employee);
         verify(repository, times(1)).save(any(EmployeeEntity.class));
-        verify(mapper, times(1)).toDomain(any(EmployeeEntity.class));
         // This is a Fire And Forget mechanism, so let's just verify the invocation from the service POV
         verify(publisher, times(1)).publish(any(NewEmployeeCreatedEvent.class));
         // await for the expected log output from the received event
@@ -96,7 +95,7 @@ class EmployeeServiceTest {
         // A full E2E test should be able to pick this up for whatever side effect it might run.
         // TODO: might remove await and CapturedOutput later
         await().atMost(Duration.ofSeconds(1))
-                .untilAsserted(() -> assertThat(output).contains("New employee was created:"));
+                .untilAsserted(() -> assertThat(output).contains("New employee created with ID:"));
         // Verify service returns the correct employee
         employee = service.findEmployeeById(employee.id());
         assertThat(employee.firstName().value())
