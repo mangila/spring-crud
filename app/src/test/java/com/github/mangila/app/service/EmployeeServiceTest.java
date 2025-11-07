@@ -91,6 +91,10 @@ class EmployeeServiceTest {
         verify(publisher, times(1)).publish(any(NewEmployeeCreatedEvent.class));
         // await for the expected log output from the received event
         // Awaitility to start a small wait for the event publishing.
+        // This is an optional assert, since code is not running from the service but it "triggers"
+        // But it is still a FaF, so no harm is done anyway if this fails from the Service POV.
+        // A full E2E test should be able to pick this up for whatever side effect it might run.
+        // TODO: might remove await and CapturedOutput later
         await().atMost(Duration.ofSeconds(1))
                 .untilAsserted(() -> assertThat(output).contains("New employee was created:"));
         // Verify service returns the correct employee

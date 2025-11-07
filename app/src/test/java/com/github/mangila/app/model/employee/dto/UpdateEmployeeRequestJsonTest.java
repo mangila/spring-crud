@@ -111,7 +111,11 @@ class UpdateEmployeeRequestJsonTest {
         jsonAssert.node("licenses")
                 .isArray()
                 .hasSize(3)
-                .containsExactly("PP7", "Widow Maker", "R.Y.N.O");
+                .containsExactly(
+                        "PP7",
+                        "Widow Maker",
+                        "R.Y.N.O"
+                );
     }
 
     private static void assertEvaluation(JsonAssert jsonAssert) {

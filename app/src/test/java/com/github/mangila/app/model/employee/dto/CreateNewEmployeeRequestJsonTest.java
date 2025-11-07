@@ -99,7 +99,11 @@ class CreateNewEmployeeRequestJsonTest {
         jsonAssert.node("licenses")
                 .isArray()
                 .hasSize(3)
-                .containsExactly("PP7", "Klobb", "DD44 Dostovei");
+                .containsExactly(
+                        "PP7",
+                        "Klobb",
+                        "DD44 Dostovei"
+                );
     }
 
     private static void assertEvaluation(JsonAssert jsonAssert) {
