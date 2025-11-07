@@ -17,6 +17,11 @@ import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Sliced Spring Context for testing the EmployeeRepository.
+ * <br>
+ * {@link DataJpaTest} is great for testing custom queries and repositories.
+ */
 @Import({TestcontainersConfiguration.class,
         ObjectMapper.class,
         JpaConfig.class,

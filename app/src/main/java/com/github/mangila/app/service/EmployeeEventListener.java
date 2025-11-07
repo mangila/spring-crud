@@ -13,6 +13,7 @@ public class EmployeeEventListener {
     /**
      * Listener for NewEmployeeCreatedEvent.
      * Run a side effect.
+     * Synchronous is the default for Spring @EventListener. To run it asynchronously, use @Async.
      * <br>
      * E.g., email the employee, notify a supervisor, etc.
      */

@@ -15,6 +15,7 @@ public class JacksonConfig {
 
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer writeNumbersAsStrings() {
+        // Spring Boot and Jackson version mismatch. NO FIX FOR NOW.
         return builder -> builder.featuresToEnable(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS);
     }
 

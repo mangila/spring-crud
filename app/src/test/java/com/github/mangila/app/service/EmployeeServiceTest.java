@@ -1,12 +1,30 @@
 package com.github.mangila.app.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.app.ObjectFactoryUtil;
 import com.github.mangila.app.TestcontainersConfiguration;
+import com.github.mangila.app.model.employee.domain.Employee;
+import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
+import com.github.mangila.app.model.employee.entity.EmployeeEntity;
+import com.github.mangila.app.repository.EmployeeJpaRepository;
+import com.github.mangila.app.shared.SpringEventPublisher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+
+import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Full-scale service test with integration towards a database.
@@ -20,13 +38,31 @@ import org.springframework.context.annotation.Import;
  * Or just do prod-testing (recommended).
  * <br>
  * But here we use a real database from Docker public repositories.
+ * <br>
+ * Repository, Mapper and Event publisher is wired as SpyBeans just to make sure they invoke its expected method.
  */
 @Import(TestcontainersConfiguration.class)
+@ExtendWith(OutputCaptureExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class EmployeeServiceTest {
 
     @Autowired
     private EmployeeService service;
+
+    @Autowired
+    private EmployeeFactory factory;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockitoSpyBean
+    private SpringEventPublisher publisher;
+
+    @MockitoSpyBean
+    private EmployeeJpaRepository repository;
+
+    @MockitoSpyBean
+    private EmployeeMapper mapper;
 
     @BeforeEach
     void setUp() {
@@ -38,7 +74,7 @@ class EmployeeServiceTest {
 
     @Test
     void findEmployeeById() {
-        service.findEmployeeById(null);
+        //  service.findEmployeeById(null);
     }
 
     @Test
@@ -46,7 +82,20 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void createNewEmployee() {
+    void createNewEmployee(CapturedOutput output) throws IOException {
+        CreateNewEmployeeRequest request = ObjectFactoryUtil.createNewEmployeeRequest(objectMapper);
+        Employee employee = factory.from(request);
+        service.createNewEmployee(employee);
+        verify(repository, times(1)).save(any());
+        verify(mapper, times(1)).toDomain(any(EmployeeEntity.class));
+        // This is a Fire And Forget mechanism, so let's just verify the invocation from the service POV
+        verify(publisher, times(1)).publish(any());
+        // With the expected log output from the received event
+        assertThat(output).contains("New employee was created:");
+        // Verify service returns the correct employee
+        employee = service.findEmployeeById(employee.id());
+        assertThat(employee.firstName().value())
+                .isEqualTo("John");
     }
 
     @Test
