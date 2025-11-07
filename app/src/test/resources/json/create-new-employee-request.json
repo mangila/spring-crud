@@ -1,7 +1,7 @@
 {
   "firstName": "John",
   "lastName": "Doe",
-  "salary": 20000.12,
+  "salary": "20000.12",
   "attributes": {
     "vegan": true,
     "pronouns": "he/him",
@@ -16,6 +16,7 @@
       "psychological": "FAIL"
     },
     "substance_addiction": true,
+    "secret_number": "123",
     "notes": "subject is not approved for field duty, immediate suspension advised"
   }
 }

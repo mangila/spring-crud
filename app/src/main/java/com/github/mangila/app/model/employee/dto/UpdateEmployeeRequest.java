@@ -10,15 +10,16 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 /**
- * Request DTO for updating an existing employee.
- * This is what would be called a PUT update in HTTP verbs.
- * It requires the full data model to be sent.
+ * DTO for updating an existing employee.
+ * All fields are required, this is convenient for the frontend if displayed in rows or forms or any other full page display.
+ * This would be considered as an HTTP PUT update.
  */
 public record UpdateEmployeeRequest(
         @NotBlank @ValidEmployeeId String employeeId,
         @ValidEmployeeName String firstName,
         @ValidEmployeeName String lastName,
         @ValidEmployeeSalary BigDecimal salary,
-        @NotNull ObjectNode attributes
+        @NotNull ObjectNode attributes,
+        @NotNull boolean deleted
 ) {
 }

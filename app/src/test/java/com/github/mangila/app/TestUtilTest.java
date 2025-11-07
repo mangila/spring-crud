@@ -15,14 +15,14 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 class TestUtilTest {
 
     @Test
-    @DisplayName("(In)sanity check for exact matching json resources/json/create-new-employee.json")
+    @DisplayName("(In)sanity check for exact matching json resources/json/create-new-update-employee-request.json")
     void shouldMatch_createNewEmployeeJson() throws IOException {
         // language=JSON
         final String jsonString = """
-                {
+                  {
                   "firstName": "John",
                   "lastName": "Doe",
-                  "salary": 20000.12,
+                  "salary": "20000.12",
                   "attributes": {
                     "vegan": true,
                     "pronouns": "he/him",
@@ -37,16 +37,17 @@ class TestUtilTest {
                       "psychological": "FAIL"
                     },
                     "substance_addiction": true,
+                    "secret_number": "123",
                     "notes": "subject is not approved for field duty, immediate suspension advised"
                   }
                 }
                 """;
         assertThatJson(jsonString)
-                .isEqualTo(FilePathUtil.readJsonFileToString("json/create-new-employee.json"));
+                .isEqualTo(FilePathUtil.readJsonFileToString("json/create-new-employee-request.json"));
     }
 
     @Test
-    @DisplayName("(In)sanity check for exact matching json resources/json/employee.json")
+    @DisplayName("(In)sanity check for exact matching json resources/json/update-employee-request.json")
     void shouldMatch_employeeJson() throws IOException {
         // language=JSON
         final String jsonString = """
@@ -66,11 +67,12 @@ class TestUtilTest {
                     "chamber_of_secrets": true,
                     "favorite_book": "No country, no home",
                     "lizard_people": null
-                  }
+                  },
+                  "deleted": false
                 }
                 """;
         assertThatJson(jsonString)
-                .isEqualTo(FilePathUtil.readJsonFileToString("json/employee.json"));
+                .isEqualTo(FilePathUtil.readJsonFileToString("json/update-employee-request.json"));
     }
 
 }

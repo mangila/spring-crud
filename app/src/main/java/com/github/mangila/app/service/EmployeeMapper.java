@@ -64,16 +64,16 @@ public class EmployeeMapper {
         return entity;
     }
 
-    public Employee toDomain(UpdateEmployeeRequest request) {
+    public Employee toDomain(UpdateEmployeeRequest dto) {
         return new Employee(
-                new EmployeeId(request.employeeId()),
-                new EmployeeName(request.firstName()),
-                new EmployeeName(request.lastName()),
-                request.salary(),
-                request.attributes(),
-                null,
-                null,
-                false
+                new EmployeeId(dto.employeeId()),
+                new EmployeeName(dto.firstName()),
+                new EmployeeName(dto.lastName()),
+                dto.salary(),
+                dto.attributes(),
+                null, // Updated by the database
+                null, // Updated by the database
+                dto.deleted()
         );
     }
 }

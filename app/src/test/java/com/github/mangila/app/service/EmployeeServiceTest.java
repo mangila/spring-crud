@@ -6,6 +6,7 @@ import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.model.employee.domain.Employee;
 import com.github.mangila.app.model.employee.domain.EmployeeId;
 import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
+import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import com.github.mangila.app.repository.EmployeeJpaRepository;
 import com.github.mangila.app.shared.SpringEventPublisher;
@@ -99,7 +100,10 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void updateEmployee() {
+    void updateEmployee() throws IOException {
+        UpdateEmployeeRequest request = ObjectFactoryUtil.createUpdateEmployeeRequest(objectMapper);
+        Employee employee = mapper.toDomain(request);
+        service.updateEmployee(employee);
     }
 
     @Test

@@ -4,6 +4,7 @@ import com.github.mangila.app.model.employee.domain.Employee;
 import com.github.mangila.app.model.employee.domain.EmployeeId;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import com.github.mangila.app.repository.EmployeeJpaRepository;
+import com.github.mangila.app.shared.Ensure;
 import com.github.mangila.app.shared.SpringEventPublisher;
 import com.github.mangila.app.shared.event.NewEmployeeCreatedEvent;
 import com.github.mangila.app.shared.exception.EntityNotFoundException;
@@ -34,6 +35,10 @@ public class EmployeeService {
         this.publisher = publisher;
     }
 
+    public boolean existsById(EmployeeId id) {
+        return repository.existsById(id.value());
+    }
+
     public Employee findEmployeeById(EmployeeId id) {
         return repository.findById(id.value())
                 .map(mapper::toDomain)
@@ -53,6 +58,7 @@ public class EmployeeService {
     }
 
     public Employee updateEmployee(Employee employee) {
+        Ensure.isTrue(existsById(employee.id()), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", employee.id().value())));
         EmployeeEntity entity = mapper.toEntity(employee);
         repository.save(entity);
         return findEmployeeById(employee.id());

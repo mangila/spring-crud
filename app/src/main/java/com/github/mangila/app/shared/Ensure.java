@@ -1,6 +1,9 @@
 package com.github.mangila.app.shared;
 
 import com.github.mangila.app.shared.exception.EnsureException;
+import com.github.mangila.app.shared.exception.EntityNotFoundException;
+
+import java.util.function.Supplier;
 
 /**
  * Ensure is (in)sanity checks to be run before any logic or after any logic.
@@ -28,6 +31,13 @@ public final class Ensure {
         notNull(value, message);
         if (value.isBlank()) {
             throw new EnsureException(message);
+        }
+    }
+
+    public static void isTrue(boolean expression,
+                              Supplier<EntityNotFoundException> exceptionSupplier) throws EnsureException {
+        if (!expression) {
+            throw exceptionSupplier.get();
         }
     }
 }

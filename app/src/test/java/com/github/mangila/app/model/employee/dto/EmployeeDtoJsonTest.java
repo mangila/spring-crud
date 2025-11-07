@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
 
 @Import(JacksonConfig.class)
 @JsonTest
-class EmployeeDtoTest {
+class EmployeeDtoJsonTest {
 
     @Autowired
     private JacksonTester<EmployeeDto> json;

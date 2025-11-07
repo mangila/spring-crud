@@ -1,5 +1,6 @@
 package com.github.mangila.app.shared;
 
+import com.github.mangila.app.shared.exception.EnsureException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -10,7 +11,7 @@ class EnsureTest {
     @Test
     void notNull() {
         assertThatThrownBy(() -> Ensure.notNull(null))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(EnsureException.class)
                 .hasMessageContaining("Value must not be null");
         assertThatCode(() -> Ensure.notNull("no null pointer here!"))
                 .doesNotThrowAnyException();
