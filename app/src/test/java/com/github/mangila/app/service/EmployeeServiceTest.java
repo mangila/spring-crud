@@ -4,13 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.app.ObjectFactoryUtil;
 import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.model.employee.domain.Employee;
+import com.github.mangila.app.model.employee.domain.EmployeeId;
 import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import com.github.mangila.app.repository.EmployeeJpaRepository;
 import com.github.mangila.app.shared.SpringEventPublisher;
 import com.github.mangila.app.shared.event.NewEmployeeCreatedEvent;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import com.github.mangila.app.shared.exception.EntityNotFoundException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -67,21 +69,14 @@ class EmployeeServiceTest {
     @MockitoSpyBean
     private EmployeeMapper mapper;
 
-    @BeforeEach
-    void setUp() {
-    }
-
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
-    void findEmployeeById() {
-        //  service.findEmployeeById(null);
-    }
-
-    @Test
-    void findAllEmployeesByPage() {
+    @DisplayName("Should not find Employee by Id and throw")
+    void shouldNotFindEmployeeByIdAndThrow() {
+        EmployeeId id = ObjectFactoryUtil.createFakeEmployeeId();
+        assertThatThrownBy(() -> service.findEmployeeById(id))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Employee with id: (EMP-JODO-00000000-0000-0000-0000-000000000000) not found");
+        verify(repository, times(1)).findById(any());
     }
 
     @Test
@@ -109,5 +104,9 @@ class EmployeeServiceTest {
 
     @Test
     void softDeleteEmployeeById() {
+    }
+
+    @Test
+    void findAllEmployeesByPage() {
     }
 }

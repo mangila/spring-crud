@@ -37,7 +37,7 @@ public class EmployeeService {
     public Employee findEmployeeById(EmployeeId id) {
         return repository.findById(id.value())
                 .map(mapper::toDomain)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Employee with id %s not found", id)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", id.value())));
     }
 
     public Page<Employee> findAllEmployeesByPage(Pageable pageable) {
