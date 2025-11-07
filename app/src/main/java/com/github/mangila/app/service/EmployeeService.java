@@ -69,6 +69,7 @@ public class EmployeeService {
 
     @Transactional
     public void softDeleteEmployeeById(EmployeeId id) {
+        Ensure.isTrue(existsById(id), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", id.value())));
         repository.softDeleteByEmployeeId(id);
     }
 }
