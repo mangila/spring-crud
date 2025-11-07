@@ -70,6 +70,7 @@ class CreateNewEmployeeRequestJsonTest {
                 .containsEntry("firstName", "John")
                 .containsEntry("lastName", "Doe")
                 .containsEntry("salary", "20000.12")
+                // Assert JSON attributes
                 .node("attributes")
                 .and(CreateNewEmployeeRequestJsonTest::assertAttributes)
                 .and(CreateNewEmployeeRequestJsonTest::assertEvaluation)

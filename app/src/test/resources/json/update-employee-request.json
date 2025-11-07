@@ -3,6 +3,7 @@
   "firstName": "Jane",
   "lastName": "Doe",
   "salary": "20000.12",
+  "deleted": false,
   "attributes": {
     "vegan": true,
     "pronouns": "she/her",
@@ -11,9 +12,13 @@
       "Widow Maker",
       "R.Y.N.O"
     ],
+    "evaluation": {
+      "medical": "PASS",
+      "physical": "PASS",
+      "psychological": "PASS"
+    },
     "chamber_of_secrets": true,
     "favorite_book": "No country, no home",
     "lizard_people": null
-  },
-  "deleted": false
+  }
 }
