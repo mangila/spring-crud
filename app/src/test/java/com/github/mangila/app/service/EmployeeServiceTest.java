@@ -21,8 +21,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -91,8 +93,10 @@ class EmployeeServiceTest {
         verify(mapper, times(1)).toDomain(any(EmployeeEntity.class));
         // This is a Fire And Forget mechanism, so let's just verify the invocation from the service POV
         verify(publisher, times(1)).publish(any(NewEmployeeCreatedEvent.class));
-        // With the expected log output from the received event
-        assertThat(output).contains("New employee was created:");
+        // await for the expected log output from the received event
+        // Awaitility to start a small wait for the event publishing.
+        await().atMost(Duration.ofSeconds(1))
+                .untilAsserted(() -> assertThat(output).contains("New employee was created:"));
         // Verify service returns the correct employee
         employee = service.findEmployeeById(employee.id());
         assertThat(employee.firstName().value())
