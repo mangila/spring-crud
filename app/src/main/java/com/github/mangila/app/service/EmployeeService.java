@@ -59,6 +59,7 @@ public class EmployeeService {
 
     public Employee updateEmployee(Employee employee) {
         // Here we don't want an Upsert-Insert to happen since we use repository.save(), so we first check for existence.
+        // Some APIs accept it, not this one :P
         Ensure.isTrue(existsById(employee.id()), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", employee.id().value())));
         EmployeeEntity entity = mapper.toEntity(employee);
         repository.save(entity);
