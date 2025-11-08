@@ -5,6 +5,7 @@ import com.github.mangila.app.ObjectFactoryUtil;
 import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
 import com.github.mangila.app.service.EmployeeRestFacade;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -44,6 +45,7 @@ public class EmployeeControllerValidationTest {
                 .build();
     }
 
+    @DisplayName("Should validate EmployeeId")
     @ParameterizedTest(name = "{0}")
     @ValueSource(strings = {
             "invalid",                              // Completely invalid format
@@ -66,6 +68,7 @@ public class EmployeeControllerValidationTest {
                 .handleConstraintViolationException(any());
     }
 
+    @DisplayName("Should validate CreateNewEmployeeRequest")
     @ParameterizedTest(name = "{0}")
     @MethodSource("notValidCreateNewEmployeeRequests")
     void shouldValidateCreateNewEmployeeRequest(CreateNewEmployeeRequest request) {

@@ -6,6 +6,7 @@ import com.github.mangila.app.ObjectFactoryUtil;
 import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.model.employee.dto.EmployeeDto;
 import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,10 +35,11 @@ class EmployeeControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
+    @DisplayName("Should C.R.U.D Employee")
     void crudEmployee() throws IOException {
         URI location = create();
         EmployeeDto dto = read(location.toString());
-        assertEmployeeDto(dto);
+        assertNewEmployeeDto(dto);
         dto = update(dto);
         assertUpdatedEmployeeDto(dto);
         delete(dto.employeeId());
@@ -74,7 +76,7 @@ class EmployeeControllerTest {
                 .getResponseBody();
     }
 
-    private void assertEmployeeDto(EmployeeDto dto) {
+    private void assertNewEmployeeDto(EmployeeDto dto) {
         assertThat(dto)
                 .isNotNull()
                 .extracting(
@@ -84,7 +86,7 @@ class EmployeeControllerTest {
                         EmployeeDto::deleted
                 )
                 .doesNotContainNull()
-                .contains("John", "Doe", new BigDecimal("20000.12"), false);
+                .contains("John", "Doe", new BigDecimal("20000.13"), false);
         assertThat(dto.created())
                 .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
         assertThat(dto.modified())

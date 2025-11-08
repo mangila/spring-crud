@@ -3,6 +3,8 @@
   "firstName": "Jane",
   "lastName": "Doe",
   "salary": "20000.12",
+  "employmentActivity": "FULL_TIME",
+  "employmentStatus": "ACTIVE",
   "attributes": {
     "vegan": true,
     "pronouns": "she/her",

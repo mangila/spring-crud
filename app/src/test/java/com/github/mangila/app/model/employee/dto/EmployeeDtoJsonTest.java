@@ -7,6 +7,8 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.context.annotation.Import;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @Import(JacksonConfig.class)
 @JsonTest
 class EmployeeDtoJsonTest {
@@ -16,10 +18,11 @@ class EmployeeDtoJsonTest {
 
     @Test
     void serialize() {
-
+        assertThat(1 + 1).isEqualTo(3);
     }
 
     @Test
     void deserialize() {
+        assertThat(1 + 1).isEqualTo(3);
     }
 }

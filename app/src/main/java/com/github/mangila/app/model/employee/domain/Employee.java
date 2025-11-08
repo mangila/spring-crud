@@ -22,9 +22,9 @@ public record Employee(
         EmployeeName firstName,
         EmployeeName lastName,
         EmployeeSalary salary,
-        EmployeeAttributes attributes,
         EmploymentActivity employmentActivity,
         EmploymentStatus employmentStatus,
+        EmployeeAttributes attributes,
         EmployeeAudit audit
 ) {
     public Employee {
@@ -32,9 +32,9 @@ public record Employee(
         Ensure.notNull(firstName, "Employee first name must not be null");
         Ensure.notNull(lastName, "Employee last name must not be null");
         Ensure.notNull(salary, "Employee salary must not be null");
-        Ensure.notNull(attributes, "Employee attributes must not be null");
         Ensure.notNull(employmentActivity, "Employee employment activity must not be null");
         Ensure.notNull(employmentStatus, "Employee employment status must not be null");
+        Ensure.notNull(attributes, "Employee attributes must not be null");
         Ensure.notNull(audit, "Employee audit must not be null");
     }
 }
