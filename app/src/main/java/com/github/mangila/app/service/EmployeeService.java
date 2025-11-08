@@ -3,11 +3,12 @@ package com.github.mangila.app.service;
 import com.github.mangila.app.model.employee.domain.Employee;
 import com.github.mangila.app.model.employee.domain.EmployeeId;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
+import com.github.mangila.app.model.employee.event.CreateNewEmployeeEvent;
+import com.github.mangila.app.model.employee.event.SoftDeleteEmployeeEvent;
+import com.github.mangila.app.model.employee.event.UpdateEmployeeEvent;
 import com.github.mangila.app.repository.EmployeeJpaRepository;
 import com.github.mangila.app.shared.Ensure;
 import com.github.mangila.app.shared.SpringEventPublisher;
-import com.github.mangila.app.shared.event.CreateNewEmployeeEvent;
-import com.github.mangila.app.shared.event.UpdateEmployeeEvent;
 import com.github.mangila.app.shared.exception.EntityNotFoundException;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.data.domain.Page;
@@ -25,14 +26,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class EmployeeService {
 
     private final EmployeeJpaRepository repository;
-    private final EmployeeMapper mapper;
+
+    private final EmployeeDomainMapper domainMapper;
+    private final EmployeeEntityMapper entityMapper;
     private final SpringEventPublisher publisher;
 
     public EmployeeService(EmployeeJpaRepository repository,
-                           EmployeeMapper mapper,
+                           EmployeeDomainMapper domainMapper,
+                           EmployeeEntityMapper entityMapper,
                            SpringEventPublisher publisher) {
         this.repository = repository;
-        this.mapper = mapper;
+        this.domainMapper = domainMapper;
+        this.entityMapper = entityMapper;
         this.publisher = publisher;
     }
 
@@ -42,18 +47,18 @@ public class EmployeeService {
 
     public Employee findEmployeeById(EmployeeId id) {
         return repository.findById(id.value())
-                .map(mapper::toDomain)
+                .map(domainMapper::map)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", id.value())));
     }
 
     public Page<Employee> findAllEmployeesByPage(Pageable pageable) {
         return repository.findAll(pageable)
-                .map(mapper::toDomain);
+                .map(domainMapper::map);
     }
 
     @Transactional
     public void createNewEmployee(Employee employee) {
-        EmployeeEntity entity = mapper.toEntity(employee);
+        EmployeeEntity entity = entityMapper.map(employee);
         repository.save(entity);
         publisher.publish(new CreateNewEmployeeEvent(employee.id()));
     }
@@ -70,7 +75,7 @@ public class EmployeeService {
     @Transactional
     public void updateEmployee(Employee employee) {
         Ensure.isTrue(existsById(employee.id()), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", employee.id().value())));
-        EmployeeEntity entity = mapper.toEntity(employee);
+        EmployeeEntity entity = entityMapper.map(employee);
         repository.save(entity);
         publisher.publish(new UpdateEmployeeEvent(employee.id()));
     }
@@ -79,5 +84,6 @@ public class EmployeeService {
     public void softDeleteEmployeeById(EmployeeId id) {
         Ensure.isTrue(existsById(id), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", id.value())));
         repository.softDeleteByEmployeeId(id);
+        publisher.publish(new SoftDeleteEmployeeEvent(id));
     }
 }

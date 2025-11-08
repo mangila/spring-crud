@@ -1,4 +1,4 @@
-package com.github.mangila.app.shared.event;
+package com.github.mangila.app.model.employee.event;
 
 import com.github.mangila.app.model.employee.domain.EmployeeId;
 

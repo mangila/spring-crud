@@ -1,9 +1,10 @@
 package com.github.mangila.app.model.employee.domain;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.mangila.app.model.employee.type.EmploymentActivity;
+import com.github.mangila.app.model.employee.type.EmploymentStatus;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 
 /**
  * Domain object, the business entity.
@@ -15,8 +16,8 @@ public record Employee(
         EmployeeName lastName,
         BigDecimal salary,
         ObjectNode attributes,
-        Instant created,
-        Instant modified,
-        boolean deleted
+        EmploymentActivity employmentActivity,
+        EmploymentStatus employmentStatus,
+        EmployeeAudit audit
 ) {
 }

@@ -10,7 +10,7 @@ import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import com.github.mangila.app.repository.EmployeeJpaRepository;
 import com.github.mangila.app.shared.SpringEventPublisher;
-import com.github.mangila.app.shared.event.CreateNewEmployeeEvent;
+import com.github.mangila.app.model.employee.event.CreateNewEmployeeEvent;
 import com.github.mangila.app.shared.exception.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,7 +62,7 @@ class EmployeeServiceTest {
     private EmployeeJpaRepository repository;
 
     @MockitoSpyBean
-    private EmployeeMapper mapper;
+    private EmployeeEntityMapper mapper;
 
     @Test
     @DisplayName("Should not find Employee by Id and throw")

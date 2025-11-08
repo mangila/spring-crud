@@ -7,7 +7,7 @@ import com.github.mangila.app.config.JacksonConfig;
 import com.github.mangila.app.config.JpaConfig;
 import com.github.mangila.app.model.employee.domain.Employee;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
-import com.github.mangila.app.service.EmployeeMapper;
+import com.github.mangila.app.service.EmployeeEntityMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         JpaConfig.class,
         JacksonConfig.class,
         ObjectMapper.class,
-        EmployeeMapper.class})
+        EmployeeEntityMapper.class})
 @DataJpaTest
 class EmployeeJpaRepositoryTest {
 
@@ -35,7 +35,7 @@ class EmployeeJpaRepositoryTest {
     private EmployeeJpaRepository repository;
 
     @Autowired
-    private EmployeeMapper mapper;
+    private EmployeeEntityMapper mapper;
 
     @Autowired
     private ObjectMapper objectMapper;

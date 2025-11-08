@@ -24,26 +24,29 @@ import org.springframework.stereotype.Service;
 public class EmployeeRestFacade {
 
     private final EmployeeService service;
-    private final EmployeeMapper mapper;
+    private final EmployeeDtoMapper dtoMapper;
+    private final EmployeeDomainMapper domainMapper;
     private final EmployeeFactory factory;
 
     public EmployeeRestFacade(EmployeeService service,
-                              EmployeeMapper mapper,
+                              EmployeeDtoMapper dtoMapper,
+                              EmployeeDomainMapper domainMapper,
                               EmployeeFactory factory) {
         this.service = service;
-        this.mapper = mapper;
+        this.dtoMapper = dtoMapper;
+        this.domainMapper = domainMapper;
         this.factory = factory;
     }
 
     public EmployeeDto findEmployeeById(String employeeId) {
         EmployeeId id = new EmployeeId(employeeId);
         Employee employee = service.findEmployeeById(id);
-        return mapper.toDto(employee);
+        return dtoMapper.map(employee);
     }
 
     public Page<EmployeeDto> findAllEmployeesByPage(Pageable pageable) {
         return service.findAllEmployeesByPage(pageable)
-                .map(mapper::toDto);
+                .map(dtoMapper::map);
     }
 
     public String createNewEmployee(CreateNewEmployeeRequest request) {
@@ -53,12 +56,12 @@ public class EmployeeRestFacade {
     }
 
     public EmployeeDto updateEmployee(UpdateEmployeeRequest request) {
-        Employee employee = mapper.toDomain(request);
+        Employee employee = domainMapper.map(request);
         // Start a transaction and update the employee in the db
         service.updateEmployee(employee);
         // Fetch the updated employee after the transaction commit
         employee = service.findEmployeeById(employee.id());
-        return mapper.toDto(employee);
+        return dtoMapper.map(employee);
     }
 
     public void softDeleteEmployeeById(String employeeId) {

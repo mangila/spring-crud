@@ -2,6 +2,8 @@ package com.github.mangila.app.model.employee.entity;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.app.model.AuditMetadata;
+import com.github.mangila.app.model.employee.type.EmploymentActivity;
+import com.github.mangila.app.model.employee.type.EmploymentStatus;
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Type;
@@ -36,6 +38,16 @@ public class EmployeeEntity {
             precision = 10,
             scale = 2)
     private BigDecimal salary;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "employment_activity",
+            nullable = false)
+    private EmploymentActivity employmentActivity;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "employment_status",
+            nullable = false)
+    private EmploymentStatus employmentStatus;
 
     @Type(JsonBinaryType.class)
     @Column(columnDefinition = "jsonb",
