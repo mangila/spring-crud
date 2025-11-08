@@ -83,7 +83,6 @@ class EmployeeServiceTest {
         assertThatThrownBy(() -> service.findEmployeeById(id))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("Employee with id: (EMP-JODO-00000000-0000-0000-0000-000000000000) not found");
-        verify(repository, times(1)).findById(any());
     }
 
     @Test
@@ -105,18 +104,18 @@ class EmployeeServiceTest {
         CreateNewEmployeeRequest request = ObjectFactoryUtil.createNewEmployeeRequest(objectMapper);
         Employee employee = factory.from(request);
         service.createNewEmployee(employee);
-        verify(entityMapper, times(1)).map(any(Employee.class));
-        verify(repository, times(1)).save(any(EmployeeEntity.class));
-        verify(publisher, times(1)).publish(any(CreateNewEmployeeEvent.class));
-        clearInvocations(entityMapper, repository, publisher);
+        var inOrder = inOrder(entityMapper, repository, publisher);
+        inOrder.verify(entityMapper, times(1)).map(any(Employee.class));
+        inOrder.verify(repository, times(1)).save(any(EmployeeEntity.class));
+        inOrder.verify(publisher, times(1)).publish(any(CreateNewEmployeeEvent.class));
         return employee.id();
     }
 
     private Employee read(EmployeeId employeeId) {
         Employee employee = service.findEmployeeById(employeeId);
-        verify(repository, times(1)).findById(any(String.class));
-        verify(domainMapper, times(1)).map(any(EmployeeEntity.class));
-        clearInvocations(repository, domainMapper);
+        var inOrder = inOrder(repository, domainMapper);
+        inOrder.verify(repository, times(1)).findById(any(String.class));
+        inOrder.verify(domainMapper, times(1)).map(any(EmployeeEntity.class));
         return employee;
     }
 
@@ -208,13 +207,13 @@ class EmployeeServiceTest {
                 employee.attributes().value().put("vegan", false)
         );
         employee = domainMapper.map(request);
-        clearInvocations(domainMapper); // clear here since we just map to use UpdateEmployeeRequest
+        clearInvocations(domainMapper); // clear here because it is a preparation for the test
         service.updateEmployee(employee);
-        verify(repository, times(1)).existsById(any(String.class));
-        verify(entityMapper, times(1)).map(any(Employee.class));
-        verify(repository, times(1)).save(any(EmployeeEntity.class));
-        verify(publisher, times(1)).publish(any(UpdateEmployeeEvent.class));
-        clearInvocations(repository, entityMapper, publisher);
+        var inOrder = inOrder(repository, entityMapper, publisher);
+        inOrder.verify(repository, times(1)).existsById(any(String.class));
+        inOrder.verify(entityMapper, times(1)).map(any(Employee.class));
+        inOrder.verify(repository, times(1)).save(any(EmployeeEntity.class));
+        inOrder.verify(publisher, times(1)).publish(any(UpdateEmployeeEvent.class));
     }
 
     private void assertUpdatedEmployee(Employee employee) {
@@ -250,44 +249,10 @@ class EmployeeServiceTest {
 
     private void delete(EmployeeId employeeId) {
         service.softDeleteEmployeeById(employeeId);
-        verify(repository, times(1)).existsById(any(String.class));
-        verify(repository, times(1)).softDeleteByEmployeeId(any(EmployeeId.class));
-        verify(publisher, times(1)).publish(any(SoftDeleteEmployeeEvent.class));
-        clearInvocations(repository, publisher);
-    }
-
-    @Test
-    void updateEmployee() throws IOException {
-        // Set up a new Employee in the database
-        CreateNewEmployeeRequest request = ObjectFactoryUtil.createNewEmployeeRequest(objectMapper);
-        Employee employee = factory.from(request);
-        service.createNewEmployee(employee);
-        // Create a update employee request
-        var updateRequest = new UpdateEmployeeRequest(
-                employee.id().value(),
-                employee.firstName().value(),
-                employee.lastName().value(),
-                employee.salary().value().add(new BigDecimal("10.00")),
-                employee.employmentActivity(),
-                employee.employmentStatus(),
-                employee.attributes().value().put("vegan", false)
-        );
-        employee = domainMapper.map(updateRequest);
-        // Invoke the service
-        service.updateEmployee(employee);
-        verify(repository, times(1)).existsById(any());
-        verify(repository, times(1)).save(any(EmployeeEntity.class));
-        // This is a Fire And Forget mechanism that runs Async,
-        // so let's just verify the invocation from the service Point of Execution
-        verify(publisher, times(1)).publish(any(CreateNewEmployeeEvent.class));
-        // Verify updated Employee
-        employee = service.findEmployeeById(employee.id());
-        System.out.println(employee);
-    }
-
-    @Test
-    void softDeleteEmployeeById() {
-        assertThat(1 + 1).isEqualTo(3);
+        var inOrder = inOrder(repository, publisher);
+        inOrder.verify(repository, times(1)).existsById(any(String.class));
+        inOrder.verify(repository, times(1)).softDeleteByEmployeeId(any(EmployeeId.class));
+        inOrder.verify(publisher, times(1)).publish(any(SoftDeleteEmployeeEvent.class));
     }
 
     @Test

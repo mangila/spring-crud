@@ -23,8 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * Load the whole context and publish events
@@ -50,7 +49,7 @@ class EmployeeEventListenerTest {
             var id = ObjectFactoryUtil.createFakeEmployeeId();
             publisher.publish(new CreateNewEmployeeEvent(id));
         }).isInstanceOf(IllegalTransactionStateException.class);
-        verify(listener, times(0)).listen(any(CreateNewEmployeeEvent.class));
+        verify(listener, never()).listen(any(CreateNewEmployeeEvent.class));
     }
 
     @Test
@@ -79,7 +78,7 @@ class EmployeeEventListenerTest {
                 .untilAsserted(() -> {
                     assertThat(output).doesNotContain("Created Employee with ID:");
                 });
-        verify(listener, times(0)).listen(any(CreateNewEmployeeEvent.class));
+        verify(listener, never()).listen(any(CreateNewEmployeeEvent.class));
     }
 
     @Test
@@ -88,7 +87,7 @@ class EmployeeEventListenerTest {
             var id = ObjectFactoryUtil.createFakeEmployeeId();
             publisher.publish(new UpdateEmployeeEvent(id));
         }).isInstanceOf(IllegalTransactionStateException.class);
-        verify(listener, times(0)).listen(any(UpdateEmployeeEvent.class));
+        verify(listener, never()).listen(any(UpdateEmployeeEvent.class));
     }
 
     @Test
@@ -117,7 +116,7 @@ class EmployeeEventListenerTest {
                 .untilAsserted(() -> {
                     assertThat(output).doesNotContain("Updated Employee with ID:");
                 });
-        verify(listener, times(0)).listen(any(UpdateEmployeeEvent.class));
+        verify(listener, never()).listen(any(UpdateEmployeeEvent.class));
     }
 
     @Test
@@ -126,7 +125,7 @@ class EmployeeEventListenerTest {
             var id = ObjectFactoryUtil.createFakeEmployeeId();
             publisher.publish(new SoftDeleteEmployeeEvent(id));
         }).isInstanceOf(IllegalTransactionStateException.class);
-        verify(listener, times(0)).listen(any(SoftDeleteEmployeeEvent.class));
+        verify(listener, never()).listen(any(SoftDeleteEmployeeEvent.class));
     }
 
     @Test
@@ -155,6 +154,6 @@ class EmployeeEventListenerTest {
                 .untilAsserted(() -> {
                     assertThat(output).doesNotContain("Soft deleted Employee with ID:");
                 });
-        verify(listener, times(0)).listen(any(SoftDeleteEmployeeEvent.class));
+        verify(listener, never()).listen(any(SoftDeleteEmployeeEvent.class));
     }
 }
