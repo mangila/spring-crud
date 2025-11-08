@@ -1,21 +1,27 @@
 package com.github.mangila.app.model.employee.domain;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.app.model.employee.type.EmploymentActivity;
 import com.github.mangila.app.model.employee.type.EmploymentStatus;
-
-import java.math.BigDecimal;
 
 /**
  * Domain object, the business entity.
  * This is the data object that will execute logic.
+ * <br>
+ * Why wrap all the fields in a single object? Just alot of work?
+ * Yes, but when isolating objects like this, it's easier to validate, test, extend and maintain the domain.
+ * Instead of cluttering the whole Employee domain object with specific field methods,
+ * it can be more isolated for the actual value.
+ * We are able to run more specific validations on the fields and methods to ensure we are not in a bad state.
+ * <br>
+ * Drawbacks are that we create a lot of Objects all the time and can cause unnecessary GC pressure.
+ * BUT that's not a problem in this scope mostly a problem for low-latency systems.
  */
 public record Employee(
         EmployeeId id,
         EmployeeName firstName,
         EmployeeName lastName,
-        BigDecimal salary,
-        ObjectNode attributes,
+        EmployeeSalary salary,
+        EmployeeAttributes attributes,
         EmploymentActivity employmentActivity,
         EmploymentStatus employmentStatus,
         EmployeeAudit audit

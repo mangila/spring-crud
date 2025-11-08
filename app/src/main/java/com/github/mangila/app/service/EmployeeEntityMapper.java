@@ -13,12 +13,14 @@ public class EmployeeEntityMapper {
         entity.setId(employee.id().value());
         entity.setFirstName(employee.firstName().value());
         entity.setLastName(employee.lastName().value());
-        entity.setSalary(employee.salary());
-        entity.setAttributes(employee.attributes());
+        entity.setSalary(employee.salary().value());
+        entity.setEmploymentActivity(employee.employmentActivity());
+        entity.setEmploymentStatus(employee.employmentStatus());
+        entity.setAttributes(employee.attributes().value());
         var auditMetadata = new AuditMetadata(
-                employee.created(),
-                employee.modified(),
-                employee.deleted()
+                employee.audit().created(),
+                employee.audit().modified(),
+                employee.audit().deleted()
         );
         entity.setAuditMetadata(auditMetadata);
         return entity;

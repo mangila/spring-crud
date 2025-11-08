@@ -3,7 +3,6 @@
   "firstName": "Jane",
   "lastName": "Doe",
   "salary": "20000.12",
-  "deleted": false,
   "attributes": {
     "vegan": true,
     "pronouns": "she/her",

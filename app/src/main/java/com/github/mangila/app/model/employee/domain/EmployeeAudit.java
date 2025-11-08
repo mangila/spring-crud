@@ -7,4 +7,5 @@ public record EmployeeAudit(
         Instant modified,
         boolean deleted
 ) {
+    public static EmployeeAudit EMPTY = new EmployeeAudit(null, null, false);
 }

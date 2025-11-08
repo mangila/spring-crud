@@ -12,11 +12,13 @@ public class EmployeeDtoMapper {
                 employee.id().value(),
                 employee.firstName().value(),
                 employee.lastName().value(),
-                employee.salary(),
-                employee.attributes(),
-                employee.created(),
-                employee.modified(),
-                employee.deleted()
+                employee.salary().value(),
+                employee.employmentActivity(),
+                employee.employmentStatus(),
+                employee.attributes().value(),
+                employee.audit().created(),
+                employee.audit().modified(),
+                employee.audit().deleted()
         );
     }
 }

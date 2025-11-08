@@ -124,8 +124,9 @@ class EmployeeControllerTest {
                 dto.firstName(),
                 dto.lastName(),
                 raise,
-                updatedAttributes,
-                dto.deleted()
+                dto.employmentActivity(),
+                dto.employmentStatus(),
+                updatedAttributes
         );
         return webTestClient.put()
                 .uri("/api/v1/employees")

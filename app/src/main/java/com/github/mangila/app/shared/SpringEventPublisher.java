@@ -31,7 +31,7 @@ public class SpringEventPublisher {
     /**
      * Force the publisher to be inside a tx since our listener is a @TransactionalEventListener.
      * A fail-fast version of this, since if you forget to wrap inside a transaction, the event will not be published.
-     * So loudly remind the programmer to wrap inside a transaction.
+     * To loudly remind the programmer to wrap a publication inside a transaction.
      */
     @Transactional(propagation = Propagation.MANDATORY)
     public void publish(CreateNewEmployeeEvent event) {
