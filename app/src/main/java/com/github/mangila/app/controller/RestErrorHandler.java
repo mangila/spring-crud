@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -42,6 +43,26 @@ public class RestErrorHandler {
     }
 
     /**
+     * MethodArgumentNotValidException - First layer of validation, can be called the "Controller validation"
+     * <br>
+     * Log this or not, that's the question. Might create a lot of noise in the logs.
+     * Since we often know what it's all about.
+     * Might log for some time and remove it later when the app is getting more mature.
+     * The client gets its feedback from the exception message.
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.error("ERR", e);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                e.getMessage()
+        );
+        return problemDetail;
+    }
+
+    /**
+     * ConstraintViolationException - Second layer of validation, can be called the "Service validation"
+     * <br>
      * Log this or not, that's the question. Might create a lot of noise in the logs.
      * Since we often know what it's all about.
      * Might log for some time and remove it later when the app is getting more mature.
@@ -77,7 +98,7 @@ public class RestErrorHandler {
      * But generally it's a good idea to hide internal server errors.
      */
     @ExceptionHandler(Exception.class)
-    public ProblemDetail handleException(RuntimeException e) {
+    public ProblemDetail handleException(Exception e) {
         log.error("ERR", e);
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.INTERNAL_SERVER_ERROR,

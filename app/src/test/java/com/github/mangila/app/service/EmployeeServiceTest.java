@@ -62,7 +62,10 @@ class EmployeeServiceTest {
     private EmployeeJpaRepository repository;
 
     @MockitoSpyBean
-    private EmployeeEntityMapper mapper;
+    private EmployeeDomainMapper domainMapper;
+
+    @MockitoSpyBean
+    private EmployeeEntityMapper entityMapper;
 
     @Test
     @DisplayName("Should not find Employee by Id and throw")
@@ -92,7 +95,7 @@ class EmployeeServiceTest {
     @Test
     void updateEmployee() throws IOException {
         UpdateEmployeeRequest request = ObjectFactoryUtil.createUpdateEmployeeRequest(objectMapper);
-        Employee employee = mapper.toDomain(request);
+        Employee employee = domainMapper.map(request);
         service.updateEmployee(employee);
     }
 

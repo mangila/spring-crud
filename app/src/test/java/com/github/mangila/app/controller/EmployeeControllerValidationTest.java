@@ -1,6 +1,7 @@
 package com.github.mangila.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.app.ObjectFactoryUtil;
 import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
 import com.github.mangila.app.service.EmployeeRestFacade;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,12 +10,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @WebMvcTest(EmployeeController.class)
@@ -34,7 +37,7 @@ public class EmployeeControllerValidationTest {
                 .build();
     }
 
-    @ParameterizedTest(name = "Employee id {0} should be invalid")
+    @ParameterizedTest(name = "{0}")
     @ValueSource(strings = {
             "invalid",                              // Completely invalid format
             "EMP-ABC1234",                         // Wrong format (not 4 uppercase letters)
@@ -56,26 +59,52 @@ public class EmployeeControllerValidationTest {
         var mapper = new ObjectMapper();
         return Stream.of(
                 // validate firstname
-                new CreateNewEmployeeRequest(null, "Doe", BigDecimal.valueOf(50000), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("", "Doe", BigDecimal.valueOf(50000), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("J", "Doe", BigDecimal.valueOf(50000), mapper.createObjectNode()),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .firstName(null)
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .firstName("")
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .firstName("J")
+                        .build(),
                 // validate lastname
-                new CreateNewEmployeeRequest("John", "", BigDecimal.valueOf(50000), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("John", "D", BigDecimal.valueOf(50000), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("John", null, BigDecimal.valueOf(50000), mapper.createObjectNode()),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .lastName(null)
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .lastName("")
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .lastName("D")
+                        .build(),
                 // validate salary
-                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(1000000), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(0), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(-1), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(-1.00), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(30.123456), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("John", "Doe", null, mapper.createObjectNode()),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .salary(null)
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .salary(BigDecimal.valueOf(1000000))
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .salary(BigDecimal.valueOf(0))
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .salary(BigDecimal.valueOf(-1))
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .salary(BigDecimal.valueOf(-1.00))
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .salary(BigDecimal.valueOf(31.231323223))
+                        .build(),
                 // validate attributes
-                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(200), null)
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .attributes(null)
+                        .build()
         );
     }
 
-    @ParameterizedTest(name = "Employee request {0} should be invalid")
+    @ParameterizedTest(name = "{0}")
     @MethodSource("notValidCreateNewEmployeeRequests")
     void shouldValidateCreateNewEmployeeRequest(CreateNewEmployeeRequest request) {
         webTestClient.post()
