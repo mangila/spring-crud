@@ -56,7 +56,9 @@ public class EmployeeControllerValidationTest {
     })
     void shouldValidateEmployeeId(String employeeId) {
         webTestClient.get()
-                .uri("/api/v1/employees/" + employeeId)
+                .uri(builder -> builder
+                        .path("/api/v1/employees/{employeeId}")
+                        .build(employeeId))
                 .exchange()
                 .expectStatus()
                 .isBadRequest();
