@@ -2,9 +2,11 @@ package com.github.mangila.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.mangila.app.model.AuditMetadata;
 import com.github.mangila.app.model.employee.domain.EmployeeId;
 import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
 import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
+import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import com.github.mangila.app.model.employee.type.EmploymentActivity;
 import com.github.mangila.app.model.employee.type.EmploymentStatus;
 
@@ -83,7 +85,6 @@ public class ObjectFactoryUtil {
         }
     }
 
-
     public static UpdateEmployeeRequest createUpdateEmployeeRequest(ObjectMapper objectMapper) throws IOException {
         var jsonString = FilePathUtil.readJsonFileToString("/json/update-employee-request.json");
         return objectMapper.readValue(jsonString, UpdateEmployeeRequest.class);
@@ -91,5 +92,19 @@ public class ObjectFactoryUtil {
 
     public static EmployeeId createFakeEmployeeId() {
         return new EmployeeId("EMP-JODO-00000000-0000-0000-0000-000000000000");
+    }
+
+    public static EmployeeEntity createFakeEmployeeEntity(ObjectMapper objectMapper) throws IOException {
+        var updateRequest = createUpdateEmployeeRequest(objectMapper);
+        var entity = new EmployeeEntity();
+        entity.setId(updateRequest.employeeId());
+        entity.setFirstName(updateRequest.firstName());
+        entity.setLastName(updateRequest.lastName());
+        entity.setSalary(updateRequest.salary());
+        entity.setEmploymentActivity(updateRequest.employmentActivity());
+        entity.setEmploymentStatus(updateRequest.employmentStatus());
+        entity.setAttributes(updateRequest.attributes());
+        entity.setAuditMetadata(new AuditMetadata(null, null, false));
+        return entity;
     }
 }
