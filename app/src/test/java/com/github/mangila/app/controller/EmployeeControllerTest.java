@@ -6,6 +6,8 @@ import com.github.mangila.app.ObjectFactoryUtil;
 import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.model.employee.dto.EmployeeDto;
 import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
+import com.github.mangila.app.model.employee.type.EmploymentActivity;
+import com.github.mangila.app.model.employee.type.EmploymentStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -79,40 +82,67 @@ class EmployeeControllerTest {
     private void assertNewEmployeeDto(EmployeeDto dto) {
         assertThat(dto)
                 .isNotNull()
-                .extracting(
-                        EmployeeDto::firstName,
-                        EmployeeDto::lastName,
-                        EmployeeDto::salary,
-                        EmployeeDto::deleted
+                .hasOnlyFields(
+                        "employeeId",
+                        "firstName",
+                        "lastName",
+                        "salary",
+                        "employmentActivity",
+                        "employmentStatus",
+                        "attributes",
+                        "created",
+                        "modified",
+                        "deleted"
                 )
-                .doesNotContainNull()
-                .contains("John", "Doe", new BigDecimal("20000.13"), false);
+                .hasFieldOrPropertyWithValue("employeeId", dto.employeeId())
+                .hasFieldOrPropertyWithValue("firstName", "John")
+                .hasFieldOrPropertyWithValue("lastName", "Doe")
+                .hasFieldOrPropertyWithValue("salary", new BigDecimal("20000.12"))
+                .hasFieldOrPropertyWithValue("employmentActivity", EmploymentActivity.FULL_TIME)
+                .hasFieldOrPropertyWithValue("employmentStatus", EmploymentStatus.ACTIVE)
+                .hasFieldOrPropertyWithValue("deleted", false);
+        // Verify created and modified dates are somewhere in the last 5 seconds
         assertThat(dto.created())
                 .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
         assertThat(dto.modified())
                 .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
         // Assert the serialized JSON attributes
-        // Assert JSON root key values
-        assertThatJson(dto.attributes().toString())
+        // Assert JSON attributes
+        var jsonAttributes = dto.attributes().toString();
+        assertThatJson(jsonAttributes)
                 .isObject()
+                .containsOnlyKeys(
+                        "vegan",
+                        "pronouns",
+                        "licenses",
+                        "evaluation",
+                        "substance_addiction",
+                        "secret_number",
+                        "notes"
+                )
+                .hasSize(7)
                 .containsEntry("vegan", true)
                 .containsEntry("pronouns", "he/him")
-                // sssssssssssssnake case
                 .containsEntry("substance_addiction", true)
-                .containsEntry("notes", "subject is not approved for field duty, immediate suspension advised");
-        // Assert nested object
-        assertThatJson(dto.attributes().toString())
-                .node("evaluation")
-                .isObject()
-                .containsEntry("medical", "FAIL")
-                .containsEntry("physical", "FAIL")
-                .containsEntry("psychological", "FAIL");
-        // Assert array
-        assertThatJson(dto.attributes().toString())
-                .node("licenses")
-                .isArray()
-                .hasSize(3)
-                .contains("PP7", "Klobb", "DD44 Dostovei");
+                .containsEntry("secret_number", "123")
+                .containsEntry("notes", "subject is not approved for field duty, immediate suspension advised")
+                .node("") // just to be able to traverse the whole JSON tree, maybe there is a better way to do this
+                .and(jsonAssert -> jsonAssert.node("licenses")
+                        .isArray()
+                        .hasSize(3)
+                        .containsExactly(
+                                "PP7",
+                                "Klobb",
+                                "DD44 Dostovei"
+                        ))
+                .and(jsonAssert -> jsonAssert.node("evaluation")
+                        .isObject()
+                        .hasSize(3)
+                        .containsExactly(
+                                Map.entry("medical", "FAIL"),
+                                Map.entry("physical", "FAIL"),
+                                Map.entry("psychological", "FAIL")
+                        ));
     }
 
     private EmployeeDto update(EmployeeDto dto) {
