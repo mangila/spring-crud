@@ -54,7 +54,10 @@ public class EmployeeRestFacade {
 
     public EmployeeDto updateEmployee(UpdateEmployeeRequest request) {
         Employee employee = mapper.toDomain(request);
-        employee = service.updateEmployee(employee);
+        // Start a transaction and update the employee in the db
+        service.updateEmployee(employee);
+        // Fetch the updated employee after the transaction commit
+        employee = service.findEmployeeById(employee.id());
         return mapper.toDto(employee);
     }
 

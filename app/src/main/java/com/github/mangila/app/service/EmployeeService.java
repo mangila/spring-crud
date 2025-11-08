@@ -6,7 +6,8 @@ import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import com.github.mangila.app.repository.EmployeeJpaRepository;
 import com.github.mangila.app.shared.Ensure;
 import com.github.mangila.app.shared.SpringEventPublisher;
-import com.github.mangila.app.shared.event.NewEmployeeCreatedEvent;
+import com.github.mangila.app.shared.event.CreateNewEmployeeEvent;
+import com.github.mangila.app.shared.event.UpdateEmployeeEvent;
 import com.github.mangila.app.shared.exception.EntityNotFoundException;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.data.domain.Page;
@@ -50,20 +51,28 @@ public class EmployeeService {
                 .map(mapper::toDomain);
     }
 
+    @Transactional
     public void createNewEmployee(Employee employee) {
         EmployeeEntity entity = mapper.toEntity(employee);
         repository.save(entity);
-        publisher.publish(new NewEmployeeCreatedEvent(employee.id()));
+        publisher.publish(new CreateNewEmployeeEvent(employee.id()));
     }
 
-    public Employee updateEmployee(Employee employee) {
-        // Here we don't want an Upsert-Insert to happen since we use repository.save(), so we first check for existence.
-        // Some APIs accept this, not this one :P;
-        // a good reason why not - is to ensure/force employee ID to be created by the application and not by the client
+    /**
+     * Update an already existing employee.
+     * <br>
+     * Here we don't want an Upsert-Insert to happen since we use repository.save(),
+     * so we first check for existence.
+     * <br>
+     * Some APIs accept this, not this one! :P
+     * a good reason why not - is to ensure/force employee ID to be created by the application and not by the client
+     */
+    @Transactional
+    public void updateEmployee(Employee employee) {
         Ensure.isTrue(existsById(employee.id()), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", employee.id().value())));
         EmployeeEntity entity = mapper.toEntity(employee);
         repository.save(entity);
-        return findEmployeeById(employee.id());
+        publisher.publish(new UpdateEmployeeEvent(employee.id()));
     }
 
     @Transactional

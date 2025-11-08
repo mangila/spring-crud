@@ -10,24 +10,19 @@ import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import com.github.mangila.app.repository.EmployeeJpaRepository;
 import com.github.mangila.app.shared.SpringEventPublisher;
-import com.github.mangila.app.shared.event.NewEmployeeCreatedEvent;
+import com.github.mangila.app.shared.event.CreateNewEmployeeEvent;
 import com.github.mangila.app.shared.exception.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.io.IOException;
-import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,7 +43,6 @@ import static org.mockito.Mockito.verify;
  * Repository, Mapper and Event publisher is wired as SpyBeans just to make sure they invoke its expected method.
  */
 @Import(TestcontainersConfiguration.class)
-@ExtendWith(OutputCaptureExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class EmployeeServiceTest {
 
@@ -81,21 +75,14 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void createNewEmployee(CapturedOutput output) throws IOException {
+    void createNewEmployee() throws IOException {
         CreateNewEmployeeRequest request = ObjectFactoryUtil.createNewEmployeeRequest(objectMapper);
         Employee employee = factory.from(request);
         service.createNewEmployee(employee);
         verify(repository, times(1)).save(any(EmployeeEntity.class));
-        // This is a Fire And Forget mechanism, so let's just verify the invocation from the service POV
-        verify(publisher, times(1)).publish(any(NewEmployeeCreatedEvent.class));
-        // await for the expected log output from the received event
-        // Awaitility to start a small wait for the event publishing.
-        // This is an optional assert, since code is not running from the service but it "triggers"
-        // But it is still a FaF, so no harm is done anyway if this fails from the Service POV.
-        // A full E2E test should be able to pick this up for whatever side effect it might run.
-        // TODO: might remove await and CapturedOutput later
-        await().atMost(Duration.ofSeconds(1))
-                .untilAsserted(() -> assertThat(output).contains("New employee created with ID:"));
+        // This is a Fire And Forget mechanism that runs Async,
+        // so let's just verify the invocation from the service Point of Execution
+        verify(publisher, times(1)).publish(any(CreateNewEmployeeEvent.class));
         // Verify service returns the correct employee
         employee = service.findEmployeeById(employee.id());
         assertThat(employee.firstName().value())
