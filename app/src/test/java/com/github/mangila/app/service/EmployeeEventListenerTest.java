@@ -2,9 +2,10 @@ package com.github.mangila.app.service;
 
 import com.github.mangila.app.ObjectFactoryUtil;
 import com.github.mangila.app.TestcontainersConfiguration;
+import com.github.mangila.app.model.employee.event.CreateNewEmployeeEvent;
+import com.github.mangila.app.model.employee.event.SoftDeleteEmployeeEvent;
+import com.github.mangila.app.model.employee.event.UpdateEmployeeEvent;
 import com.github.mangila.app.shared.SpringEventPublisher;
-import com.github.mangila.app.shared.event.CreateNewEmployeeEvent;
-import com.github.mangila.app.shared.event.UpdateEmployeeEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,5 +118,43 @@ class EmployeeEventListenerTest {
                     assertThat(output).doesNotContain("Updated Employee with ID:");
                 });
         verify(listener, times(0)).listen(any(UpdateEmployeeEvent.class));
+    }
+
+    @Test
+    void publishSoftDeleteEmployeeEventNeedTx() {
+        assertThatThrownBy(() -> {
+            var id = ObjectFactoryUtil.createFakeEmployeeId();
+            publisher.publish(new SoftDeleteEmployeeEvent(id));
+        }).isInstanceOf(IllegalTransactionStateException.class);
+        verify(listener, times(0)).listen(any(SoftDeleteEmployeeEvent.class));
+    }
+
+    @Test
+    void listenTransactionCommitSoftDeleteEmployee(CapturedOutput output) {
+        transactionTemplate.executeWithoutResult(txStatus -> {
+            var id = ObjectFactoryUtil.createFakeEmployeeId();
+            publisher.publish(new SoftDeleteEmployeeEvent(id));
+        });
+        await()
+                .atMost(Duration.ofSeconds(3))
+                .untilAsserted(() -> {
+                    assertThat(output).contains("Soft deleted Employee with ID:");
+                });
+        verify(listener, times(1)).listen(any(SoftDeleteEmployeeEvent.class));
+    }
+
+    @Test
+    void listenTransactionRollbackSoftDeleteEmployee(CapturedOutput output) {
+        transactionTemplate.executeWithoutResult(txStatus -> {
+            txStatus.setRollbackOnly();
+            var id = ObjectFactoryUtil.createFakeEmployeeId();
+            publisher.publish(new SoftDeleteEmployeeEvent(id));
+        });
+        await()
+                .atMost(Duration.ofSeconds(3))
+                .untilAsserted(() -> {
+                    assertThat(output).doesNotContain("Soft deleted Employee with ID:");
+                });
+        verify(listener, times(0)).listen(any(SoftDeleteEmployeeEvent.class));
     }
 }

@@ -1,8 +1,9 @@
 package com.github.mangila.app.service;
 
 import com.github.mangila.app.model.employee.domain.EmployeeId;
-import com.github.mangila.app.shared.event.CreateNewEmployeeEvent;
-import com.github.mangila.app.shared.event.UpdateEmployeeEvent;
+import com.github.mangila.app.model.employee.event.CreateNewEmployeeEvent;
+import com.github.mangila.app.model.employee.event.SoftDeleteEmployeeEvent;
+import com.github.mangila.app.model.employee.event.UpdateEmployeeEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -45,4 +46,15 @@ public class EmployeeEventListener {
         log.info("Updated Employee with ID: {}", id.value());
     }
 
+    /**
+     * Listener for SoftDeleteEmployeeEvent
+     * <br>
+     * E.g., Run some cleanup tasks for a soft deleted employee
+     */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Async
+    public void listen(SoftDeleteEmployeeEvent event) {
+        EmployeeId id = event.employeeId();
+        log.info("Soft deleted Employee with ID: {}", id.value());
+    }
 }

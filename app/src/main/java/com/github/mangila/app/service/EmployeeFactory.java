@@ -1,8 +1,6 @@
 package com.github.mangila.app.service;
 
-import com.github.mangila.app.model.employee.domain.Employee;
-import com.github.mangila.app.model.employee.domain.EmployeeId;
-import com.github.mangila.app.model.employee.domain.EmployeeName;
+import com.github.mangila.app.model.employee.domain.*;
 import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
 import org.springframework.stereotype.Component;
 
@@ -28,11 +26,11 @@ public class EmployeeFactory {
                 id,
                 new EmployeeName(request.firstName()),
                 new EmployeeName(request.lastName()),
-                request.salary(),
-                request.attributes(),
-                null, // Database will generate the created timestamp
-                null, // Database will generate the modified timestamp
-                false
+                new EmployeeSalary(request.salary()),
+                new EmployeeAttributes(request.attributes()),
+                request.employmentActivity(),
+                request.employmentStatus(),
+                EmployeeAudit.EMPTY
         );
     }
 }

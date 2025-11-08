@@ -15,11 +15,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * If there are more dependencies, it can be loaded with {@link ContextConfiguration} or just use the full Spring context.
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = EmployeeMapper.class)
-class EmployeeMapperTest {
+@ContextConfiguration(classes = EmployeeEntityMapper.class)
+class EmployeeEntityMapperTest {
 
     @Autowired
-    private EmployeeMapper mapper;
+    private EmployeeEntityMapper mapper;
 
     @Test
     void test() {

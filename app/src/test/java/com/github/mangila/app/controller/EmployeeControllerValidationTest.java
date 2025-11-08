@@ -1,6 +1,7 @@
 package com.github.mangila.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.app.ObjectFactoryUtil;
 import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
 import com.github.mangila.app.service.EmployeeRestFacade;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,12 +11,18 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 
 import java.math.BigDecimal;
+import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @WebMvcTest(EmployeeController.class)
 public class EmployeeControllerValidationTest {
@@ -26,6 +33,9 @@ public class EmployeeControllerValidationTest {
     @MockitoBean
     private EmployeeRestFacade restFacade;
 
+    @MockitoSpyBean
+    private RestErrorHandler errorHandler;
+
     private WebTestClient webTestClient;
 
     @BeforeEach
@@ -34,7 +44,7 @@ public class EmployeeControllerValidationTest {
                 .build();
     }
 
-    @ParameterizedTest(name = "Employee id {0} should be invalid")
+    @ParameterizedTest(name = "{0}")
     @ValueSource(strings = {
             "invalid",                              // Completely invalid format
             "EMP-ABC1234",                         // Wrong format (not 4 uppercase letters)
@@ -46,36 +56,17 @@ public class EmployeeControllerValidationTest {
     })
     void shouldValidateEmployeeId(String employeeId) {
         webTestClient.get()
-                .uri("/api/v1/employees/" + employeeId)
+                .uri(builder -> builder
+                        .path("/api/v1/employees/{employeeId}")
+                        .build(employeeId))
                 .exchange()
                 .expectStatus()
                 .isBadRequest();
+        verify(errorHandler, times(1))
+                .handleConstraintViolationException(any());
     }
 
-    static Stream<CreateNewEmployeeRequest> notValidCreateNewEmployeeRequests() {
-        var mapper = new ObjectMapper();
-        return Stream.of(
-                // validate firstname
-                new CreateNewEmployeeRequest(null, "Doe", BigDecimal.valueOf(50000), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("", "Doe", BigDecimal.valueOf(50000), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("J", "Doe", BigDecimal.valueOf(50000), mapper.createObjectNode()),
-                // validate lastname
-                new CreateNewEmployeeRequest("John", "", BigDecimal.valueOf(50000), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("John", "D", BigDecimal.valueOf(50000), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("John", null, BigDecimal.valueOf(50000), mapper.createObjectNode()),
-                // validate salary
-                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(1000000), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(0), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(-1), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(-1.00), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(30.123456), mapper.createObjectNode()),
-                new CreateNewEmployeeRequest("John", "Doe", null, mapper.createObjectNode()),
-                // validate attributes
-                new CreateNewEmployeeRequest("John", "Doe", BigDecimal.valueOf(200), null)
-        );
-    }
-
-    @ParameterizedTest(name = "Employee request {0} should be invalid")
+    @ParameterizedTest(name = "{0}")
     @MethodSource("notValidCreateNewEmployeeRequests")
     void shouldValidateCreateNewEmployeeRequest(CreateNewEmployeeRequest request) {
         webTestClient.post()
@@ -84,5 +75,80 @@ public class EmployeeControllerValidationTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest();
+        verify(errorHandler, times(1))
+                .handleMethodArgumentNotValidException(any());
+    }
+
+    private static Stream<CreateNewEmployeeRequest> notValidCreateNewEmployeeRequests() {
+        var mapper = new ObjectMapper();
+        var firstNameValidation = validateFirstName(mapper);
+        var lastNameValidation = validateLastName(mapper);
+        var salaryValidation = validateSalary(mapper);
+        var attributesValidation = validateAttributes(mapper);
+        return Stream.of(
+                firstNameValidation,
+                lastNameValidation,
+                salaryValidation,
+                attributesValidation
+        ).flatMap(Function.identity());
+    }
+
+    private static Stream<CreateNewEmployeeRequest> validateAttributes(ObjectMapper mapper) {
+        return Stream.of(
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .attributes(null)
+                        .build()
+        );
+    }
+
+    private static Stream<CreateNewEmployeeRequest> validateFirstName(ObjectMapper mapper) {
+        return Stream.of(
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .firstName(null)
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .firstName("")
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .firstName("J")
+                        .build()
+        );
+    }
+
+    private static Stream<CreateNewEmployeeRequest> validateLastName(ObjectMapper mapper) {
+        return Stream.of(
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .lastName(null)
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .lastName("")
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .lastName("D")
+                        .build()
+        );
+    }
+
+    private static Stream<CreateNewEmployeeRequest> validateSalary(ObjectMapper mapper) {
+        return Stream.of(
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .salary(null)
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .salary(BigDecimal.valueOf(1000000))
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .salary(BigDecimal.valueOf(0))
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .salary(BigDecimal.valueOf(-1))
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .salary(BigDecimal.valueOf(-1.00))
+                        .build(),
+                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                        .salary(BigDecimal.valueOf(31.231323223))
+                        .build()
+        );
     }
 }

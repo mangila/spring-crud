@@ -1,7 +1,8 @@
 package com.github.mangila.app.shared;
 
-import com.github.mangila.app.shared.event.CreateNewEmployeeEvent;
-import com.github.mangila.app.shared.event.UpdateEmployeeEvent;
+import com.github.mangila.app.model.employee.event.CreateNewEmployeeEvent;
+import com.github.mangila.app.model.employee.event.SoftDeleteEmployeeEvent;
+import com.github.mangila.app.model.employee.event.UpdateEmployeeEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -30,7 +31,7 @@ public class SpringEventPublisher {
     /**
      * Force the publisher to be inside a tx since our listener is a @TransactionalEventListener.
      * A fail-fast version of this, since if you forget to wrap inside a transaction, the event will not be published.
-     * So loudly remind the programmer to wrap inside a transaction.
+     * To loudly remind the programmer to wrap a publication inside a transaction.
      */
     @Transactional(propagation = Propagation.MANDATORY)
     public void publish(CreateNewEmployeeEvent event) {
@@ -39,6 +40,11 @@ public class SpringEventPublisher {
 
     @Transactional(propagation = Propagation.MANDATORY)
     public void publish(UpdateEmployeeEvent event) {
+        publisher.publishEvent(event);
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void publish(SoftDeleteEmployeeEvent event) {
         publisher.publishEvent(event);
     }
 }

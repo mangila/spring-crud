@@ -41,15 +41,13 @@ class UpdateEmployeeRequestJsonTest {
                 .extracting(UpdateEmployeeRequest::employeeId,
                         UpdateEmployeeRequest::firstName,
                         UpdateEmployeeRequest::lastName,
-                        UpdateEmployeeRequest::salary,
-                        UpdateEmployeeRequest::deleted)
+                        UpdateEmployeeRequest::salary)
                 .doesNotContainNull()
                 .containsExactly(
                         "EMP-JODO-00000000-0000-0000-0000-000000000000",
                         "Jane",
                         "Doe",
-                        new BigDecimal("20000.12"),
-                        false
+                        new BigDecimal("20000.12")
                 );
         // Assert JSON attributes
         ObjectNode attributes = objectContent.getObject().attributes();
