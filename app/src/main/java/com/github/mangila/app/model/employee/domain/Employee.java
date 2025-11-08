@@ -2,6 +2,7 @@ package com.github.mangila.app.model.employee.domain;
 
 import com.github.mangila.app.model.employee.type.EmploymentActivity;
 import com.github.mangila.app.model.employee.type.EmploymentStatus;
+import com.github.mangila.app.shared.Ensure;
 
 /**
  * Domain object, the business entity.
@@ -26,4 +27,14 @@ public record Employee(
         EmploymentStatus employmentStatus,
         EmployeeAudit audit
 ) {
+    public Employee {
+        Ensure.notNull(id, "Employee id must not be null");
+        Ensure.notNull(firstName, "Employee first name must not be null");
+        Ensure.notNull(lastName, "Employee last name must not be null");
+        Ensure.notNull(salary, "Employee salary must not be null");
+        Ensure.notNull(attributes, "Employee attributes must not be null");
+        Ensure.notNull(employmentActivity, "Employee employment activity must not be null");
+        Ensure.notNull(employmentStatus, "Employee employment status must not be null");
+        Ensure.notNull(audit, "Employee audit must not be null");
+    }
 }
