@@ -43,7 +43,7 @@ public class RestErrorHandler {
     }
 
     /**
-     * MethodArgumentNotValidException - First layer of validation, can be called the "Controller validation"
+     * MethodArgumentNotValidException - Can be called the "@Valid validation"
      * <br>
      * Log this or not, that's the question. Might create a lot of noise in the logs.
      * Since we often know what it's all about.
@@ -61,7 +61,7 @@ public class RestErrorHandler {
     }
 
     /**
-     * ConstraintViolationException - Second layer of validation, can be called the "Service validation"
+     * ConstraintViolationException - Can be called the "@Validated validation"
      * <br>
      * Log this or not, that's the question. Might create a lot of noise in the logs.
      * Since we often know what it's all about.

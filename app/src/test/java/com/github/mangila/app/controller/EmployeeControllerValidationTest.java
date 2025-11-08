@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
@@ -19,6 +20,10 @@ import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.stream.Stream;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @WebMvcTest(EmployeeController.class)
 public class EmployeeControllerValidationTest {
@@ -28,6 +33,9 @@ public class EmployeeControllerValidationTest {
 
     @MockitoBean
     private EmployeeRestFacade restFacade;
+
+    @MockitoSpyBean
+    private RestErrorHandler errorHandler;
 
     private WebTestClient webTestClient;
 
@@ -53,6 +61,8 @@ public class EmployeeControllerValidationTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest();
+        verify(errorHandler, times(1))
+                .handleConstraintViolationException(any());
     }
 
     static Stream<CreateNewEmployeeRequest> notValidCreateNewEmployeeRequests() {
@@ -113,5 +123,7 @@ public class EmployeeControllerValidationTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest();
+        verify(errorHandler, times(1))
+                .handleMethodArgumentNotValidException(any());
     }
 }
