@@ -14,9 +14,9 @@ public class EmployeeDomainMapper {
                 new EmployeeName(dto.firstName()),
                 new EmployeeName(dto.lastName()),
                 new EmployeeSalary(dto.salary()),
-                new EmployeeAttributes(dto.attributes()),
                 dto.employmentActivity(),
                 dto.employmentStatus(),
+                new EmployeeAttributes(dto.attributes()),
                 EmployeeAudit.EMPTY
         );
     }
@@ -27,9 +27,9 @@ public class EmployeeDomainMapper {
                 new EmployeeName(entity.getFirstName()),
                 new EmployeeName(entity.getLastName()),
                 new EmployeeSalary(entity.getSalary()),
-                new EmployeeAttributes(entity.getAttributes()),
                 entity.getEmploymentActivity(),
                 entity.getEmploymentStatus(),
+                new EmployeeAttributes(entity.getAttributes()),
                 new EmployeeAudit(
                         entity.getAuditMetadata().created(),
                         entity.getAuditMetadata().modified(),

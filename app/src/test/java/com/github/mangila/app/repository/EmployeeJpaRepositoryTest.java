@@ -5,8 +5,9 @@ import com.github.mangila.app.ObjectFactoryUtil;
 import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.config.JacksonConfig;
 import com.github.mangila.app.config.JpaConfig;
-import com.github.mangila.app.service.EmployeeDomainMapper;
+import com.github.mangila.app.model.employee.domain.EmployeeId;
 import com.github.mangila.app.service.EmployeeEntityMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -32,12 +33,6 @@ class EmployeeJpaRepositoryTest {
 
     @Autowired
     private EmployeeJpaRepository repository;
-
-    @Autowired
-    private EmployeeDomainMapper domainMapper;
-    @Autowired
-    private EmployeeEntityMapper entityMapper;
-
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -47,13 +42,12 @@ class EmployeeJpaRepositoryTest {
     }
 
     @Test
+    @DisplayName("Should Soft Delete an Employee")
     void softDeleteEmployee() throws IOException {
-        var dto = ObjectFactoryUtil.createUpdateEmployeeRequest(objectMapper);
-        var domain = domainMapper.map(dto);
-        var entity = entityMapper.map(domain);
+        var entity = ObjectFactoryUtil.createEmployeeEntity(objectMapper);
         repository.save(entity);
-        repository.softDeleteByEmployeeId(domain.id());
-        entity = repository.findById(domain.id().value())
+        repository.softDeleteByEmployeeId(new EmployeeId(entity.getId()));
+        entity = repository.findById(entity.getId())
                 .orElseThrow();
         assertThat(entity.getAuditMetadata().deleted())
                 .isTrue();

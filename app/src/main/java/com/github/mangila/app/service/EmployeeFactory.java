@@ -27,9 +27,9 @@ public class EmployeeFactory {
                 new EmployeeName(request.firstName()),
                 new EmployeeName(request.lastName()),
                 new EmployeeSalary(request.salary()),
-                new EmployeeAttributes(request.attributes()),
                 request.employmentActivity(),
                 request.employmentStatus(),
+                new EmployeeAttributes(request.attributes()),
                 EmployeeAudit.EMPTY
         );
     }
