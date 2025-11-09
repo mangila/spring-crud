@@ -52,7 +52,12 @@ import static org.mockito.Mockito.*;
  * Repository, Mapper and Event publisher is wired as SpyBeans just to make sure they invoke its expected method.
  */
 @Import(TestcontainersConfiguration.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.NONE,
+        properties = {
+                "application.scheduler.enabled=false"
+        }
+)
 class EmployeeServiceTest {
 
     @Autowired

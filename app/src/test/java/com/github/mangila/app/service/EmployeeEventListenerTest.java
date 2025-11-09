@@ -32,7 +32,12 @@ import static org.mockito.Mockito.*;
  */
 @Import(TestcontainersConfiguration.class)
 @ExtendWith(OutputCaptureExtension.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.NONE,
+        properties = {
+                "application.scheduler.enabled=false"
+        }
+)
 class EmployeeEventListenerTest {
 
     @Autowired

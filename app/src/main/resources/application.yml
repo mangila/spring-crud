@@ -1,0 +1,50 @@
+# Application Properties
+application:
+  scheduler:
+    enabled: true
+    fixed-rate: 5s
+    fixed-delay: 3s
+    cron: 0 0 0 * * *
+# Spring Properties
+spring:
+  task:
+    scheduling:
+      thread-name-prefix: "scheduler-"
+      shutdown:
+        await-termination: true
+        await-termination-period: 30s
+    execution:
+      thread-name-prefix: "async-"
+  application:
+    name: spring-crud
+  threads:
+    virtual:
+      enabled: true
+  docker:
+    compose:
+      enabled: true
+      file: ${user.dir}/infrastructure/local/compose.yaml
+      skip:
+        in-tests: true
+  datasource:
+    hikari:
+      pool-name: spring-crud-hikari-pool
+      minimum-idle: 5
+      maximum-pool-size: 10
+  jpa:
+    properties:
+      hibernate.generate_statistics: true
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    # https://vladmihalcea.com/the-open-session-in-view-anti-pattern/
+    open-in-view: false
+# Logging Properties
+logging:
+  level:
+    root: INFO
+# SpringDoc Properties
+springdoc:
+  show-actuator: true
+  cache:
+    disabled: true
