@@ -138,7 +138,9 @@ class EmployeeServiceTest {
                 .hasFieldOrPropertyWithValue("lastName", new EmployeeName("Doe"))
                 .hasFieldOrPropertyWithValue("salary", new EmployeeSalary(new BigDecimal("20000.12")))
                 .hasFieldOrPropertyWithValue("employmentActivity", EmploymentActivity.FULL_TIME)
-                .hasFieldOrPropertyWithValue("employmentStatus", EmploymentStatus.ACTIVE);
+                .hasFieldOrPropertyWithValue("employmentStatus", EmploymentStatus.ACTIVE)
+                .hasFieldOrProperty("attributes")
+                .hasFieldOrProperty("audit");
         // Assert JSON attributes
         var jsonAttributes = employee.attributes().value();
         var jsonAttibutesString = jsonAttributes.toString();
@@ -159,23 +161,26 @@ class EmployeeServiceTest {
                 .containsEntry("substance_addiction", true)
                 .containsEntry("secret_number", "123")
                 .containsEntry("notes", "subject is not approved for field duty, immediate suspension advised")
-                .node("") // just to be able to traverse the whole JSON tree, maybe there is a better way to do this
-                .and(jsonAssert -> jsonAssert.node("licenses")
-                        .isArray()
-                        .hasSize(3)
-                        .containsExactly(
-                                "PP7",
-                                "Klobb",
-                                "DD44 Dostovei"
-                        ))
-                .and(jsonAssert -> jsonAssert.node("evaluation")
-                        .isObject()
-                        .hasSize(3)
-                        .containsExactly(
-                                Map.entry("medical", "FAIL"),
-                                Map.entry("physical", "FAIL"),
-                                Map.entry("psychological", "FAIL")
-                        ));
+                .hasEntrySatisfying("licenses", json -> {
+                    assertThatJson(json)
+                            .isArray()
+                            .hasSize(3)
+                            .containsExactly(
+                                    "PP7",
+                                    "Klobb",
+                                    "DD44 Dostovei"
+                            );
+                })
+                .hasEntrySatisfying("evaluation", json -> {
+                    assertThatJson(json)
+                            .isObject()
+                            .hasSize(3)
+                            .containsExactly(
+                                    Map.entry("medical", "FAIL"),
+                                    Map.entry("physical", "FAIL"),
+                                    Map.entry("psychological", "FAIL")
+                            );
+                });
         // Assert Employee Audit
         assertThat(employee.audit())
                 .isNotNull()

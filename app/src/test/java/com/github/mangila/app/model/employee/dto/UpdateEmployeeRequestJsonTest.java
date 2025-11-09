@@ -1,8 +1,12 @@
 package com.github.mangila.app.model.employee.dto;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.app.FilePathUtil;
+import com.github.mangila.app.ObjectFactoryUtil;
 import com.github.mangila.app.config.JacksonConfig;
+import com.github.mangila.app.model.employee.type.EmploymentActivity;
+import com.github.mangila.app.model.employee.type.EmploymentStatus;
 import net.javacrumbs.jsonunit.assertj.JsonAssert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,47 +27,45 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 class UpdateEmployeeRequestJsonTest {
 
     @Autowired
-    private JacksonTester<UpdateEmployeeRequest> json;
+    private JacksonTester<UpdateEmployeeRequest> jsonTester;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     void serialize() throws IOException {
         String jsonString = FilePathUtil.readJsonFileToString("json/update-employee-request.json");
-        ObjectContent<UpdateEmployeeRequest> objectContent = json.parse(jsonString);
+        ObjectContent<UpdateEmployeeRequest> objectContent = jsonTester.parse(jsonString);
         objectContent.assertThat()
                 .hasOnlyFields(
                         "employeeId",
                         "firstName",
                         "lastName",
                         "salary",
-                        "attributes",
-                        "deleted"
+                        "employmentActivity",
+                        "employmentStatus",
+                        "attributes"
                 )
-                .extracting(UpdateEmployeeRequest::employeeId,
-                        UpdateEmployeeRequest::firstName,
-                        UpdateEmployeeRequest::lastName,
-                        UpdateEmployeeRequest::salary)
-                .doesNotContainNull()
-                .containsExactly(
-                        "EMP-JODO-00000000-0000-0000-0000-000000000000",
-                        "Jane",
-                        "Doe",
-                        new BigDecimal("20000.12")
-                );
+                .hasFieldOrPropertyWithValue("employeeId", "EMP-JODO-00000000-0000-0000-0000-000000000000")
+                .hasFieldOrPropertyWithValue("firstName", "Jane")
+                .hasFieldOrPropertyWithValue("lastName", "Doe")
+                .hasFieldOrPropertyWithValue("salary", new BigDecimal("20000.12"))
+                .hasFieldOrPropertyWithValue("employmentActivity", EmploymentActivity.FULL_TIME)
+                .hasFieldOrPropertyWithValue("employmentStatus", EmploymentStatus.ACTIVE)
+                .hasFieldOrProperty("attributes");
         // Assert JSON attributes
         ObjectNode attributes = objectContent.getObject().attributes();
         String jsonAttributesString = attributes.toString();
         assertThatJson(jsonAttributesString)
-                .and(UpdateEmployeeRequestJsonTest::assertAttributes)
-                .and(UpdateEmployeeRequestJsonTest::assertEvaluation)
-                .and(UpdateEmployeeRequestJsonTest::assertLicenses);
+                .and(UpdateEmployeeRequestJsonTest::assertAttributesRoot)
+                .and(root -> root.node("evaluation").and(UpdateEmployeeRequestJsonTest::assertEvaluation))
+                .and(root -> root.node("licenses").and(UpdateEmployeeRequestJsonTest::assertLicenses));
     }
 
     @Test
     void deserialize() throws IOException {
-        String jsonString = FilePathUtil.readJsonFileToString("json/update-employee-request.json");
-        UpdateEmployeeRequest request = json.parse(jsonString)
-                .getObject();
-        JsonContent<UpdateEmployeeRequest> jsonContent = json.write(request);
+        UpdateEmployeeRequest request = ObjectFactoryUtil.createUpdateEmployeeRequest(objectMapper);
+        JsonContent<UpdateEmployeeRequest> jsonContent = jsonTester.write(request);
         // Assert JSON root keys
         assertThatJson(jsonContent.getJson())
                 .isObject()
@@ -72,23 +74,25 @@ class UpdateEmployeeRequestJsonTest {
                         "firstName",
                         "lastName",
                         "salary",
-                        "deleted",
+                        "employmentActivity",
+                        "employmentStatus",
                         "attributes"
                 )
-                .hasSize(6)
+                .hasSize(7)
                 .containsEntry("employeeId", "EMP-JODO-00000000-0000-0000-0000-000000000000")
                 .containsEntry("firstName", "Jane")
                 .containsEntry("lastName", "Doe")
                 .containsEntry("salary", "20000.12")
-                .containsEntry("deleted", false)
+                .containsEntry("employmentActivity", "FULL_TIME")
+                .containsEntry("employmentStatus", "ACTIVE")
                 // Assert JSON attributes
                 .node("attributes")
-                .and(UpdateEmployeeRequestJsonTest::assertAttributes)
-                .and(UpdateEmployeeRequestJsonTest::assertEvaluation)
-                .and(UpdateEmployeeRequestJsonTest::assertLicenses);
+                .and(UpdateEmployeeRequestJsonTest::assertAttributesRoot)
+                .and(root -> root.node("evaluation").and(UpdateEmployeeRequestJsonTest::assertEvaluation))
+                .and(root -> root.node("licenses").and(UpdateEmployeeRequestJsonTest::assertLicenses));
     }
 
-    private static void assertAttributes(JsonAssert jsonAssert) {
+    private static void assertAttributesRoot(JsonAssert jsonAssert) {
         jsonAssert.isObject()
                 .hasSize(7)
                 .containsOnlyKeys("vegan",
@@ -106,7 +110,7 @@ class UpdateEmployeeRequestJsonTest {
     }
 
     private static void assertLicenses(JsonAssert jsonAssert) {
-        jsonAssert.node("licenses")
+        jsonAssert
                 .isArray()
                 .hasSize(3)
                 .containsExactly(
@@ -117,7 +121,7 @@ class UpdateEmployeeRequestJsonTest {
     }
 
     private static void assertEvaluation(JsonAssert jsonAssert) {
-        jsonAssert.node("evaluation")
+        jsonAssert
                 .isObject()
                 .hasSize(3)
                 .containsExactly(
