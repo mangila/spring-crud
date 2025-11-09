@@ -90,11 +90,11 @@ public class ObjectFactoryUtil {
         return objectMapper.readValue(jsonString, UpdateEmployeeRequest.class);
     }
 
-    public static EmployeeId createFakeEmployeeId() {
+    public static EmployeeId createEmployeeId() {
         return new EmployeeId("EMP-JODO-00000000-0000-0000-0000-000000000000");
     }
 
-    public static EmployeeEntity createFakeEmployeeEntity(ObjectMapper objectMapper) throws IOException {
+    public static EmployeeEntity createEmployeeEntity(ObjectMapper objectMapper) throws IOException {
         var updateRequest = createUpdateEmployeeRequest(objectMapper);
         var entity = new EmployeeEntity();
         entity.setId(updateRequest.employeeId());

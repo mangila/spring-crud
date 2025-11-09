@@ -79,7 +79,7 @@ class EmployeeServiceTest {
     @Test
     @DisplayName("Should not find Employee by Id and throw")
     void shouldNotFindEmployeeByIdAndThrow() {
-        EmployeeId id = ObjectFactoryUtil.createFakeEmployeeId();
+        EmployeeId id = ObjectFactoryUtil.createEmployeeId();
         assertThatThrownBy(() -> service.findEmployeeById(id))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("Employee with id: (EMP-JODO-00000000-0000-0000-0000-000000000000) not found");
@@ -208,7 +208,7 @@ class EmployeeServiceTest {
                 employee.lastName().value(),
                 employee.salary().value().add(new BigDecimal("20.00")),
                 EmploymentActivity.PART_TIME,
-                EmploymentStatus.ACTIVE,
+                employee.employmentStatus(),
                 employee.attributes().value().put("vegan", false)
         );
         employee = domainMapper.map(request);

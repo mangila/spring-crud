@@ -38,17 +38,17 @@ class TestUtilTest {
         assertThatCode(() -> {
             ObjectFactoryUtil.createNewEmployeeRequest(mapper);
             ObjectFactoryUtil.createUpdateEmployeeRequest(mapper);
-            ObjectFactoryUtil.createFakeEmployeeId();
         }).doesNotThrowAnyException();
     }
 
     @Test
-    @DisplayName("Should build CreateNewEmployeeRequest")
-    void buildCreateNewEmployeeRequest() {
+    @DisplayName("Should create Objects")
+    void createObjects() {
         assertThatCode(() -> {
             ObjectFactoryUtil.createNewEmployeeRequestBuilder(new ObjectMapper())
                     .build();
+            ObjectFactoryUtil.createEmployeeEntity(new ObjectMapper());
+            ObjectFactoryUtil.createEmployeeId();
         }).doesNotThrowAnyException();
     }
-
 }
