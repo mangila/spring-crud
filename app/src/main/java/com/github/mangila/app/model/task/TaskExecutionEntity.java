@@ -31,16 +31,17 @@ public class TaskExecutionEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status",
             nullable = false)
-    private ExecutionStatus status;
+    private TaskExecutionStatus status;
 
     @Type(JsonBinaryType.class)
-    @Column(columnDefinition = "jsonb")
+    @Column(name = "attributes",
+            columnDefinition = "jsonb")
     private ObjectNode attributes;
 
     @Embedded
     private AuditMetadata auditMetadata;
 
-    public TaskExecutionEntity(String taskName, ExecutionStatus status, @Nullable ObjectNode attributes) {
+    public TaskExecutionEntity(String taskName, TaskExecutionStatus status, @Nullable ObjectNode attributes) {
         this.taskName = taskName;
         this.status = status;
         this.attributes = attributes;

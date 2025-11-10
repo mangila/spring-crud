@@ -2,7 +2,7 @@ package com.github.mangila.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.mangila.app.model.task.ExecutionStatus;
+import com.github.mangila.app.model.task.TaskExecutionStatus;
 import com.github.mangila.app.model.task.TaskExecutionEntity;
 import com.github.mangila.app.repository.TaskExecutionJpaRepository;
 import com.github.mangila.app.scheduler.Task;
@@ -60,19 +60,19 @@ public class TaskActuatorController {
                     HttpStatus.NOT_FOUND.value()
             );
         }
-        TaskExecutionEntity taskExecution = taskExecutionRepository.save(new TaskExecutionEntity(task.name(), ExecutionStatus.RUNNING, null));
+        TaskExecutionEntity taskExecution = taskExecutionRepository.persist(new TaskExecutionEntity(task.name(), TaskExecutionStatus.RUNNING, null));
         taskExecutor.submitCompletable(task)
                 .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
                 .whenComplete((result, throwable) -> {
                     if (throwable != null) {
-                        taskExecution.setStatus(ExecutionStatus.FAILURE);
+                        taskExecution.setStatus(TaskExecutionStatus.FAILURE);
                         ObjectNode attributes = objectMapper.createObjectNode()
                                 .put("error", throwable.getMessage());
                         taskExecution.setAttributes(attributes);
-                        taskExecutionRepository.save(taskExecution);
+                        taskExecutionRepository.merge(taskExecution);
                     } else {
-                        taskExecution.setStatus(ExecutionStatus.SUCCESS);
-                        taskExecutionRepository.save(taskExecution);
+                        taskExecution.setStatus(TaskExecutionStatus.SUCCESS);
+                        taskExecutionRepository.merge(taskExecution);
                     }
                 });
         return new WebEndpointResponse<>(

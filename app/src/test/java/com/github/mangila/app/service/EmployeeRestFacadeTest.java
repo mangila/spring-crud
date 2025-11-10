@@ -1,0 +1,26 @@
+package com.github.mangila.app.service;
+
+import com.github.mangila.app.TestcontainersConfiguration;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+
+@Import(TestcontainersConfiguration.class)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.NONE,
+        properties = {
+                "application.scheduler.enabled=false"
+        }
+)
+class EmployeeRestFacadeTest {
+
+    @Autowired
+    private EmployeeRestFacade facade;
+
+    @Test
+    @DisplayName("Should C.R.U.D Employee")
+    void crudEmployee() {
+    }
+}

@@ -1,6 +1,6 @@
 package com.github.mangila.app.model.task;
 
-public enum ExecutionStatus {
+public enum TaskExecutionStatus {
     RUNNING,
     SUCCESS,
     FAILURE,

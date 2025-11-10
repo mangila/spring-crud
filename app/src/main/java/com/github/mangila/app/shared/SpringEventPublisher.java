@@ -1,8 +1,8 @@
 package com.github.mangila.app.shared;
 
-import com.github.mangila.app.model.employee.event.CreateNewEmployeeEvent;
-import com.github.mangila.app.model.employee.event.SoftDeleteEmployeeEvent;
-import com.github.mangila.app.model.employee.event.UpdateEmployeeEvent;
+import com.github.mangila.app.model.outbox.OutboxEntity;
+import com.github.mangila.app.repository.OutboxJpaRepository;
+import com.github.mangila.app.service.OutboxFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,27 +24,36 @@ public class SpringEventPublisher {
 
     private final ApplicationEventPublisher publisher;
 
-    public SpringEventPublisher(ApplicationEventPublisher publisher) {
+    private final OutboxFactory outboxFactory;
+
+    private final OutboxJpaRepository outboxRepository;
+
+    public SpringEventPublisher(ApplicationEventPublisher publisher,
+                                OutboxFactory outboxFactory,
+                                OutboxJpaRepository outboxRepository) {
         this.publisher = publisher;
+        this.outboxFactory = outboxFactory;
+        this.outboxRepository = outboxRepository;
+    }
+
+
+    /**
+     * Creates an outbox event from the given event and persists it in the database
+     * before publishing it.
+     * <br>
+     * MANDATORY transaction propagation is used to ensure that the event is persisted inside a tx
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void publishOutboxEvent(Object event) {
+        OutboxEntity outbox = outboxFactory.from(event);
+        outboxRepository.persist(outbox);
+        publisher.publishEvent(outbox);
     }
 
     /**
-     * Force the publisher to be inside a tx since our listener is a @TransactionalEventListener.
-     * A fail-fast version of this, since if you forget to wrap inside a transaction, the event will not be published.
-     * To loudly remind the programmer to wrap a publication inside a transaction.
+     * Publishes the given event from the OutboxMessageRelay
      */
-    @Transactional(propagation = Propagation.MANDATORY)
-    public void publish(CreateNewEmployeeEvent event) {
-        publisher.publishEvent(event);
-    }
-
-    @Transactional(propagation = Propagation.MANDATORY)
-    public void publish(UpdateEmployeeEvent event) {
-        publisher.publishEvent(event);
-    }
-
-    @Transactional(propagation = Propagation.MANDATORY)
-    public void publish(SoftDeleteEmployeeEvent event) {
+    public void publish(OutboxEntity event) {
         publisher.publishEvent(event);
     }
 }

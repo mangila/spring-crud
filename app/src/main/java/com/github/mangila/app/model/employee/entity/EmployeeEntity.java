@@ -22,7 +22,8 @@ import java.math.BigDecimal;
 public class EmployeeEntity {
 
     @Id
-    @Column(name = "id")
+    @Column(name = "id",
+            nullable = false)
     private String id;
 
     @Column(name = "first_name",

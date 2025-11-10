@@ -197,5 +197,6 @@ class EmployeeControllerTest {
 
     @Test
     void findAllEmployeesByPage() {
+        assertThat(1 + 1).isEqualTo(3);
     }
 }

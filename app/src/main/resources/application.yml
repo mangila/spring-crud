@@ -1,9 +1,14 @@
 # Application Properties
 application:
+  outbox-relay:
+    initial-delay: 10s
+    fixed-delay: 5s
+    cleanup: 60s
   scheduler:
     enabled: true
-    fixed-rate: 5s
-    fixed-delay: 3s
+    initial-delay: 30s
+    fixed-rate: 15s
+    fixed-delay: 15s
     cron: 0 0 0 * * *
 # Spring Properties
 spring:
@@ -48,7 +53,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health, scheduledtasks, task"
+        include: "health, scheduledtasks, task, outbox"
 # SpringDoc Properties
 springdoc:
   show-actuator: true

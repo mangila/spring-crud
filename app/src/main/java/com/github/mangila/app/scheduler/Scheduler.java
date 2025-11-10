@@ -2,8 +2,8 @@ package com.github.mangila.app.scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.mangila.app.model.task.ExecutionStatus;
 import com.github.mangila.app.model.task.TaskExecutionEntity;
+import com.github.mangila.app.model.task.TaskExecutionStatus;
 import com.github.mangila.app.repository.TaskExecutionJpaRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
@@ -48,43 +48,49 @@ public class Scheduler {
     }
 
     // Run a task every 5 seconds
-    @Scheduled(fixedRateString = "${application.scheduler.fixed-rate}")
+    @Scheduled(
+            initialDelayString = "${application.scheduler.initial-delay}",
+            fixedRateString = "${application.scheduler.fixed-rate}"
+    )
     public void fixedRateTask() {
         Task task = tasks.get("fixedRateTask");
-        TaskExecutionEntity taskExecution = taskExecutionRepository.save(new TaskExecutionEntity(task.name(), ExecutionStatus.RUNNING, null));
+        TaskExecutionEntity taskExecution = taskExecutionRepository.persist(new TaskExecutionEntity(task.name(), TaskExecutionStatus.RUNNING, null));
         taskExecutor.submitCompletable(task)
                 .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
                 .whenComplete((result, throwable) -> {
                     if (throwable != null) {
-                        taskExecution.setStatus(ExecutionStatus.FAILURE);
+                        taskExecution.setStatus(TaskExecutionStatus.FAILURE);
                         ObjectNode attributes = objectMapper.createObjectNode()
                                 .put("error", throwable.getMessage());
                         taskExecution.setAttributes(attributes);
-                        taskExecutionRepository.save(taskExecution);
+                        taskExecutionRepository.merge(taskExecution);
                     } else {
-                        taskExecution.setStatus(ExecutionStatus.SUCCESS);
-                        taskExecutionRepository.save(taskExecution);
+                        taskExecution.setStatus(TaskExecutionStatus.SUCCESS);
+                        taskExecutionRepository.merge(taskExecution);
                     }
                 });
     }
 
     // Run a task every 5 seconds, but only if the previous run has finished
-    @Scheduled(fixedDelayString = "${application.scheduler.fixed-delay}")
+    @Scheduled(
+            initialDelayString = "${application.scheduler.initial-delay}",
+            fixedDelayString = "${application.scheduler.fixed-delay}"
+    )
     public void fixedDelayTask() {
         Task task = tasks.get("fixedDelayTask");
-        TaskExecutionEntity taskExecution = taskExecutionRepository.save(new TaskExecutionEntity(task.name(), ExecutionStatus.RUNNING, null));
+        TaskExecutionEntity taskExecution = taskExecutionRepository.persist(new TaskExecutionEntity(task.name(), TaskExecutionStatus.RUNNING, null));
         CompletableFuture<Void> future = taskExecutor.submitCompletable(task)
                 .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
                 .whenComplete((result, throwable) -> {
                     if (throwable != null) {
-                        taskExecution.setStatus(ExecutionStatus.FAILURE);
+                        taskExecution.setStatus(TaskExecutionStatus.FAILURE);
                         ObjectNode attributes = objectMapper.createObjectNode()
                                 .put("error", throwable.getMessage());
                         taskExecution.setAttributes(attributes);
-                        taskExecutionRepository.save(taskExecution);
+                        taskExecutionRepository.merge(taskExecution);
                     } else {
-                        taskExecution.setStatus(ExecutionStatus.SUCCESS);
-                        taskExecutionRepository.save(taskExecution);
+                        taskExecution.setStatus(TaskExecutionStatus.SUCCESS);
+                        taskExecutionRepository.merge(taskExecution);
                     }
                 });
         // Here we want to block the calling thread until the previous task is finished.
@@ -99,19 +105,19 @@ public class Scheduler {
     @Scheduled(cron = "${application.scheduler.cron}")
     public void cronTask() {
         Task task = tasks.get("cronTask");
-        TaskExecutionEntity taskExecution = taskExecutionRepository.save(new TaskExecutionEntity(task.name(), ExecutionStatus.RUNNING, null));
+        TaskExecutionEntity taskExecution = taskExecutionRepository.persist(new TaskExecutionEntity(task.name(), TaskExecutionStatus.RUNNING, null));
         taskExecutor.submitCompletable(task)
                 .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
                 .whenComplete((result, throwable) -> {
                     if (throwable != null) {
-                        taskExecution.setStatus(ExecutionStatus.FAILURE);
+                        taskExecution.setStatus(TaskExecutionStatus.FAILURE);
                         ObjectNode attributes = objectMapper.createObjectNode()
                                 .put("error", throwable.getMessage());
                         taskExecution.setAttributes(attributes);
-                        taskExecutionRepository.save(taskExecution);
+                        taskExecutionRepository.merge(taskExecution);
                     } else {
-                        taskExecution.setStatus(ExecutionStatus.SUCCESS);
-                        taskExecutionRepository.save(taskExecution);
+                        taskExecution.setStatus(TaskExecutionStatus.SUCCESS);
+                        taskExecutionRepository.merge(taskExecution);
                     }
                 });
     }

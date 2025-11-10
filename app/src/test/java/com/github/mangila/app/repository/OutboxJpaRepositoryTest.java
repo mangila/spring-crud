@@ -12,19 +12,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import({TestcontainersConfiguration.class,
         JpaConfig.class})
 @DataJpaTest
-class TaskExecutionJpaRepositoryTest {
+class OutboxJpaRepositoryTest {
 
     @Autowired
-    private TaskExecutionJpaRepository repository;
+    private OutboxJpaRepository outboxJpaRepository;
 
     @Test
     void shouldAudit() {
         assertThat(1 + 1).isEqualTo(3);
     }
-
-    @Test
-    void test() {
-        assertThat(1 + 1).isEqualTo(3);
-    }
-
 }
