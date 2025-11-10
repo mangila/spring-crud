@@ -28,7 +28,7 @@ public record Scheduler(VirtualThreadTaskExecutor taskExecutor) {
         log.info("Fixed Rate Task started");
         // Run it as a CompletableFuture to make it cancellable, chain or combine it with other tasks, wait, timeout.
         CompletableFuture<Void> future = taskExecutor.submitCompletable(new FixedRateTask());
-        // No need to block here, but can be useful if you want to run some cleanup, insert task execution in a database or something.
+        // No need to block here, but can be useful if you want to run some cleanup, insert task execution in a database or something on the Scheduler thread
         future.join();
         log.info("Fixed Rate Task finished");
     }
