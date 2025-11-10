@@ -45,7 +45,7 @@ class EmployeeJpaRepositoryTest {
     @DisplayName("Should Soft Delete an Employee")
     void softDeleteEmployee() throws IOException {
         var entity = ObjectFactoryUtil.createEmployeeEntity(objectMapper);
-        repository.save(entity);
+        repository.persist(entity);
         repository.softDeleteByEmployeeId(new EmployeeId(entity.getId()));
         entity = repository.findById(entity.getId())
                 .orElseThrow();

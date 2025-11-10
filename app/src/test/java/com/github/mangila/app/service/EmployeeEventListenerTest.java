@@ -5,6 +5,7 @@ import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.model.employee.event.CreateNewEmployeeEvent;
 import com.github.mangila.app.model.employee.event.SoftDeleteEmployeeEvent;
 import com.github.mangila.app.model.employee.event.UpdateEmployeeEvent;
+import com.github.mangila.app.repository.OutboxJpaRepository;
 import com.github.mangila.app.shared.SpringEventPublisher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,12 @@ class EmployeeEventListenerTest {
     @MockitoSpyBean
     private EmployeeEventListener listener;
 
+    @MockitoSpyBean
+    private OutboxFactory outboxFactory;
+
+    @MockitoSpyBean
+    private OutboxJpaRepository outboxJpaRepository;
+
     @Test
     @DisplayName("Should throw when CreateNewEmployeeEvent is not a TX")
     void publishCreateEmployeeEventNeedTx() {
@@ -56,6 +63,8 @@ class EmployeeEventListenerTest {
             var id = ObjectFactoryUtil.createEmployeeId();
             publisher.publish(new CreateNewEmployeeEvent(id));
         }).isInstanceOf(IllegalTransactionStateException.class);
+        verify(outboxFactory, never()).from(any());
+        verify(outboxJpaRepository, never()).persist(any());
         verify(listener, never()).listen(any(CreateNewEmployeeEvent.class));
     }
 

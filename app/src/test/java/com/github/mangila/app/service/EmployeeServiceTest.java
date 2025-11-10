@@ -111,7 +111,7 @@ class EmployeeServiceTest {
         service.createNewEmployee(employee);
         var inOrder = inOrder(entityMapper, repository, publisher);
         inOrder.verify(entityMapper, times(1)).map(any(Employee.class));
-        inOrder.verify(repository, times(1)).save(any(EmployeeEntity.class));
+        inOrder.verify(repository, times(1)).persist(any(EmployeeEntity.class));
         inOrder.verify(publisher, times(1)).publish(any(CreateNewEmployeeEvent.class));
         return employee.id();
     }
@@ -222,7 +222,7 @@ class EmployeeServiceTest {
         var inOrder = inOrder(repository, entityMapper, publisher);
         inOrder.verify(repository, times(1)).existsById(any(String.class));
         inOrder.verify(entityMapper, times(1)).map(any(Employee.class));
-        inOrder.verify(repository, times(1)).save(any(EmployeeEntity.class));
+        inOrder.verify(repository, times(1)).merge(any(EmployeeEntity.class));
         inOrder.verify(publisher, times(1)).publish(any(UpdateEmployeeEvent.class));
     }
 

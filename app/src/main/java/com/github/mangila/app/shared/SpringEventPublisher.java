@@ -3,6 +3,9 @@ package com.github.mangila.app.shared;
 import com.github.mangila.app.model.employee.event.CreateNewEmployeeEvent;
 import com.github.mangila.app.model.employee.event.SoftDeleteEmployeeEvent;
 import com.github.mangila.app.model.employee.event.UpdateEmployeeEvent;
+import com.github.mangila.app.model.outbox.OutboxEntity;
+import com.github.mangila.app.repository.OutboxJpaRepository;
+import com.github.mangila.app.service.OutboxFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,8 +27,16 @@ public class SpringEventPublisher {
 
     private final ApplicationEventPublisher publisher;
 
-    public SpringEventPublisher(ApplicationEventPublisher publisher) {
+    private final OutboxFactory outboxFactory;
+
+    private final OutboxJpaRepository outboxRepository;
+
+    public SpringEventPublisher(ApplicationEventPublisher publisher,
+                                OutboxFactory outboxFactory,
+                                OutboxJpaRepository outboxRepository) {
         this.publisher = publisher;
+        this.outboxFactory = outboxFactory;
+        this.outboxRepository = outboxRepository;
     }
 
     /**
@@ -35,16 +46,22 @@ public class SpringEventPublisher {
      */
     @Transactional(propagation = Propagation.MANDATORY)
     public void publish(CreateNewEmployeeEvent event) {
+        OutboxEntity outbox = outboxFactory.from(event);
+        outboxRepository.persist(outbox);
         publisher.publishEvent(event);
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
     public void publish(UpdateEmployeeEvent event) {
+        OutboxEntity outbox = outboxFactory.from(event);
+        outboxRepository.persist(outbox);
         publisher.publishEvent(event);
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
     public void publish(SoftDeleteEmployeeEvent event) {
+        OutboxEntity outbox = outboxFactory.from(event);
+        outboxRepository.persist(outbox);
         publisher.publishEvent(event);
     }
 }

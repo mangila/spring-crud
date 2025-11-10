@@ -11,6 +11,7 @@ import com.github.mangila.app.shared.Ensure;
 import com.github.mangila.app.shared.SpringEventPublisher;
 import com.github.mangila.app.shared.exception.EntityNotFoundException;
 import org.jspecify.annotations.NullMarked;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,42 +25,42 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @NullMarked
 public class EmployeeService {
-
-    private final EmployeeJpaRepository repository;
-
+    private final EmployeeJpaRepository employeeRepository;
     private final EmployeeDomainMapper domainMapper;
     private final EmployeeEntityMapper entityMapper;
     private final SpringEventPublisher publisher;
 
-    public EmployeeService(EmployeeJpaRepository repository,
+    public EmployeeService(EmployeeJpaRepository employeeRepository,
                            EmployeeDomainMapper domainMapper,
                            EmployeeEntityMapper entityMapper,
                            SpringEventPublisher publisher) {
-        this.repository = repository;
+        this.employeeRepository = employeeRepository;
         this.domainMapper = domainMapper;
         this.entityMapper = entityMapper;
         this.publisher = publisher;
     }
 
     public boolean existsById(EmployeeId id) {
-        return repository.existsById(id.value());
+        return employeeRepository.existsById(id.value());
     }
 
     public Employee findEmployeeById(EmployeeId id) {
-        return repository.findById(id.value())
+        return employeeRepository.findById(id.value())
                 .map(domainMapper::map)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", id.value())));
     }
 
     public Page<Employee> findAllEmployeesByPage(Pageable pageable) {
-        return repository.findAll(pageable)
+        // TODO: create a Probe for querying
+        var example = Example.of(new EmployeeEntity());
+        return employeeRepository.findAll(example, pageable)
                 .map(domainMapper::map);
     }
 
     @Transactional
     public void createNewEmployee(Employee employee) {
         EmployeeEntity entity = entityMapper.map(employee);
-        repository.save(entity);
+        employeeRepository.persist(entity);
         publisher.publish(new CreateNewEmployeeEvent(employee.id()));
     }
 
@@ -76,14 +77,14 @@ public class EmployeeService {
     public void updateEmployee(Employee employee) {
         Ensure.isTrue(existsById(employee.id()), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", employee.id().value())));
         EmployeeEntity entity = entityMapper.map(employee);
-        repository.save(entity);
+        employeeRepository.merge(entity);
         publisher.publish(new UpdateEmployeeEvent(employee.id()));
     }
 
     @Transactional
     public void softDeleteEmployeeById(EmployeeId id) {
         Ensure.isTrue(existsById(id), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", id.value())));
-        repository.softDeleteByEmployeeId(id);
+        employeeRepository.softDeleteByEmployeeId(id);
         publisher.publish(new SoftDeleteEmployeeEvent(id));
     }
 }
