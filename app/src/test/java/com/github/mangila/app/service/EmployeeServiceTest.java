@@ -112,7 +112,7 @@ class EmployeeServiceTest {
         var inOrder = inOrder(entityMapper, repository, publisher);
         inOrder.verify(entityMapper, times(1)).map(any(Employee.class));
         inOrder.verify(repository, times(1)).persist(any(EmployeeEntity.class));
-        inOrder.verify(publisher, times(1)).publishOutboxEvent(any(CreateNewEmployeeEvent.class));
+        inOrder.verify(publisher, times(1)).publishAsOutboxEvent(any(CreateNewEmployeeEvent.class));
         return employee.id();
     }
 
@@ -223,7 +223,7 @@ class EmployeeServiceTest {
         inOrder.verify(repository, times(1)).existsById(any(String.class));
         inOrder.verify(entityMapper, times(1)).map(any(Employee.class));
         inOrder.verify(repository, times(1)).merge(any(EmployeeEntity.class));
-        inOrder.verify(publisher, times(1)).publishOutboxEvent(any(UpdateEmployeeEvent.class));
+        inOrder.verify(publisher, times(1)).publishAsOutboxEvent(any(UpdateEmployeeEvent.class));
     }
 
     private void assertUpdatedEmployee(Employee employee) {
@@ -262,7 +262,7 @@ class EmployeeServiceTest {
         var inOrder = inOrder(repository, publisher);
         inOrder.verify(repository, times(1)).existsById(any(String.class));
         inOrder.verify(repository, times(1)).softDeleteByEmployeeId(any(EmployeeId.class));
-        inOrder.verify(publisher, times(1)).publishOutboxEvent(any(SoftDeleteEmployeeEvent.class));
+        inOrder.verify(publisher, times(1)).publishAsOutboxEvent(any(SoftDeleteEmployeeEvent.class));
     }
 
     @Test

@@ -1,7 +1,9 @@
 package com.github.mangila.app.shared;
 
 import com.github.mangila.app.model.outbox.OutboxEntity;
+import com.github.mangila.app.model.outbox.OutboxEvent;
 import com.github.mangila.app.repository.OutboxJpaRepository;
+import com.github.mangila.app.service.OutboxEventMapper;
 import com.github.mangila.app.service.OutboxFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -28,12 +30,16 @@ public class SpringEventPublisher {
 
     private final OutboxJpaRepository outboxRepository;
 
+    private final OutboxEventMapper eventMapper;
+
     public SpringEventPublisher(ApplicationEventPublisher publisher,
                                 OutboxFactory outboxFactory,
-                                OutboxJpaRepository outboxRepository) {
+                                OutboxJpaRepository outboxRepository,
+                                OutboxEventMapper eventMapper) {
         this.publisher = publisher;
         this.outboxFactory = outboxFactory;
         this.outboxRepository = outboxRepository;
+        this.eventMapper = eventMapper;
     }
 
 
@@ -44,16 +50,10 @@ public class SpringEventPublisher {
      * MANDATORY transaction propagation is used to ensure that the event is persisted inside a tx
      */
     @Transactional(propagation = Propagation.MANDATORY)
-    public void publishOutboxEvent(Object event) {
-        OutboxEntity outbox = outboxFactory.from(event);
-        outboxRepository.persist(outbox);
-        publisher.publishEvent(outbox);
-    }
-
-    /**
-     * Publishes the given event from the OutboxMessageRelay
-     */
-    public void publish(OutboxEntity event) {
+    public void publishAsOutboxEvent(Object obj) {
+        OutboxEntity entity = outboxFactory.from(obj);
+        outboxRepository.persist(entity);
+        OutboxEvent event = eventMapper.map(entity);
         publisher.publishEvent(event);
     }
 }

@@ -61,16 +61,13 @@ public class EmployeeService {
     public void createNewEmployee(Employee employee) {
         EmployeeEntity entity = entityMapper.map(employee);
         employeeRepository.persist(entity);
-        publisher.publishOutboxEvent(new CreateNewEmployeeEvent(employee.id()));
+        publisher.publishAsOutboxEvent(new CreateNewEmployeeEvent(employee.id()));
     }
 
     /**
      * Update an already existing employee.
      * <br>
-     * Here we don't want an Upsert-Insert to happen since we use repository.save(),
-     * so we first check for existence.
-     * <br>
-     * Some APIs accept this, not this one! :P
+     * Some APIs accept Upsert-Insert to be done here, but not this one. :)
      * a good reason why not - is to ensure/force employee ID to be created by the application and not by the client
      */
     @Transactional
@@ -78,13 +75,13 @@ public class EmployeeService {
         Ensure.isTrue(existsById(employee.id()), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", employee.id().value())));
         EmployeeEntity entity = entityMapper.map(employee);
         employeeRepository.merge(entity);
-        publisher.publishOutboxEvent(new UpdateEmployeeEvent(employee.id()));
+        publisher.publishAsOutboxEvent(new UpdateEmployeeEvent(employee.id()));
     }
 
     @Transactional
     public void softDeleteEmployeeById(EmployeeId id) {
         Ensure.isTrue(existsById(id), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", id.value())));
         employeeRepository.softDeleteByEmployeeId(id);
-        publisher.publishOutboxEvent(new SoftDeleteEmployeeEvent(id));
+        publisher.publishAsOutboxEvent(new SoftDeleteEmployeeEvent(id));
     }
 }

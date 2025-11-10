@@ -1,7 +1,6 @@
 package com.github.mangila.app.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mangila.app.model.outbox.OutboxEntity;
+import com.github.mangila.app.model.outbox.OutboxEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -18,21 +17,20 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Service
 @Slf4j
 public class EmployeeEventListener {
-
     private final EmployeeEventHandler eventHandler;
-    private final ObjectMapper objectMapper;
 
-    public EmployeeEventListener(EmployeeEventHandler eventHandler, ObjectMapper objectMapper) {
+    public EmployeeEventListener(EmployeeEventHandler eventHandler) {
         this.eventHandler = eventHandler;
-        this.objectMapper = objectMapper;
     }
 
-    @TransactionalEventListener(
-            phase = TransactionPhase.AFTER_COMMIT,
-            condition = "#event.status.toString() != 'PUBLISHED'"
-    )
+    /**
+     * Listen for the OutboxEvent after the transaction has been committed
+     * This is a happy path scenario. For immediate handling.
+     */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
-    public void listen(OutboxEntity event) {
+    public void listen(OutboxEvent event) {
         log.info("Received OutboxEvent: {}", event);
+        eventHandler.handle(event);
     }
 }
