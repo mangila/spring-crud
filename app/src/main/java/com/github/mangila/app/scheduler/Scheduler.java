@@ -44,7 +44,7 @@ public class Scheduler {
     @Scheduled(fixedRateString = "${application.scheduler.fixed-rate}")
     public void fixedRateTask() {
         Task task = tasks.get("fixedRateTask");
-        TaskExecutionEntity taskExecution = taskExecutionRepository.save(new TaskExecutionEntity(task.name(), ExecutionStatus.RUNNING));
+        TaskExecutionEntity taskExecution = taskExecutionRepository.save(new TaskExecutionEntity(task.name(), ExecutionStatus.RUNNING, null));
         taskExecutor.submitCompletable(task)
                 .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
                 .whenComplete((result, throwable) -> {
@@ -62,7 +62,7 @@ public class Scheduler {
     @Scheduled(fixedDelayString = "${application.scheduler.fixed-delay}")
     public void fixedDelayTask() {
         Task task = tasks.get("fixedDelayTask");
-        TaskExecutionEntity taskExecution = taskExecutionRepository.save(new TaskExecutionEntity(task.name(), ExecutionStatus.RUNNING));
+        TaskExecutionEntity taskExecution = taskExecutionRepository.save(new TaskExecutionEntity(task.name(), ExecutionStatus.RUNNING, null));
         CompletableFuture<Void> future = taskExecutor.submitCompletable(task)
                 .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
                 .whenComplete((result, throwable) -> {
@@ -86,7 +86,7 @@ public class Scheduler {
     @Scheduled(cron = "${application.scheduler.cron}")
     public void cronTask() {
         Task task = tasks.get("cronTask");
-        TaskExecutionEntity taskExecution = taskExecutionRepository.save(new TaskExecutionEntity(task.name(), ExecutionStatus.RUNNING));
+        TaskExecutionEntity taskExecution = taskExecutionRepository.save(new TaskExecutionEntity(task.name(), ExecutionStatus.RUNNING, null));
         taskExecutor.submitCompletable(task)
                 .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
                 .whenComplete((result, throwable) -> {

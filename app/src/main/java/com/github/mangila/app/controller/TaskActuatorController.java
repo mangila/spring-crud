@@ -54,7 +54,7 @@ public class TaskActuatorController {
                     HttpStatus.NOT_FOUND.value()
             );
         }
-        TaskExecutionEntity taskExecution = taskExecutionRepository.save(new TaskExecutionEntity(task.name(), ExecutionStatus.RUNNING));
+        TaskExecutionEntity taskExecution = taskExecutionRepository.save(new TaskExecutionEntity(task.name(), ExecutionStatus.RUNNING, null));
         taskExecutor.submitCompletable(task)
                 .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
                 .whenComplete((result, throwable) -> {
