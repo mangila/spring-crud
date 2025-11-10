@@ -28,6 +28,7 @@ public record Scheduler(VirtualThreadTaskExecutor taskExecutor) {
         log.info("Fixed Rate Task started");
         // Run it as a CompletableFuture to make it cancellable, chain or combine it with other tasks, wait, timeout.
         CompletableFuture<Void> future = taskExecutor.submitCompletable(new FixedRateTask());
+        // No need to block here, but can be useful if you want to run some cleanup, insert task execution in a database or something.
         future.join();
         log.info("Fixed Rate Task finished");
     }
@@ -37,11 +38,15 @@ public record Scheduler(VirtualThreadTaskExecutor taskExecutor) {
     public void fixedDelayTask() {
         log.info("Fixed Delay Task started");
         CompletableFuture<Void> future = taskExecutor.submitCompletable(new FixedDelayTask());
+        // Here we want to block the calling thread until the previous task is finished.
+        // If the programmer forgets to block here, the task will be executed every 5 seconds, even if the previous task is still running.
+        // Then a fixed-delay task will lose its meaning.
         future.join();
         log.info("Fixed Delay Task finished");
     }
 
     // Run a task at a specific time
+    // This is a Spring Cron Expression
     @Scheduled(cron = "${application.scheduler.cron}")
     public void cronTask() {
         log.info("Cron Task started");
