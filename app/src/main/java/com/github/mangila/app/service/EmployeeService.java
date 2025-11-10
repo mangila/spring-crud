@@ -61,7 +61,7 @@ public class EmployeeService {
     public void createNewEmployee(Employee employee) {
         EmployeeEntity entity = entityMapper.map(employee);
         employeeRepository.persist(entity);
-        publisher.publish(new CreateNewEmployeeEvent(employee.id()));
+        publisher.publishOutboxEvent(new CreateNewEmployeeEvent(employee.id()));
     }
 
     /**
@@ -78,13 +78,13 @@ public class EmployeeService {
         Ensure.isTrue(existsById(employee.id()), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", employee.id().value())));
         EmployeeEntity entity = entityMapper.map(employee);
         employeeRepository.merge(entity);
-        publisher.publish(new UpdateEmployeeEvent(employee.id()));
+        publisher.publishOutboxEvent(new UpdateEmployeeEvent(employee.id()));
     }
 
     @Transactional
     public void softDeleteEmployeeById(EmployeeId id) {
         Ensure.isTrue(existsById(id), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", id.value())));
         employeeRepository.softDeleteByEmployeeId(id);
-        publisher.publish(new SoftDeleteEmployeeEvent(id));
+        publisher.publishOutboxEvent(new SoftDeleteEmployeeEvent(id));
     }
 }

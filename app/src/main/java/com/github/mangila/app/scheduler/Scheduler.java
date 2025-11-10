@@ -48,7 +48,10 @@ public class Scheduler {
     }
 
     // Run a task every 5 seconds
-    @Scheduled(fixedRateString = "${application.scheduler.fixed-rate}")
+    @Scheduled(
+            initialDelayString = "${application.scheduler.initial-delay}",
+            fixedRateString = "${application.scheduler.fixed-rate}"
+    )
     public void fixedRateTask() {
         Task task = tasks.get("fixedRateTask");
         TaskExecutionEntity taskExecution = taskExecutionRepository.persist(new TaskExecutionEntity(task.name(), TaskExecutionStatus.RUNNING, null));
@@ -69,7 +72,10 @@ public class Scheduler {
     }
 
     // Run a task every 5 seconds, but only if the previous run has finished
-    @Scheduled(fixedDelayString = "${application.scheduler.fixed-delay}")
+    @Scheduled(
+            initialDelayString = "${application.scheduler.initial-delay}",
+            fixedDelayString = "${application.scheduler.fixed-delay}"
+    )
     public void fixedDelayTask() {
         Task task = tasks.get("fixedDelayTask");
         TaskExecutionEntity taskExecution = taskExecutionRepository.persist(new TaskExecutionEntity(task.name(), TaskExecutionStatus.RUNNING, null));
