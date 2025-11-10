@@ -19,4 +19,5 @@ public record AuditMetadata(
         @Column(name = "deleted")
         boolean deleted
 ) {
+    public static AuditMetadata EMPTY = new AuditMetadata(null, null, false);
 }

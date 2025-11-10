@@ -104,7 +104,7 @@ public class ObjectFactoryUtil {
         entity.setEmploymentActivity(updateRequest.employmentActivity());
         entity.setEmploymentStatus(updateRequest.employmentStatus());
         entity.setAttributes(updateRequest.attributes());
-        entity.setAuditMetadata(new AuditMetadata(null, null, false));
+        entity.setAuditMetadata(AuditMetadata.EMPTY);
         return entity;
     }
 }

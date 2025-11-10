@@ -43,6 +43,12 @@ spring:
 logging:
   level:
     root: INFO
+# Actuator Properties
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health, scheduledtasks, task"
 # SpringDoc Properties
 springdoc:
   show-actuator: true

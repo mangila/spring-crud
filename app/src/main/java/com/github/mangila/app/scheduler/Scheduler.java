@@ -1,9 +1,13 @@
 package com.github.mangila.app.scheduler;
 
+import com.github.mangila.app.model.task.ExecutionStatus;
+import com.github.mangila.app.model.task.TaskExecutionEntity;
+import com.github.mangila.app.repository.TaskExecutionJpaRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -20,24 +24,56 @@ import java.util.concurrent.CompletableFuture;
  * <a href="https://spring.io/blog/2020/11/10/new-in-spring-5-3-improved-cron-expressions">Spring Scheduler stuffs</a>
  */
 @Slf4j
-public record Scheduler(VirtualThreadTaskExecutor taskExecutor) {
+public class Scheduler {
+
+    private final VirtualThreadTaskExecutor taskExecutor;
+    private final TaskExecutionJpaRepository taskExecutionRepository;
+
+    // Spring magic, wires a map of tasks with their bean names.
+    private final Map<String, Task> tasks;
+
+    public Scheduler(VirtualThreadTaskExecutor taskExecutor,
+                     TaskExecutionJpaRepository taskExecutionRepository,
+                     Map<String, Task> tasks) {
+        this.taskExecutor = taskExecutor;
+        this.taskExecutionRepository = taskExecutionRepository;
+        this.tasks = tasks;
+    }
 
     // Run a task every 5 seconds
     @Scheduled(fixedRateString = "${application.scheduler.fixed-rate}")
     public void fixedRateTask() {
-        log.info("Fixed Rate Task started");
-        // Run it as a CompletableFuture to make it cancellable, chain or combine it with other tasks, wait, timeout.
-        CompletableFuture<Void> future = taskExecutor.submitCompletable(new FixedRateTask());
-        // No need to block here, but can be useful if you want to run some cleanup, insert task execution in a database or something on the Scheduler thread
-        future.join();
-        log.info("Fixed Rate Task finished");
+        Task task = tasks.get("fixedRateTask");
+        TaskExecutionEntity taskExecution = taskExecutionRepository.save(new TaskExecutionEntity(task.name(), ExecutionStatus.RUNNING));
+        taskExecutor.submitCompletable(task)
+                .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                .whenComplete((result, throwable) -> {
+                    if (throwable != null) {
+                        taskExecution.setStatus(ExecutionStatus.FAILURE);
+                        taskExecutionRepository.save(taskExecution);
+                    } else {
+                        taskExecution.setStatus(ExecutionStatus.SUCCESS);
+                        taskExecutionRepository.save(taskExecution);
+                    }
+                });
     }
 
     // Run a task every 5 seconds, but only if the previous run has finished
     @Scheduled(fixedDelayString = "${application.scheduler.fixed-delay}")
     public void fixedDelayTask() {
-        log.info("Fixed Delay Task started");
-        CompletableFuture<Void> future = taskExecutor.submitCompletable(new FixedDelayTask());
+        Task task = tasks.get("fixedDelayTask");
+        TaskExecutionEntity taskExecution = taskExecutionRepository.save(new TaskExecutionEntity(task.name(), ExecutionStatus.RUNNING));
+        CompletableFuture<Void> future = taskExecutor.submitCompletable(task)
+                .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                .whenComplete((result, throwable) -> {
+                    if (throwable != null) {
+                        taskExecution.setStatus(ExecutionStatus.FAILURE);
+                        taskExecutionRepository.save(taskExecution);
+                    } else {
+                        taskExecution.setStatus(ExecutionStatus.SUCCESS);
+                        taskExecutionRepository.save(taskExecution);
+                    }
+                });
         // Here we want to block the calling thread until the previous task is finished.
         // If the programmer forgets to block here, the task will be executed every 5 seconds, even if the previous task is still running.
         // Then a fixed-delay task will lose its meaning.
@@ -49,10 +85,19 @@ public record Scheduler(VirtualThreadTaskExecutor taskExecutor) {
     // This is a Spring Cron Expression
     @Scheduled(cron = "${application.scheduler.cron}")
     public void cronTask() {
-        log.info("Cron Task started");
-        CompletableFuture<Void> future = taskExecutor.submitCompletable(new CronTask());
-        future.join();
-        log.info("Cron Task finished");
+        Task task = tasks.get("cronTask");
+        TaskExecutionEntity taskExecution = taskExecutionRepository.save(new TaskExecutionEntity(task.name(), ExecutionStatus.RUNNING));
+        taskExecutor.submitCompletable(task)
+                .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                .whenComplete((result, throwable) -> {
+                    if (throwable != null) {
+                        taskExecution.setStatus(ExecutionStatus.FAILURE);
+                        taskExecutionRepository.save(taskExecution);
+                    } else {
+                        taskExecution.setStatus(ExecutionStatus.SUCCESS);
+                        taskExecutionRepository.save(taskExecution);
+                    }
+                });
     }
 
 }

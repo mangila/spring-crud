@@ -1,6 +1,7 @@
 package com.github.mangila.app.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 /**
  * Good practice to isolate a task in a dedicated class. Easier to test, extend and maintain.
@@ -8,11 +9,17 @@ import lombok.extern.slf4j.Slf4j;
  * Let the Scheduler decide when to run the task, and the Task should run the business logic.
  * Separation of concerns thinking.
  */
+@Component
 @Slf4j
-public record FixedDelayTask() implements Runnable {
+public record FixedDelayTask() implements Task {
 
     @Override
     public void run() {
         log.info("Hello from FixedDelay Task");
+    }
+
+    @Override
+    public String name() {
+        return this.getClass().getSimpleName();
     }
 }
