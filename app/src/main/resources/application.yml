@@ -34,7 +34,6 @@ spring:
   datasource:
     hikari:
       pool-name: spring-crud-hikari-pool
-      minimum-idle: 5
       maximum-pool-size: 10
   jpa:
     properties:
