@@ -6,6 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+
+/**
+ * Outbox message relay service.
+ * Polls the database for messages and publish them to the application.
+ * And also cleans up the database.
+ */
 @Service
 @Slf4j
 public class OutboxMessageRelay {
