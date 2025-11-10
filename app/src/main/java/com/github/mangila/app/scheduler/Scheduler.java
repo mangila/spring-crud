@@ -1,5 +1,7 @@
 package com.github.mangila.app.scheduler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.app.model.task.ExecutionStatus;
 import com.github.mangila.app.model.task.TaskExecutionEntity;
 import com.github.mangila.app.repository.TaskExecutionJpaRepository;
@@ -29,15 +31,20 @@ public class Scheduler {
     private final VirtualThreadTaskExecutor taskExecutor;
     private final TaskExecutionJpaRepository taskExecutionRepository;
 
+    private final ObjectMapper objectMapper;
+
     // Spring magic, wires a map of tasks with their bean names.
     private final Map<String, Task> tasks;
 
     public Scheduler(VirtualThreadTaskExecutor taskExecutor,
                      TaskExecutionJpaRepository taskExecutionRepository,
+                     ObjectMapper objectMapper,
                      Map<String, Task> tasks) {
         this.taskExecutor = taskExecutor;
         this.taskExecutionRepository = taskExecutionRepository;
+        this.objectMapper = objectMapper;
         this.tasks = tasks;
+        // TODO: DRY execution of tasks
     }
 
     // Run a task every 5 seconds
@@ -50,6 +57,9 @@ public class Scheduler {
                 .whenComplete((result, throwable) -> {
                     if (throwable != null) {
                         taskExecution.setStatus(ExecutionStatus.FAILURE);
+                        ObjectNode attributes = objectMapper.createObjectNode()
+                                .put("error", throwable.getMessage());
+                        taskExecution.setAttributes(attributes);
                         taskExecutionRepository.save(taskExecution);
                     } else {
                         taskExecution.setStatus(ExecutionStatus.SUCCESS);
@@ -68,6 +78,9 @@ public class Scheduler {
                 .whenComplete((result, throwable) -> {
                     if (throwable != null) {
                         taskExecution.setStatus(ExecutionStatus.FAILURE);
+                        ObjectNode attributes = objectMapper.createObjectNode()
+                                .put("error", throwable.getMessage());
+                        taskExecution.setAttributes(attributes);
                         taskExecutionRepository.save(taskExecution);
                     } else {
                         taskExecution.setStatus(ExecutionStatus.SUCCESS);
@@ -92,6 +105,9 @@ public class Scheduler {
                 .whenComplete((result, throwable) -> {
                     if (throwable != null) {
                         taskExecution.setStatus(ExecutionStatus.FAILURE);
+                        ObjectNode attributes = objectMapper.createObjectNode()
+                                .put("error", throwable.getMessage());
+                        taskExecution.setAttributes(attributes);
                         taskExecutionRepository.save(taskExecution);
                     } else {
                         taskExecution.setStatus(ExecutionStatus.SUCCESS);

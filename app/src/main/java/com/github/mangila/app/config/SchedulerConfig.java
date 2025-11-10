@@ -1,5 +1,6 @@
 package com.github.mangila.app.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.app.repository.TaskExecutionJpaRepository;
 import com.github.mangila.app.scheduler.Scheduler;
 import com.github.mangila.app.scheduler.Task;
@@ -31,9 +32,10 @@ public class SchedulerConfig {
     Scheduler scheduler(
             @Qualifier("schedulerTaskExecutor") VirtualThreadTaskExecutor taskExecutor,
             TaskExecutionJpaRepository taskExecutionRepository,
+            ObjectMapper objectMapper,
             Map<String, Task> tasks
     ) {
         log.info("Scheduler enabled");
-        return new Scheduler(taskExecutor, taskExecutionRepository, tasks);
+        return new Scheduler(taskExecutor, taskExecutionRepository, objectMapper, tasks);
     }
 }

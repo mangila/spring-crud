@@ -1,5 +1,7 @@
 package com.github.mangila.app.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.app.model.task.ExecutionStatus;
 import com.github.mangila.app.model.task.TaskExecutionEntity;
 import com.github.mangila.app.repository.TaskExecutionJpaRepository;
@@ -29,12 +31,16 @@ public class TaskActuatorController {
     private final TaskExecutionJpaRepository taskExecutionRepository;
     private final Map<String, Task> taskMap;
 
+    private final ObjectMapper objectMapper;
+
     public TaskActuatorController(@Qualifier("schedulerTaskExecutor") VirtualThreadTaskExecutor taskExecutor,
                                   TaskExecutionJpaRepository taskExecutionRepository,
-                                  Map<String, Task> taskMap) {
+                                  Map<String, Task> taskMap,
+                                  ObjectMapper objectMapper) {
         this.taskExecutor = taskExecutor;
         this.taskExecutionRepository = taskExecutionRepository;
         this.taskMap = taskMap;
+        this.objectMapper = objectMapper;
     }
 
     @ReadOperation
@@ -60,6 +66,9 @@ public class TaskActuatorController {
                 .whenComplete((result, throwable) -> {
                     if (throwable != null) {
                         taskExecution.setStatus(ExecutionStatus.FAILURE);
+                        ObjectNode attributes = objectMapper.createObjectNode()
+                                .put("error", throwable.getMessage());
+                        taskExecution.setAttributes(attributes);
                         taskExecutionRepository.save(taskExecution);
                     } else {
                         taskExecution.setStatus(ExecutionStatus.SUCCESS);
