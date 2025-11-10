@@ -1,5 +1,6 @@
 package com.github.mangila.app.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.app.model.outbox.OutboxEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -19,9 +20,11 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class EmployeeEventListener {
 
     private final EmployeeEventHandler eventHandler;
+    private final ObjectMapper objectMapper;
 
-    public EmployeeEventListener(EmployeeEventHandler eventHandler) {
+    public EmployeeEventListener(EmployeeEventHandler eventHandler, ObjectMapper objectMapper) {
         this.eventHandler = eventHandler;
+        this.objectMapper = objectMapper;
     }
 
     @TransactionalEventListener(

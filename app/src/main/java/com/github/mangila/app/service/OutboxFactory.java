@@ -18,7 +18,8 @@ public class OutboxFactory {
     public OutboxEntity from(Object event) {
         var outbox = new OutboxEntity();
         outbox.setStatus(OutboxEventStatus.PENDING);
-        outbox.setEventName(event.getClass().getSimpleName());
+        // We need the Fully Qualified Name of the event class to be able to check the type later
+        outbox.setEventName(event.getClass().getName());
         outbox.setPayload(objectMapper.valueToTree(event));
         outbox.setAuditMetadata(AuditMetadata.EMPTY);
         return outbox;
