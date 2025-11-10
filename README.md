@@ -4,6 +4,8 @@ Spring Web app demonstrating C.R.U.D (Create, Read, Update, Delete) operations i
 
 Deployed to AWS and automated with IaC (Infrastructure as Code) and CM (Configuration Management) using Terraform and Ansible.
 
+**NOTE: This project is just for demonstration purposes. With a POC value**
+
 ### Spring Boot
 
 Spring RESTful service with CRUD operations for the Employee domain. (The famous Employee CRUD, great for demonstration purposes)
