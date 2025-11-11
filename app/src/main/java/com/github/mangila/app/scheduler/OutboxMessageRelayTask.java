@@ -52,11 +52,14 @@ public class OutboxMessageRelayTask implements Task {
                 OutboxEventStatus.FAILURE,
                 Sort.by("auditMetadata.created").descending(),
                 Limit.of(25));
+        var node = objectMapper.createObjectNode();
+        if (pendingEntities.isEmpty() && failureEntities.isEmpty()) {
+            return node.put("message", "No outbox events to relay");
+        }
         Stream.of(pendingEntities, failureEntities)
                 .flatMap(Collection::stream)
                 .map(eventMapper::map)
                 .forEach(publisher::publish);
-        var node = objectMapper.createObjectNode();
         node.put("pending-size", pendingEntities.size());
         node.put("failure-size", failureEntities.size());
         var pendingArray = node.putArray("pending");
