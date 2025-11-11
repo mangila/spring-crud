@@ -44,10 +44,11 @@ public class EmployeeEventListener {
     public void listen(OutboxEvent event) {
         log.info("Received OutboxEvent: {}", event);
         transactionTemplate.executeWithoutResult(txStatus -> {
-            // Exclusive lock for the aggregateId and handle the event
+            // Exclusive lock for the aggregate and handle the event
             OutboxCurrentSequenceEntity sequence = sequenceRepository.lockById(
                     event.aggregateId(),
                     LockModeType.PESSIMISTIC_WRITE);
+            // Try to find the next event in order for the aggregate
             long expectedSequence = sequence.getCurrentSequence() + 1;
             if (event.sequence() == expectedSequence) {
                 eventHandler.handle(event);
