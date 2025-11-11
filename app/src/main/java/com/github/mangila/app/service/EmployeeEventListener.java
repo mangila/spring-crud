@@ -1,11 +1,15 @@
 package com.github.mangila.app.service;
 
 import com.github.mangila.app.model.outbox.OutboxEvent;
+import com.github.mangila.app.model.outbox.OutboxSequenceEntity;
+import com.github.mangila.app.repository.OutboxSequenceRepository;
+import jakarta.persistence.LockModeType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Synchronous is the default for Spring @EventListener. To run it asynchronously, use @Async.
@@ -18,9 +22,16 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 public class EmployeeEventListener {
     private final EmployeeEventHandler eventHandler;
+    private final OutboxSequenceRepository sequenceRepository;
 
-    public EmployeeEventListener(EmployeeEventHandler eventHandler) {
+    private final TransactionTemplate transactionTemplate;
+
+    public EmployeeEventListener(EmployeeEventHandler eventHandler,
+                                 OutboxSequenceRepository sequenceRepository,
+                                 TransactionTemplate transactionTemplate) {
         this.eventHandler = eventHandler;
+        this.sequenceRepository = sequenceRepository;
+        this.transactionTemplate = transactionTemplate;
     }
 
     /**
@@ -29,11 +40,20 @@ public class EmployeeEventListener {
      */
     @TransactionalEventListener(
             phase = TransactionPhase.AFTER_COMMIT
-        //    condition = "#event.status == 'PENDING'"
     )
     @Async
     public void listen(OutboxEvent event) {
         log.info("Received OutboxEvent: {}", event);
-        eventHandler.handle(event);
+        transactionTemplate.executeWithoutResult(txStatus -> {
+            OutboxSequenceEntity sequence = sequenceRepository.lockById(event.aggregateId(), LockModeType.PESSIMISTIC_WRITE);
+            long expectedSequence = sequence.getLatestSequence() + 1;
+            if (event.sequence() == expectedSequence) {
+                eventHandler.handle(event);
+                sequence.setLatestSequence(event.sequence());
+                sequenceRepository.merge(sequence);
+            } else if (event.sequence() < expectedSequence) {
+                log.warn("OutboxEvent sequence mismatch {} - {}", event.sequence(), expectedSequence);
+            }
+        });
     }
 }

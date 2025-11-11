@@ -28,7 +28,7 @@ public record Employee(
         EmployeeAudit audit
 ) {
     public Employee {
-        Ensure.notNull(id, "Employee id must not be null");
+        Ensure.notNull(id, "Employee aggregateId must not be null");
         Ensure.notNull(firstName, "Employee first name must not be null");
         Ensure.notNull(lastName, "Employee last name must not be null");
         Ensure.notNull(salary, "Employee salary must not be null");

@@ -1,10 +1,16 @@
 package com.github.mangila.app.scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.app.model.outbox.OutboxEventStatus;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Run some tasks, running with the Spring integrated scheduler.
@@ -37,17 +43,18 @@ public class Scheduler {
     }
 
     /**
-     * Soft delete all published outbox events
-     * For the actual deletion, we can use a separate service with a dedicated Scheduler framework.
+     * The Outbox message relay task. Since we use Spring in-memory event bus.
+     * We use this task to relay from our Outbox for sad path scenarios.
+     * Failed messages etc.
      * <br>
-     * Run a task every n(timeunit) is the purpose of a fixed-rate scheduling.
+     * Run a task every n(timeunit), but only if the previous run has finished
+     * Is the purpose of a fixed-delay scheduling.
      */
     @Scheduled(
-            initialDelayString = "${application.scheduler.initial-delay}",
-            fixedRateString = "${application.scheduler.fixed-rate}"
-    )
-    void softDeletePublishedOutboxTask() {
-        Task task = taskMap.get("softDeletePublishedOutboxTask");
+            initialDelayString = "${application.outbox-relay.initial-delay}",
+            fixedDelayString = "${application.outbox-relay.fixed-delay}")
+    public void outboxMessageRelayTask() {
+        Task task = taskMap.get("outboxMessageRelayTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
         schedulerTaskExecutor.submit(task, node);

@@ -114,6 +114,7 @@ public class ObjectFactoryUtil {
 
     public static OutboxEntity createOutboxEntity(OutboxEventStatus status, ObjectMapper objectMapper) {
         var entity = new OutboxEntity();
+        entity.setAggregateId("test");
         entity.setEventName("test");
         entity.setStatus(status);
         entity.setPayload(objectMapper.createObjectNode());

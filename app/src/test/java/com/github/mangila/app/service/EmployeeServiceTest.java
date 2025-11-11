@@ -87,7 +87,7 @@ class EmployeeServiceTest {
         EmployeeId id = ObjectFactoryUtil.createEmployeeId();
         assertThatThrownBy(() -> service.findEmployeeById(id))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("Employee with id: (EMP-JODO-00000000-0000-0000-0000-000000000000) not found");
+                .hasMessageContaining("Employee with aggregateId: (EMP-JODO-00000000-0000-0000-0000-000000000000) not found");
     }
 
     @Test
@@ -112,7 +112,7 @@ class EmployeeServiceTest {
         var inOrder = inOrder(entityMapper, repository, publisher);
         inOrder.verify(entityMapper, times(1)).map(any(Employee.class));
         inOrder.verify(repository, times(1)).persist(any(EmployeeEntity.class));
-        inOrder.verify(publisher, times(1)).publishAsOutboxEvent(any(CreateNewEmployeeEvent.class));
+        inOrder.verify(publisher, times(1)).publish(any(CreateNewEmployeeEvent.class));
         return employee.id();
     }
 
@@ -223,7 +223,7 @@ class EmployeeServiceTest {
         inOrder.verify(repository, times(1)).existsById(any(String.class));
         inOrder.verify(entityMapper, times(1)).map(any(Employee.class));
         inOrder.verify(repository, times(1)).merge(any(EmployeeEntity.class));
-        inOrder.verify(publisher, times(1)).publishAsOutboxEvent(any(UpdateEmployeeEvent.class));
+        inOrder.verify(publisher, times(1)).publish(any(UpdateEmployeeEvent.class));
     }
 
     private void assertUpdatedEmployee(Employee employee) {
@@ -262,7 +262,7 @@ class EmployeeServiceTest {
         var inOrder = inOrder(repository, publisher);
         inOrder.verify(repository, times(1)).existsById(any(String.class));
         inOrder.verify(repository, times(1)).softDeleteByEmployeeId(any(EmployeeId.class));
-        inOrder.verify(publisher, times(1)).publishAsOutboxEvent(any(SoftDeleteEmployeeEvent.class));
+        inOrder.verify(publisher, times(1)).publish(any(SoftDeleteEmployeeEvent.class));
     }
 
     @Test

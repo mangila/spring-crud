@@ -50,10 +50,15 @@ public class SpringEventPublisher {
      * MANDATORY transaction propagation is used to ensure that the event is persisted inside a tx
      */
     @Transactional(propagation = Propagation.MANDATORY)
-    public void publishAsOutboxEvent(Object obj) {
-        OutboxEntity entity = outboxFactory.from(obj);
+    public void publish(String aggregateId, Object obj) {
+        OutboxEntity entity = outboxFactory.from(aggregateId, obj);
         outboxRepository.persist(entity);
         OutboxEvent event = eventMapper.map(entity);
+        publisher.publishEvent(event);
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void publish(OutboxEvent event) {
         publisher.publishEvent(event);
     }
 }

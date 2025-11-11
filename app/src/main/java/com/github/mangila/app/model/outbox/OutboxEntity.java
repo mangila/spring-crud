@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.util.UUID;
+
 /**
  * Playing around with events it's important to have an Event storage.
  * Since we are using in-memory publishing, we will need some kind of backup for resilience.
@@ -23,16 +25,21 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @lombok.Data
 public class OutboxEntity {
 
-    // the sequence is used to order the events in the outbox
-    // so we can replay them in the right order together with the aggregate
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long sequence;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(columnDefinition = "uuid",
+            updatable = false,
+            nullable = false)
+    private UUID id;
 
-    @Column(columnDefinition = "aggregate_id",
+    @Column(name = "aggregate_id",
             updatable = false,
             nullable = false)
     private String aggregateId;
+
+    @Column(name = "sequence",
+            nullable = false)
+    private long sequence;
 
     @Column(name = "event_name",
             nullable = false)

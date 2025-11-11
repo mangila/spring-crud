@@ -47,7 +47,7 @@ public class EmployeeService {
     public Employee findEmployeeById(EmployeeId id) {
         return employeeRepository.findById(id.value())
                 .map(domainMapper::map)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", id.value())));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Employee with aggregateId: (%s) not found", id.value())));
     }
 
     public Page<Employee> findAllEmployeesByPage(Pageable pageable) {
@@ -61,7 +61,7 @@ public class EmployeeService {
     public void createNewEmployee(Employee employee) {
         EmployeeEntity entity = entityMapper.map(employee);
         employeeRepository.persist(entity);
-        publisher.publishAsOutboxEvent(new CreateNewEmployeeEvent(employee.id()));
+        publisher.publish(employee.id().value(), new CreateNewEmployeeEvent(employee.id()));
     }
 
     /**
@@ -72,16 +72,16 @@ public class EmployeeService {
      */
     @Transactional
     public void updateEmployee(Employee employee) {
-        Ensure.isTrue(existsById(employee.id()), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", employee.id().value())));
+        Ensure.isTrue(existsById(employee.id()), () -> new EntityNotFoundException(String.format("Employee with aggregateId: (%s) not found", employee.id().value())));
         EmployeeEntity entity = entityMapper.map(employee);
         employeeRepository.merge(entity);
-        publisher.publishAsOutboxEvent(new UpdateEmployeeEvent(employee.id()));
+        publisher.publish(employee.id().value(), new UpdateEmployeeEvent(employee.id()));
     }
 
     @Transactional
     public void softDeleteEmployeeById(EmployeeId id) {
-        Ensure.isTrue(existsById(id), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", id.value())));
+        Ensure.isTrue(existsById(id), () -> new EntityNotFoundException(String.format("Employee with aggregateId: (%s) not found", id.value())));
         employeeRepository.softDeleteByEmployeeId(id);
-        publisher.publishAsOutboxEvent(new SoftDeleteEmployeeEvent(id));
+        publisher.publish(id.value(), new SoftDeleteEmployeeEvent(id));
     }
 }

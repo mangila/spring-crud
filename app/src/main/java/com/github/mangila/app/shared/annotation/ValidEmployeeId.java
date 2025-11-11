@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 public @interface ValidEmployeeId {
 
     // 1. Error message template
-    String message() default "Not valid employee id";
+    String message() default "Not valid employee aggregateId";
 
     // 2. Used to specify constraint groups
     Class<?>[] groups() default {};

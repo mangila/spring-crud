@@ -10,11 +10,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, Long> {
-    List<OutboxEntity> findAllByStatusAndAuditMetadataDeleted(OutboxEventStatus status, boolean deleted, Sort sort, Limit limit);
-
+public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, UUID> {
     List<OutboxEntity> findAllByStatus(OutboxEventStatus status, Sort sort, Limit limit);
 
     @Modifying(
@@ -27,16 +26,4 @@ public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, Lon
             WHERE o.aggregateId = :aggregateId
             """)
     void changeStatus(OutboxEventStatus status, String aggregateId);
-
-    @Modifying(
-            clearAutomatically = true,
-            flushAutomatically = true
-    )
-    @Query("""
-                    UPDATE OutboxEntity o
-                    SET o.status = 'PROCESSING'
-                    WHERE o.aggregateId = :aggregateId
-                    AND o.status <> 'PROCESSING'
-            """)
-    int optimisticClaim(String aggregateId);
 }
