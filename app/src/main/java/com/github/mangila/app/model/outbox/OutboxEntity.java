@@ -26,11 +26,13 @@ import java.util.UUID;
 public class OutboxEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(columnDefinition = "uuid",
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long sequence;
+
+    @Column(columnDefinition = "aggregate_id",
             updatable = false,
             nullable = false)
-    private UUID id;
+    private String aggregateId;
 
     @Column(name = "event_name",
             nullable = false)

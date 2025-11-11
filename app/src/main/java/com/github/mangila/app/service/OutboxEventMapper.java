@@ -9,7 +9,7 @@ public class OutboxEventMapper {
 
     public OutboxEvent map(OutboxEntity entity) {
         return new OutboxEvent(
-                entity.getId(),
+                entity.getAggregateId(),
                 entity.getEventName(),
                 entity.getStatus(),
                 entity.getPayload()

@@ -70,8 +70,8 @@ class OutboxJpaRepositoryTest {
     @DisplayName("Should change status")
     void changeStatus() {
         OutboxEntity entity = repository.persist(ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.PENDING, objectMapper));
-        repository.changeStatus(OutboxEventStatus.FAILURE, entity.getId());
-        entity = repository.findById(entity.getId()).orElseThrow();
+        repository.changeStatus(OutboxEventStatus.FAILURE, entity.getAggregateId());
+        entity = repository.findById(entity.getAggregateId()).orElseThrow();
         assertThat(entity.getStatus())
                 .isEqualTo(OutboxEventStatus.FAILURE);
     }
@@ -80,10 +80,10 @@ class OutboxJpaRepositoryTest {
     @DisplayName("Should Optimistic claim")
     void optimisticClaim() {
         OutboxEntity entity = repository.persist(ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.PENDING, objectMapper));
-        int claim = repository.optimisticClaim(entity.getId());
+        int claim = repository.optimisticClaim(entity.getAggregateId());
         assertThat(claim)
                 .isEqualTo(1);
-        claim = repository.optimisticClaim(entity.getId());
+        claim = repository.optimisticClaim(entity.getAggregateId());
         assertThat(claim)
                 .isEqualTo(0);
     }
