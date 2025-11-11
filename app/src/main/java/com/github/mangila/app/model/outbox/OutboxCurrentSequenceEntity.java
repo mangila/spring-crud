@@ -6,14 +6,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 /**
- * We need a sequence table to keep track of the latest sequence number for each aggregate.
+ * We need a sequence table to keep track of the latest processed sequence number for each aggregate.
  * So we can both replay the events and keep them in order.
  */
 @Entity
-@Table(name = "outbox_sequence")
+@Table(name = "outbox_current_sequence")
 @lombok.NoArgsConstructor
 @lombok.Data
-public class OutboxSequenceEntity {
+public class OutboxCurrentSequenceEntity {
 
     @Id
     @Column(name = "aggregate_id",
@@ -21,7 +21,7 @@ public class OutboxSequenceEntity {
             nullable = false)
     private String aggregateId;
 
-    @Column(name = "latest_sequence",
+    @Column(name = "current_sequence",
             nullable = false)
-    private long latestSequence;
+    private long currentSequence;
 }

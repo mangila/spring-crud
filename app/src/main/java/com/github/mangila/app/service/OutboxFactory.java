@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.app.model.AuditMetadata;
 import com.github.mangila.app.model.outbox.OutboxEntity;
 import com.github.mangila.app.model.outbox.OutboxEventStatus;
-import com.github.mangila.app.model.outbox.OutboxSequenceEntity;
-import com.github.mangila.app.repository.OutboxSequenceRepository;
+import com.github.mangila.app.model.outbox.OutboxNextSequenceEntity;
+import com.github.mangila.app.repository.OutboxNextSequenceRepository;
 import jakarta.persistence.LockModeType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,12 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class OutboxFactory {
 
-    private final OutboxSequenceRepository sequenceRepository;
+    private final OutboxNextSequenceRepository nextSequenceRepository;
     private final ObjectMapper objectMapper;
 
-    public OutboxFactory(OutboxSequenceRepository sequenceRepository,
+    public OutboxFactory(OutboxNextSequenceRepository nextSequenceRepository,
                          ObjectMapper objectMapper) {
-        this.sequenceRepository = sequenceRepository;
+        this.nextSequenceRepository = nextSequenceRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -30,10 +30,13 @@ public class OutboxFactory {
         outbox.setPayload(objectMapper.valueToTree(event));
         outbox.setAuditMetadata(AuditMetadata.EMPTY);
         // Exclusive lock for the aggregateId and increment sequence
-        OutboxSequenceEntity sequence = sequenceRepository.lockById(
+        OutboxNextSequenceEntity sequence = nextSequenceRepository.lockById(
                 aggregateId,
                 LockModeType.PESSIMISTIC_WRITE);
-        outbox.setSequence(sequence.getLatestSequence() + 1);
+        long nextSequence = sequence.getNextSequence() + 1;
+        sequence.setNextSequence(nextSequence);
+        outbox.setSequence(nextSequence);
+        nextSequenceRepository.merge(sequence);
         return outbox;
     }
 }

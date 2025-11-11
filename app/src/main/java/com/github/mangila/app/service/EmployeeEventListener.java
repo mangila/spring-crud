@@ -1,8 +1,8 @@
 package com.github.mangila.app.service;
 
 import com.github.mangila.app.model.outbox.OutboxEvent;
-import com.github.mangila.app.model.outbox.OutboxSequenceEntity;
-import com.github.mangila.app.repository.OutboxSequenceRepository;
+import com.github.mangila.app.model.outbox.OutboxCurrentSequenceEntity;
+import com.github.mangila.app.repository.OutboxCurrentSequenceRepository;
 import jakarta.persistence.LockModeType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -22,11 +22,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Slf4j
 public class EmployeeEventListener {
     private final EmployeeEventHandler eventHandler;
-    private final OutboxSequenceRepository sequenceRepository;
+    private final OutboxCurrentSequenceRepository sequenceRepository;
     private final TransactionTemplate transactionTemplate;
 
     public EmployeeEventListener(EmployeeEventHandler eventHandler,
-                                 OutboxSequenceRepository sequenceRepository,
+                                 OutboxCurrentSequenceRepository sequenceRepository,
                                  TransactionTemplate transactionTemplate) {
         this.eventHandler = eventHandler;
         this.sequenceRepository = sequenceRepository;
@@ -45,13 +45,13 @@ public class EmployeeEventListener {
         log.info("Received OutboxEvent: {}", event);
         transactionTemplate.executeWithoutResult(txStatus -> {
             // Exclusive lock for the aggregateId and handle the event
-            OutboxSequenceEntity sequence = sequenceRepository.lockById(
+            OutboxCurrentSequenceEntity sequence = sequenceRepository.lockById(
                     event.aggregateId(),
                     LockModeType.PESSIMISTIC_WRITE);
-            long expectedSequence = sequence.getLatestSequence() + 1;
+            long expectedSequence = sequence.getCurrentSequence() + 1;
             if (event.sequence() == expectedSequence) {
                 eventHandler.handle(event);
-                sequence.setLatestSequence(event.sequence());
+                sequence.setCurrentSequence(event.sequence());
                 sequenceRepository.merge(sequence);
             } else if (event.sequence() < expectedSequence) {
                 log.warn("OutboxEvent sequence mismatch: {} - {}", event.sequence(), expectedSequence);
