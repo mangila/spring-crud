@@ -52,7 +52,11 @@ public class EmployeeEventListener {
                 sequence.setLatestSequence(event.sequence());
                 sequenceRepository.merge(sequence);
             } else if (event.sequence() < expectedSequence) {
-                log.warn("OutboxEvent sequence mismatch {} - {}", event.sequence(), expectedSequence);
+                log.warn("OutboxEvent sequence mismatch: {} - {}", event.sequence(), expectedSequence);
+                // do nothing and wait for the next event message relay cycle
+            } else {
+                log.warn("OutboxEvent sequence duplicate: {} - {}", event.sequence(), expectedSequence);
+                // do nothing and wait for the next event message relay cycle
             }
         });
     }
