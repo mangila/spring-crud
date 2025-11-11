@@ -15,7 +15,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class SoftDeletePublishedOutboxTask implements CallableTask {
+public class SoftDeletePublishedOutboxTask implements Task {
 
     private final OutboxJpaRepository outboxRepository;
     private final ObjectMapper objectMapper;

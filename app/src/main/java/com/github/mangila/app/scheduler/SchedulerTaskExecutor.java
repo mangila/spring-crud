@@ -26,29 +26,9 @@ public class SchedulerTaskExecutor {
     /**
      * Submit a task to the scheduler executor and return a completable future.
      * <br>
-     * DRY method with the database inserts since all tasks share the same expected behavior.
-     * <br>
-     * If a task needs more stuffs to create better insight, a new method can be created
+     * Using Jackson ObjectNode to create insight about the task execution.
      */
-    public CompletableFuture<Void> submitRunnable(RunnableTask task, @NonNull ObjectNode attributes) {
-        var taskExecution = taskExecutionRepository.persist(
-                TaskExecutionEntity.newExecution(task.name(), attributes)
-        );
-        return taskExecutor.submitCompletable(task)
-                .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-                .whenComplete((unused, throwable) -> {
-                    if (throwable != null) {
-                        taskExecution.setStatus(TaskExecutionStatus.FAILURE);
-                        attributes.put("error", throwable.getMessage());
-                    } else {
-                        taskExecution.setStatus(TaskExecutionStatus.SUCCESS);
-                    }
-                    taskExecution.setAttributes(attributes);
-                    taskExecutionRepository.merge(taskExecution);
-                });
-    }
-
-    public CompletableFuture<ObjectNode> submitCallable(CallableTask task, @NonNull ObjectNode attributes) {
+    public CompletableFuture<ObjectNode> submit(Task task, @NonNull ObjectNode attributes) {
         var taskExecution = taskExecutionRepository.persist(
                 TaskExecutionEntity.newExecution(task.name(), attributes)
         );

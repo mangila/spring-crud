@@ -26,17 +26,14 @@ public class Scheduler {
     private final ObjectMapper objectMapper;
 
     // Spring magic, wires a map of tasks with their bean names.
-    private final Map<String, RunnableTask> runnableTaskMap;
-    private final Map<String, CallableTask> callableTaskMap;
+    private final Map<String, Task> taskMap;
 
     public Scheduler(SchedulerTaskExecutor schedulerTaskExecutor,
                      ObjectMapper objectMapper,
-                     Map<String, RunnableTask> runnableTaskMap,
-                     Map<String, CallableTask> callableTaskMap) {
+                     Map<String, Task> taskMap) {
         this.schedulerTaskExecutor = schedulerTaskExecutor;
         this.objectMapper = objectMapper;
-        this.runnableTaskMap = runnableTaskMap;
-        this.callableTaskMap = callableTaskMap;
+        this.taskMap = taskMap;
     }
 
     /**
@@ -50,10 +47,10 @@ public class Scheduler {
             fixedRateString = "${application.scheduler.fixed-rate}"
     )
     void softDeletePublishedOutboxTask() {
-        CallableTask task = callableTaskMap.get("softDeletePublishedOutboxTask");
+        Task task = taskMap.get("softDeletePublishedOutboxTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
-        schedulerTaskExecutor.submitCallable(task, node);
+        schedulerTaskExecutor.submit(task, node);
     }
 
     /**
@@ -67,19 +64,19 @@ public class Scheduler {
             fixedRateString = "${application.scheduler.fixed-rate}"
     )
     void softDeleteSuccessTaskExecutionTask() {
-        CallableTask task = callableTaskMap.get("softDeleteSuccessTaskExecutionTask");
+        Task task = taskMap.get("softDeleteSuccessTaskExecutionTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
-        schedulerTaskExecutor.submitCallable(task, node);
+        schedulerTaskExecutor.submit(task, node);
     }
 
     // Run a task at a specific time
     // This is a Spring Cron Expression
     @Scheduled(cron = "${application.scheduler.cron}")
     public void cronTask() {
-        RunnableTask task = runnableTaskMap.get("cronTask");
+        Task task = taskMap.get("cronTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
-        schedulerTaskExecutor.submitRunnable(task, node);
+        schedulerTaskExecutor.submit(task, node);
     }
 }

@@ -1,10 +1,9 @@
 package com.github.mangila.app.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mangila.app.scheduler.CallableTask;
-import com.github.mangila.app.scheduler.RunnableTask;
 import com.github.mangila.app.scheduler.Scheduler;
 import com.github.mangila.app.scheduler.SchedulerTaskExecutor;
+import com.github.mangila.app.scheduler.Task;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -32,10 +31,9 @@ public class SchedulerConfig {
     Scheduler scheduler(
             SchedulerTaskExecutor taskExecutor,
             ObjectMapper objectMapper,
-            Map<String, RunnableTask> runeableTaskMap,
-            Map<String, CallableTask> callableTaskMap
+            Map<String, Task> taskMap
     ) {
         log.info("Scheduler enabled");
-        return new Scheduler(taskExecutor, objectMapper, runeableTaskMap, callableTaskMap);
+        return new Scheduler(taskExecutor, objectMapper, taskMap);
     }
 }

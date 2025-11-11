@@ -15,7 +15,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class SoftDeleteSuccessTaskExecutionTask implements CallableTask {
+public class SoftDeleteSuccessTaskExecutionTask implements Task {
 
     private final TaskExecutionJpaRepository taskExecutionRepository;
     private final ObjectMapper objectMapper;

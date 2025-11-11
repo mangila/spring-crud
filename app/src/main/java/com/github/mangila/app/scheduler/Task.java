@@ -1,5 +1,9 @@
 package com.github.mangila.app.scheduler;
 
-public interface Task {
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.concurrent.Callable;
+
+public interface Task extends Callable<ObjectNode> {
     String name();
 }
