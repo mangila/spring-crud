@@ -13,8 +13,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, String> {
+public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, UUID> {
     List<OutboxEntity> findAllByStatusAndAuditMetadataDeleted(OutboxEventStatus status, boolean deleted, Sort sort, Limit limit);
+
+    List<OutboxEntity> findAllByStatus(OutboxEventStatus status, Sort sort, Limit limit);
 
     @Modifying(
             clearAutomatically = true,
@@ -24,6 +26,7 @@ public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, Str
             UPDATE OutboxEntity o
             SET o.status = :status
             WHERE o.id = :id
+            AND o.status <> 'PROCESSING'
             """)
-    void changeStatus(OutboxEventStatus status, UUID id);
+    int changeStatus(OutboxEventStatus status, UUID id);
 }

@@ -4,5 +4,6 @@ public enum OutboxEventStatus {
     PENDING,
     PROCESSING,
     PUBLISHED,
-    FAILURE
+    FAILURE,
+    UNPROCESSABLE_EVENT
 }

@@ -39,4 +39,10 @@ public final class Ensure {
             throw exceptionSupplier.get();
         }
     }
+
+    public static void isFalse(boolean expression, String message) throws EnsureException {
+        if (expression) {
+            throw new EnsureException(message);
+        }
+    }
 }

@@ -27,7 +27,10 @@ public class EmployeeEventListener {
      * Listen for the OutboxEvent after the transaction has been committed
      * This is a happy path scenario. For immediate handling.
      */
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @TransactionalEventListener(
+            phase = TransactionPhase.AFTER_COMMIT
+        //    condition = "#event.status == 'PENDING'"
+    )
     @Async
     public void listen(OutboxEvent event) {
         log.info("Received OutboxEvent: {}", event);

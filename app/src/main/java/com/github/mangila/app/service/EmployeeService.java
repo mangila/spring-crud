@@ -52,8 +52,8 @@ public class EmployeeService {
 
     public Page<Employee> findAllEmployeesByPage(Pageable pageable) {
         // TODO: create a Probe for querying
-        var example = Example.of(new EmployeeEntity());
-        return employeeRepository.findAll(example, pageable)
+        var probe = Example.of(new EmployeeEntity());
+        return employeeRepository.findAll(probe, pageable)
                 .map(domainMapper::map);
     }
 
