@@ -1,16 +1,10 @@
 package com.github.mangila.app.scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.mangila.app.model.task.TaskExecutionEntity;
-import com.github.mangila.app.model.task.TaskExecutionStatus;
-import com.github.mangila.app.repository.TaskExecutionJpaRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.task.VirtualThreadTaskExecutor;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Run some tasks, running with the Spring integrated scheduler.
@@ -28,76 +22,52 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class Scheduler {
 
-    private final VirtualThreadTaskExecutor taskExecutor;
-    private final TaskExecutionJpaRepository taskExecutionRepository;
-
+    private final SchedulerTaskExecutor schedulerTaskExecutor;
     private final ObjectMapper objectMapper;
 
     // Spring magic, wires a map of tasks with their bean names.
     private final Map<String, Task> tasks;
 
-    public Scheduler(VirtualThreadTaskExecutor taskExecutor,
-                     TaskExecutionJpaRepository taskExecutionRepository,
+    public Scheduler(SchedulerTaskExecutor schedulerTaskExecutor,
                      ObjectMapper objectMapper,
                      Map<String, Task> tasks) {
-        this.taskExecutor = taskExecutor;
-        this.taskExecutionRepository = taskExecutionRepository;
+        this.schedulerTaskExecutor = schedulerTaskExecutor;
         this.objectMapper = objectMapper;
         this.tasks = tasks;
-        // TODO: DRY execution of tasks
     }
 
-    // Run a task every 5 seconds
+    /**
+     * Soft delete all published outbox events save the sometime for auditing.
+     * For the actual deletion, we can use a separate service with a dedicated Scheduler framework.
+     * <br>
+     * Run a task every n(timeunit) is the purpose of a fixed-rate scheduling.
+     */
     @Scheduled(
             initialDelayString = "${application.scheduler.initial-delay}",
             fixedRateString = "${application.scheduler.fixed-rate}"
     )
-    public void fixedRateTask() {
-        Task task = tasks.get("fixedRateTask");
-        TaskExecutionEntity taskExecution = taskExecutionRepository.persist(new TaskExecutionEntity(task.name(), TaskExecutionStatus.RUNNING, null));
-        taskExecutor.submitCompletable(task)
-                .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-                .whenComplete((result, throwable) -> {
-                    if (throwable != null) {
-                        taskExecution.setStatus(TaskExecutionStatus.FAILURE);
-                        ObjectNode attributes = objectMapper.createObjectNode()
-                                .put("error", throwable.getMessage());
-                        taskExecution.setAttributes(attributes);
-                        taskExecutionRepository.merge(taskExecution);
-                    } else {
-                        taskExecution.setStatus(TaskExecutionStatus.SUCCESS);
-                        taskExecutionRepository.merge(taskExecution);
-                    }
-                });
+    void softDeletePublishedOutboxTask() {
+        Task task = tasks.get("softDeletePublishedOutboxTask");
+        var node = objectMapper.createObjectNode();
+        node.put("executedBy", "Scheduler");
+        schedulerTaskExecutor.submitCompletable(task, null);
     }
 
-    // Run a task every 5 seconds, but only if the previous run has finished
+    /**
+     * Soft delete all success task executions.
+     * For the actual deletion, we can use a separate service with a dedicated Scheduler framework.
+     * <br>
+     * Run a task every n(timeunit) is the purpose of a fixed-rate scheduling.
+     */
     @Scheduled(
             initialDelayString = "${application.scheduler.initial-delay}",
-            fixedDelayString = "${application.scheduler.fixed-delay}"
+            fixedRateString = "${application.scheduler.fixed-rate}"
     )
-    public void fixedDelayTask() {
-        Task task = tasks.get("fixedDelayTask");
-        TaskExecutionEntity taskExecution = taskExecutionRepository.persist(new TaskExecutionEntity(task.name(), TaskExecutionStatus.RUNNING, null));
-        CompletableFuture<Void> future = taskExecutor.submitCompletable(task)
-                .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-                .whenComplete((result, throwable) -> {
-                    if (throwable != null) {
-                        taskExecution.setStatus(TaskExecutionStatus.FAILURE);
-                        ObjectNode attributes = objectMapper.createObjectNode()
-                                .put("error", throwable.getMessage());
-                        taskExecution.setAttributes(attributes);
-                        taskExecutionRepository.merge(taskExecution);
-                    } else {
-                        taskExecution.setStatus(TaskExecutionStatus.SUCCESS);
-                        taskExecutionRepository.merge(taskExecution);
-                    }
-                });
-        // Here we want to block the calling thread until the previous task is finished.
-        // If the programmer forgets to block here, the task will be executed every 5 seconds, even if the previous task is still running.
-        // Then a fixed-delay task will lose its meaning.
-        future.join();
-        log.info("Fixed Delay Task finished");
+    void softDeleteSuccessTaskExecutionTask() {
+        Task task = tasks.get("softDeleteSuccessTaskExecutionTask");
+        var node = objectMapper.createObjectNode();
+        node.put("executedBy", "Scheduler");
+        schedulerTaskExecutor.submitCompletable(task, null);
     }
 
     // Run a task at a specific time
@@ -105,21 +75,9 @@ public class Scheduler {
     @Scheduled(cron = "${application.scheduler.cron}")
     public void cronTask() {
         Task task = tasks.get("cronTask");
-        TaskExecutionEntity taskExecution = taskExecutionRepository.persist(new TaskExecutionEntity(task.name(), TaskExecutionStatus.RUNNING, null));
-        taskExecutor.submitCompletable(task)
-                .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-                .whenComplete((result, throwable) -> {
-                    if (throwable != null) {
-                        taskExecution.setStatus(TaskExecutionStatus.FAILURE);
-                        ObjectNode attributes = objectMapper.createObjectNode()
-                                .put("error", throwable.getMessage());
-                        taskExecution.setAttributes(attributes);
-                        taskExecutionRepository.merge(taskExecution);
-                    } else {
-                        taskExecution.setStatus(TaskExecutionStatus.SUCCESS);
-                        taskExecutionRepository.merge(taskExecution);
-                    }
-                });
+        var node = objectMapper.createObjectNode();
+        node.put("executedBy", "Scheduler");
+        schedulerTaskExecutor.submitCompletable(task, null);
     }
 
 }

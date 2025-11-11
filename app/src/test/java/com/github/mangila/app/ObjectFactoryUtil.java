@@ -9,6 +9,10 @@ import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import com.github.mangila.app.model.employee.type.EmploymentActivity;
 import com.github.mangila.app.model.employee.type.EmploymentStatus;
+import com.github.mangila.app.model.outbox.OutboxEntity;
+import com.github.mangila.app.model.outbox.OutboxEventStatus;
+import com.github.mangila.app.model.task.TaskExecutionEntity;
+import com.github.mangila.app.model.task.TaskExecutionStatus;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -106,5 +110,18 @@ public class ObjectFactoryUtil {
         entity.setAttributes(updateRequest.attributes());
         entity.setAuditMetadata(AuditMetadata.EMPTY);
         return entity;
+    }
+
+    public static OutboxEntity createOutboxEntity(OutboxEventStatus status, ObjectMapper objectMapper) {
+        var entity = new OutboxEntity();
+        entity.setEventName("test");
+        entity.setStatus(status);
+        entity.setPayload(objectMapper.createObjectNode());
+        entity.setAuditMetadata(AuditMetadata.EMPTY);
+        return entity;
+    }
+
+    public static TaskExecutionEntity createTaskExecutionEntity(String taskName, TaskExecutionStatus status) {
+        return new TaskExecutionEntity(taskName, status, null);
     }
 }

@@ -43,7 +43,8 @@ public class OutboxEntity {
 
     @Type(JsonBinaryType.class)
     @Column(name = "payload",
-            columnDefinition = "jsonb")
+            columnDefinition = "jsonb",
+            nullable = false)
     private ObjectNode payload;
 
     @Embedded

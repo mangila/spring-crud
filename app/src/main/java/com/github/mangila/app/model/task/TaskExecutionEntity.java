@@ -8,6 +8,8 @@ import org.hibernate.annotations.Type;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.util.UUID;
+
 /**
  * Entity is a POJO representation of a database table.
  * Save our task executions for auditing purposes.
@@ -20,9 +22,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @lombok.NoArgsConstructor
 @lombok.Data
 public class TaskExecutionEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(columnDefinition = "uuid",
+            updatable = false,
+            nullable = false)
+    private UUID id;
 
     @Column(name = "task_name",
             nullable = false)
@@ -40,6 +46,10 @@ public class TaskExecutionEntity {
 
     @Embedded
     private AuditMetadata auditMetadata;
+
+    public static TaskExecutionEntity newExecution(String taskName, @Nullable ObjectNode attributes) {
+        return new TaskExecutionEntity(taskName, TaskExecutionStatus.RUNNING, attributes);
+    }
 
     public TaskExecutionEntity(String taskName, TaskExecutionStatus status, @Nullable ObjectNode attributes) {
         this.taskName = taskName;

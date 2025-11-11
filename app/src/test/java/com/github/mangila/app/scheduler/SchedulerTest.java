@@ -9,17 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SchedulerTest {
 
     @Test
-    void fixedRateTask() {
-        assertThat(1 + 1).isEqualTo(3);
-    }
-
-    @Test
-    void fixedDelayTask() {
-        assertThat(1 + 1).isEqualTo(3);
-    }
-
-    @Test
-    void cronTask() {
+    void test() {
         assertThat(1 + 1).isEqualTo(3);
     }
 }

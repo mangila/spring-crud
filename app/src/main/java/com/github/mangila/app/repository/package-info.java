@@ -1,3 +1,4 @@
+// https://vladmihalcea.com/the-open-session-in-view-anti-pattern/
 // https://vladmihalcea.com/basejparepository-hypersistence-utils/
 // https://vladmihalcea.com/best-spring-data-jparepository/
 // https://vladmihalcea.com/spring-data-findall-anti-pattern/

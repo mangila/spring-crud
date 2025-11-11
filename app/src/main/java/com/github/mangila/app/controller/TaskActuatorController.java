@@ -1,18 +1,13 @@
 package com.github.mangila.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.mangila.app.model.task.TaskExecutionStatus;
-import com.github.mangila.app.model.task.TaskExecutionEntity;
-import com.github.mangila.app.repository.TaskExecutionJpaRepository;
+import com.github.mangila.app.scheduler.SchedulerTaskExecutor;
 import com.github.mangila.app.scheduler.Task;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Selector;
 import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 import org.springframework.boot.actuate.endpoint.web.WebEndpointResponse;
 import org.springframework.boot.actuate.endpoint.web.annotation.WebEndpoint;
-import org.springframework.core.task.VirtualThreadTaskExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -27,20 +22,17 @@ import java.util.Map;
 @WebEndpoint(id = "task")
 @Component
 public class TaskActuatorController {
-    private final VirtualThreadTaskExecutor taskExecutor;
-    private final TaskExecutionJpaRepository taskExecutionRepository;
+
+    private final SchedulerTaskExecutor taskExecutor;
+    private final ObjectMapper objectMapper;
     private final Map<String, Task> taskMap;
 
-    private final ObjectMapper objectMapper;
-
-    public TaskActuatorController(@Qualifier("schedulerTaskExecutor") VirtualThreadTaskExecutor taskExecutor,
-                                  TaskExecutionJpaRepository taskExecutionRepository,
-                                  Map<String, Task> taskMap,
-                                  ObjectMapper objectMapper) {
+    public TaskActuatorController(SchedulerTaskExecutor taskExecutor,
+                                  ObjectMapper objectMapper,
+                                  Map<String, Task> taskMap) {
         this.taskExecutor = taskExecutor;
-        this.taskExecutionRepository = taskExecutionRepository;
-        this.taskMap = taskMap;
         this.objectMapper = objectMapper;
+        this.taskMap = taskMap;
     }
 
     @ReadOperation
@@ -60,21 +52,9 @@ public class TaskActuatorController {
                     HttpStatus.NOT_FOUND.value()
             );
         }
-        TaskExecutionEntity taskExecution = taskExecutionRepository.persist(new TaskExecutionEntity(task.name(), TaskExecutionStatus.RUNNING, null));
-        taskExecutor.submitCompletable(task)
-                .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-                .whenComplete((result, throwable) -> {
-                    if (throwable != null) {
-                        taskExecution.setStatus(TaskExecutionStatus.FAILURE);
-                        ObjectNode attributes = objectMapper.createObjectNode()
-                                .put("error", throwable.getMessage());
-                        taskExecution.setAttributes(attributes);
-                        taskExecutionRepository.merge(taskExecution);
-                    } else {
-                        taskExecution.setStatus(TaskExecutionStatus.SUCCESS);
-                        taskExecutionRepository.merge(taskExecution);
-                    }
-                });
+        var node = objectMapper.createObjectNode();
+        node.put("executedBy", "Actuator");
+        taskExecutor.submitCompletable(task, node);
         return new WebEndpointResponse<>(
                 Map.of("task", taskName),
                 HttpStatus.ACCEPTED.value()

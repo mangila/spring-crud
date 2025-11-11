@@ -1,14 +1,13 @@
 # Application Properties
 application:
   outbox-relay:
-    initial-delay: 10s
-    fixed-delay: 5s
-    cleanup: 60s
+    initial-delay: 30s
+    fixed-delay: 10s
   scheduler:
     enabled: true
     initial-delay: 30s
-    fixed-rate: 15s
-    fixed-delay: 15s
+    fixed-rate: 5s
+    fixed-delay: 10
     cron: 0 0 0 * * *
 # Spring Properties
 spring:
@@ -37,11 +36,22 @@ spring:
       maximum-pool-size: 10
   jpa:
     properties:
+      # pretty print SQL statements
+      hibernate.format_sql: true
+      # generate JDBC statistics
       hibernate.generate_statistics: true
-    show-sql: true
+      # batching
+      hibernate.jdbc.batch_size: 50
+      # batch when doing inserts
+      hibernate.order_inserts: true
+      # batch when using @Version
+      hibernate.batch_versioned_data: true
+      # batch when doing updates
+      hibernate.order_updates: true
     hibernate:
       ddl-auto: create-drop
-    # https://vladmihalcea.com/the-open-session-in-view-anti-pattern/
+    show-sql: true
+    # Detach JPA from the Spring HTTP request lifecycle
     open-in-view: false
 # Logging Properties
 logging:
