@@ -1,6 +1,7 @@
 package com.github.mangila.app.service;
 
 import com.github.mangila.app.model.outbox.OutboxEvent;
+import com.github.mangila.app.model.outbox.OutboxEventStatus;
 import com.github.mangila.app.repository.OutboxJpaRepository;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,8 @@ public class EmployeeEventHandler {
     }
 
     public void handle(OutboxEvent event) {
-
+        repository.changeStatus(OutboxEventStatus.PROCESSING, event.id());
+        // TODO: match event type and handle it accordingly.
+        repository.changeStatus(OutboxEventStatus.PUBLISHED, event.id());
     }
 }

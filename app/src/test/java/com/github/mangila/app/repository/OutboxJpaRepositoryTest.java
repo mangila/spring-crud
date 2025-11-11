@@ -6,13 +6,13 @@ import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.config.JpaConfig;
 import com.github.mangila.app.model.outbox.OutboxEntity;
 import com.github.mangila.app.model.outbox.OutboxEventStatus;
-import com.github.mangila.app.service.OutboxFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
 
@@ -70,6 +70,20 @@ class OutboxJpaRepositoryTest {
         );
         assertThat(entities)
                 .isEmpty();
+    }
+
+    @Test
+    @DisplayName("Should change status")
+    void changeStatus() {
+        var entities = repository.findAll(Example.of(new OutboxEntity()));
+        entities.forEach(entity -> {
+            repository.changeStatus(OutboxEventStatus.FAILURE, entity.getId());
+        });
+        repository.findAll(Example.of(new OutboxEntity()))
+                .forEach(entity -> {
+                    assertThat(entity.getStatus())
+                            .isEqualTo(OutboxEventStatus.FAILURE);
+                });
     }
 
     @Test
