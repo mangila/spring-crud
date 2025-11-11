@@ -5,6 +5,7 @@ import com.github.mangila.app.model.outbox.OutboxEventStatus;
 import com.github.mangila.app.repository.OutboxJpaRepository;
 import com.github.mangila.app.shared.exception.UnprocessableEventException;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -32,32 +33,52 @@ public class EmployeeEventHandler {
     }
 
     public void handle(OutboxEvent event) {
-        // Acquire Optimistic Claim on the event
-        transactionTemplate.executeWithoutResult(txStatus -> {
-            int claim = repository.changeStatus(OutboxEventStatus.PROCESSING, event.id());
+        Integer claim = acquireOptimisticClaim(event);
+        if (hasClaim(claim)) {
+            try {
+                // Do the business logic
+                transactionTemplate.executeWithoutResult(txStatus -> {
+                    switch (event.eventName()) {
+                        case "CreateNewEmployeeEvent" -> handleCreateNewEmployeeEvent(event);
+                        case "UpdateEmployeeEvent" -> handleUpdateEmployeeEvent(event);
+                        case "SoftDeleteEmployeeEvent" -> handleSoftDeleteEmployeeEvent(event);
+                        default ->
+                                throw new UnprocessableEventException("Event unprocessable: %s".formatted(event.eventName()));
+                    }
+                    repository.changeStatus(OutboxEventStatus.PUBLISHED, event.id());
+                });
+            } catch (UnprocessableEventException e) {
+                log.error("Unprocessable event: {}", event, e);
+                repository.changeStatus(OutboxEventStatus.UNPROCESSABLE_EVENT, event.id());
+            } catch (Exception e) {
+                log.error("Error handling event: {}", event, e);
+                repository.changeStatus(OutboxEventStatus.FAILURE, event.id());
+            }
+        }
+    }
+
+    /**
+     * Acquire an optimistic claim on the event.
+     * If the row was changed, we can proceed with the business logic.
+     * Change the row to PROCESSING if that fails, then roll back the transaction.
+     */
+    private @Nullable Integer acquireOptimisticClaim(OutboxEvent event) {
+        return transactionTemplate.execute(txStatus -> {
+            int claim = repository.optimisticClaim(event.id());
             if (claim == 0) {
                 log.warn("Optimistic Claim on event {} failed", event.id());
-                throw new RuntimeException("Optimistic Claim on event " + event.id() + " failed");
+                txStatus.setRollbackOnly();
             }
+            return claim;
         });
-        try {
-            // Do the business logic
-            transactionTemplate.executeWithoutResult(txStatus -> {
-                switch (event.eventName()) {
-                    case "CreateNewEmployeeEvent" -> handleCreateNewEmployeeEvent(event);
-                    case "UpdateEmployeeEvent" -> handleUpdateEmployeeEvent(event);
-                    case "SoftDeleteEmployeeEvent" -> handleSoftDeleteEmployeeEvent(event);
-                    default -> throw new UnprocessableEventException("Event unprocessable: " + event.eventName());
-                }
-                repository.changeStatus(OutboxEventStatus.PUBLISHED, event.id());
-            });
-        } catch (UnprocessableEventException e) {
-            log.error("Unprocessable event: {}", event, e);
-            repository.changeStatus(OutboxEventStatus.UNPROCESSABLE_EVENT, event.id());
-        } catch (Exception e) {
-            log.error("Error handling event: {}", event, e);
-            repository.changeStatus(OutboxEventStatus.FAILURE, event.id());
-        }
+    }
+
+    /**
+     * Check if the optimistic claim was successful.
+     * The row was changed, and we can safely proceed with the business logic.
+     */
+    private static boolean hasClaim(Integer claim) {
+        return claim != null && claim == 1;
     }
 
     private void handleCreateNewEmployeeEvent(OutboxEvent event) {

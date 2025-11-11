@@ -26,7 +26,18 @@ public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, UUI
             UPDATE OutboxEntity o
             SET o.status = :status
             WHERE o.id = :id
-            AND o.status <> 'PROCESSING'
             """)
-    int changeStatus(OutboxEventStatus status, UUID id);
+    void changeStatus(OutboxEventStatus status, UUID id);
+
+    @Modifying(
+            clearAutomatically = true,
+            flushAutomatically = true
+    )
+    @Query("""
+                    UPDATE OutboxEntity o
+                    SET o.status = 'PROCESSING'
+                    WHERE o.id = :id
+                    AND o.status <> 'PROCESSING'
+            """)
+    int optimisticClaim(UUID id);
 }

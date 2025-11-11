@@ -6,13 +6,11 @@ import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.config.JpaConfig;
 import com.github.mangila.app.model.outbox.OutboxEntity;
 import com.github.mangila.app.model.outbox.OutboxEventStatus;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
 
@@ -35,8 +33,9 @@ class OutboxJpaRepositoryTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @BeforeEach
-    void beforeEach() {
+    @Test
+    @DisplayName("Should find all by Status and AuditMedata deleted")
+    void findIdsByStatus() {
         repository.persistAll(
                 List.of(ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.PENDING, objectMapper),
                         ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.FAILURE, objectMapper),
@@ -47,11 +46,6 @@ class OutboxJpaRepositoryTest {
                         ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.PUBLISHED, objectMapper)
                 )
         );
-    }
-
-    @Test
-    @DisplayName("Should find by Status and AuditMedata deleted")
-    void findIdsByStatus() {
         List<OutboxEntity> entities = repository.findAllByStatusAndAuditMetadataDeleted(
                 OutboxEventStatus.PUBLISHED,
                 false,
@@ -75,18 +69,27 @@ class OutboxJpaRepositoryTest {
     @Test
     @DisplayName("Should change status")
     void changeStatus() {
-        var entities = repository.findAll(Example.of(new OutboxEntity()));
-        entities.forEach(entity -> {
-            repository.changeStatus(OutboxEventStatus.FAILURE, entity.getId());
-        });
-        repository.findAll(Example.of(new OutboxEntity()))
-                .forEach(entity -> {
-                    assertThat(entity.getStatus())
-                            .isEqualTo(OutboxEventStatus.FAILURE);
-                });
+        OutboxEntity entity = repository.persist(ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.PENDING, objectMapper));
+        repository.changeStatus(OutboxEventStatus.FAILURE, entity.getId());
+        entity = repository.findById(entity.getId()).orElseThrow();
+        assertThat(entity.getStatus())
+                .isEqualTo(OutboxEventStatus.FAILURE);
     }
 
     @Test
+    @DisplayName("Should Optimistic claim")
+    void optimisticClaim() {
+        OutboxEntity entity = repository.persist(ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.PENDING, objectMapper));
+        int claim = repository.optimisticClaim(entity.getId());
+        assertThat(claim)
+                .isEqualTo(1);
+        claim = repository.optimisticClaim(entity.getId());
+        assertThat(claim)
+                .isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("Should audit")
     void shouldAudit() {
         OutboxEntity entity = repository.persist(ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.PENDING, objectMapper));
         var auditMetadata = entity.getAuditMetadata();
