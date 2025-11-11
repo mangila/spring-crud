@@ -23,7 +23,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class EmployeeEventListener {
     private final EmployeeEventHandler eventHandler;
     private final OutboxSequenceRepository sequenceRepository;
-
     private final TransactionTemplate transactionTemplate;
 
     public EmployeeEventListener(EmployeeEventHandler eventHandler,

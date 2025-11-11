@@ -52,20 +52,32 @@ public class OutboxMessageRelayTask implements Task {
                 OutboxEventStatus.FAILURE,
                 Sort.by("auditMetadata.created").descending(),
                 Limit.of(25));
+        List<OutboxEntity> unprocessableEntities = repository.findAllByStatus(
+                OutboxEventStatus.UNPROCESSABLE_EVENT,
+                Sort.by("auditMetadata.created").descending(),
+                Limit.of(25));
         var node = objectMapper.createObjectNode();
-        if (pendingEntities.isEmpty() && failureEntities.isEmpty()) {
+        var lists = List.of(pendingEntities, failureEntities, unprocessableEntities);
+        if (isEmpty(lists)) {
             return node.put("message", "No outbox events to relay");
         }
-        Stream.of(pendingEntities, failureEntities)
+        lists.stream()
                 .flatMap(Collection::stream)
                 .map(eventMapper::map)
                 .forEach(publisher::publish);
         node.put("pending-size", pendingEntities.size());
         node.put("failure-size", failureEntities.size());
+        node.put("unprocessable-size", unprocessableEntities.size());
         var pendingArray = node.putArray("pending");
         pendingEntities.forEach(entity -> pendingArray.add(entity.getId().toString()));
         var failureArray = node.putArray("failure");
         failureEntities.forEach(entity -> failureArray.add(entity.getId().toString()));
+        var unprocessableArray = node.putArray("unprocessable");
+        unprocessableEntities.forEach(entity -> unprocessableArray.add(entity.getId().toString()));
         return node;
+    }
+
+    public static boolean isEmpty(List<List<OutboxEntity>> lists) {
+        return lists.stream().allMatch(List::isEmpty);
     }
 }

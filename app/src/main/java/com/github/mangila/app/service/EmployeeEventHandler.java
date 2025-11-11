@@ -6,7 +6,8 @@ import com.github.mangila.app.repository.OutboxJpaRepository;
 import com.github.mangila.app.shared.exception.UnprocessableEventException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
+
+import java.time.Duration;
 
 /**
  * The event handling that takes care of all the events.
@@ -21,29 +22,22 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 @Slf4j
 public class EmployeeEventHandler {
-
-    private final TransactionTemplate transactionTemplate;
     private final OutboxJpaRepository repository;
 
-    public EmployeeEventHandler(TransactionTemplate transactionTemplate,
-                                OutboxJpaRepository repository) {
-        this.transactionTemplate = transactionTemplate;
+    public EmployeeEventHandler(OutboxJpaRepository repository) {
         this.repository = repository;
     }
 
     public void handle(OutboxEvent event) {
         try {
-            // Do the business logic
-            transactionTemplate.executeWithoutResult(txStatus -> {
-                switch (event.eventName()) {
-                    case "CreateNewEmployeeEvent" -> handleCreateNewEmployeeEvent(event);
-                    case "UpdateEmployeeEvent" -> handleUpdateEmployeeEvent(event);
-                    case "SoftDeleteEmployeeEvent" -> handleSoftDeleteEmployeeEvent(event);
-                    default ->
-                            throw new UnprocessableEventException("Event unprocessable: %s".formatted(event.eventName()));
-                }
-                repository.changeStatus(OutboxEventStatus.PUBLISHED, event.aggregateId());
-            });
+            switch (event.eventName()) {
+                case "CreateNewEmployeeEvent" -> handleCreateNewEmployeeEvent(event);
+                case "UpdateEmployeeEvent" -> handleUpdateEmployeeEvent(event);
+                case "SoftDeleteEmployeeEvent" -> handleSoftDeleteEmployeeEvent(event);
+                default ->
+                        throw new UnprocessableEventException("Event unprocessable: %s".formatted(event.eventName()));
+            }
+            repository.changeStatus(OutboxEventStatus.PUBLISHED, event.aggregateId());
         } catch (UnprocessableEventException e) {
             log.error("Unprocessable event: {}", event, e);
             repository.changeStatus(OutboxEventStatus.UNPROCESSABLE_EVENT, event.aggregateId());
@@ -53,15 +47,40 @@ public class EmployeeEventHandler {
         }
     }
 
+    /**
+     * This is where the event handling logic goes for the event.
+     * Here we simulate a 500-ms-second task.
+     * <br>
+     * This is where the event leaves our "Outbox" and hopefully enters someone's "Inbox" :)
+     * <br>
+     * If it fails here, we just re-deliver from the OutboxMessageRelayTask.
+     * <br>
+     *
+     */
     private void handleCreateNewEmployeeEvent(OutboxEvent event) {
         log.info("Handling CreateNewEmployeeEvent: {}", event);
+        try {
+            Thread.sleep(Duration.ofMillis(500));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void handleUpdateEmployeeEvent(OutboxEvent event) {
         log.info("Handling UpdateEmployeeEvent: {}", event);
+        try {
+            Thread.sleep(Duration.ofMillis(500));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void handleSoftDeleteEmployeeEvent(OutboxEvent event) {
         log.info("Handling SoftDeleteEmployeeEvent: {}", event);
+        try {
+            Thread.sleep(Duration.ofMillis(500));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -15,7 +15,6 @@ import java.util.UUID;
 @Repository
 public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, UUID> {
     List<OutboxEntity> findAllByStatus(OutboxEventStatus status, Sort sort, Limit limit);
-
     @Modifying(
             clearAutomatically = true,
             flushAutomatically = true
