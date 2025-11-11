@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Actuator endpoint for executing tasks.
@@ -41,8 +42,11 @@ public class TaskActuatorController {
 
     @ReadOperation
     public WebEndpointResponse<Map<String, List<String>>> findAllTasks() {
+        var tasks = Stream.of(runnableTaskMap, callableTaskMap)
+                .flatMap(map -> map.keySet().stream())
+                .toList();
         return new WebEndpointResponse<>(
-                Map.of("tasks", runnableTaskMap.keySet().stream().toList()),
+                Map.of("tasks", tasks),
                 HttpStatus.OK.value()
         );
     }
