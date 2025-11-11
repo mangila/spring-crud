@@ -6,18 +6,15 @@ import com.github.mangila.app.model.task.TaskExecutionEntity;
 import com.github.mangila.app.model.task.TaskExecutionStatus;
 import com.github.mangila.app.repository.TaskExecutionJpaRepository;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Example;
 
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Import(TestcontainersConfiguration.class)
-@ExtendWith(OutputCaptureExtension.class)
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
@@ -33,21 +30,37 @@ class SoftDeleteSuccessTaskExecutionTaskTest {
     private TaskExecutionJpaRepository taskExecutionRepository;
 
     @Test
-    void run(CapturedOutput output) {
+    void run() {
         for (int i = 0; i < 55; i++) {
             var entity = ObjectFactoryUtil.createTaskExecutionEntity("test", TaskExecutionStatus.SUCCESS);
             taskExecutionRepository.persist(entity);
         }
         taskExecutionRepository.flush();
-        task.run();
-        assertThat(output)
-                .contains("Soft deleting 50 success task executions");
-        task.run();
-        assertThat(output)
-                .contains("Soft deleting 5 success task executions");
-        task.run();
-        assertThat(output)
-                .contains("No success task executions to soft delete");
+        var node = task.call();
+        assertThatJson(node.toString())
+                .isObject()
+                .containsOnlyKeys(
+                        "message",
+                        "ids"
+                )
+                .containsEntry("message", "Soft deleting 50 success task executions")
+                .hasSize(2)
+                .node("ids")
+                .isArray()
+                .hasSize(50);
+        node = task.call();
+        assertThatJson(node.toString())
+                .isObject()
+                .containsEntry("message", "Soft deleting 5 success task executions")
+                .hasSize(2)
+                .node("ids")
+                .isArray()
+                .hasSize(5);
+        node = task.call();
+        assertThatJson(node.toString())
+                .isObject()
+                .containsEntry("message", "No success task executions to soft delete")
+                .hasSize(1);
         var entities = taskExecutionRepository.findAll(Example.of(new TaskExecutionEntity()));
         assertThat(entities)
                 .hasSize(55);

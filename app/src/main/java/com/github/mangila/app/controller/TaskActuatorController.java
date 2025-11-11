@@ -1,8 +1,9 @@
 package com.github.mangila.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.app.scheduler.CallableTask;
+import com.github.mangila.app.scheduler.RunnableTask;
 import com.github.mangila.app.scheduler.SchedulerTaskExecutor;
-import com.github.mangila.app.scheduler.Task;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Selector;
 import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
@@ -25,39 +26,53 @@ public class TaskActuatorController {
 
     private final SchedulerTaskExecutor taskExecutor;
     private final ObjectMapper objectMapper;
-    private final Map<String, Task> taskMap;
+    private final Map<String, RunnableTask> runnableTaskMap;
+    private final Map<String, CallableTask> callableTaskMap;
 
     public TaskActuatorController(SchedulerTaskExecutor taskExecutor,
                                   ObjectMapper objectMapper,
-                                  Map<String, Task> taskMap) {
+                                  Map<String, RunnableTask> runnableTaskMap,
+                                  Map<String, CallableTask> callableTaskMap) {
         this.taskExecutor = taskExecutor;
         this.objectMapper = objectMapper;
-        this.taskMap = taskMap;
+        this.runnableTaskMap = runnableTaskMap;
+        this.callableTaskMap = callableTaskMap;
     }
 
     @ReadOperation
     public WebEndpointResponse<Map<String, List<String>>> findAllTasks() {
         return new WebEndpointResponse<>(
-                Map.of("tasks", taskMap.keySet().stream().toList()),
+                Map.of("tasks", runnableTaskMap.keySet().stream().toList()),
                 HttpStatus.OK.value()
         );
     }
 
     @WriteOperation
     public WebEndpointResponse<Map<String, Object>> execute(@Selector String taskName) {
-        Task task = taskMap.get(taskName);
-        if (task == null) {
+        RunnableTask runnableTask = runnableTaskMap.get(taskName);
+        if (runnableTask != null) {
+            var node = objectMapper.createObjectNode();
+            node.put("executedBy", "Actuator");
+            taskExecutor.submitRunnable(runnableTask, node);
             return new WebEndpointResponse<>(
-                    Map.of("error", "Task not found"),
-                    HttpStatus.NOT_FOUND.value()
+                    Map.of("task", taskName),
+                    HttpStatus.ACCEPTED.value()
             );
         }
-        var node = objectMapper.createObjectNode();
-        node.put("executedBy", "Actuator");
-        taskExecutor.submitCompletable(task, node);
+        CallableTask callableTask = callableTaskMap.get(taskName);
+        if (callableTask != null) {
+            var node = objectMapper.createObjectNode();
+            node.put("executedBy", "Actuator");
+            taskExecutor.submitCallable(callableTask, node);
+            return new WebEndpointResponse<>(
+                    Map.of("task", taskName),
+                    HttpStatus.ACCEPTED.value()
+            );
+        }
         return new WebEndpointResponse<>(
-                Map.of("task", taskName),
-                HttpStatus.ACCEPTED.value()
+                Map.of("error", "Task not found: %s".formatted(taskName)),
+                HttpStatus.NOT_FOUND.value()
         );
     }
+
 }

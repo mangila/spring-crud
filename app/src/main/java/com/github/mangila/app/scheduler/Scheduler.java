@@ -26,14 +26,17 @@ public class Scheduler {
     private final ObjectMapper objectMapper;
 
     // Spring magic, wires a map of tasks with their bean names.
-    private final Map<String, Task> tasks;
+    private final Map<String, RunnableTask> runnableTaskMap;
+    private final Map<String, CallableTask> callableTaskMap;
 
     public Scheduler(SchedulerTaskExecutor schedulerTaskExecutor,
                      ObjectMapper objectMapper,
-                     Map<String, Task> tasks) {
+                     Map<String, RunnableTask> runnableTaskMap,
+                     Map<String, CallableTask> callableTaskMap) {
         this.schedulerTaskExecutor = schedulerTaskExecutor;
         this.objectMapper = objectMapper;
-        this.tasks = tasks;
+        this.runnableTaskMap = runnableTaskMap;
+        this.callableTaskMap = callableTaskMap;
     }
 
     /**
@@ -47,10 +50,10 @@ public class Scheduler {
             fixedRateString = "${application.scheduler.fixed-rate}"
     )
     void softDeletePublishedOutboxTask() {
-        Task task = tasks.get("softDeletePublishedOutboxTask");
+        CallableTask task = callableTaskMap.get("softDeletePublishedOutboxTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
-        schedulerTaskExecutor.submitCompletable(task, null);
+        schedulerTaskExecutor.submitCallable(task, objectMapper.createObjectNode());
     }
 
     /**
@@ -64,20 +67,19 @@ public class Scheduler {
             fixedRateString = "${application.scheduler.fixed-rate}"
     )
     void softDeleteSuccessTaskExecutionTask() {
-        Task task = tasks.get("softDeleteSuccessTaskExecutionTask");
+        CallableTask task = callableTaskMap.get("softDeleteSuccessTaskExecutionTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
-        schedulerTaskExecutor.submitCompletable(task, null);
+        schedulerTaskExecutor.submitCallable(task, objectMapper.createObjectNode());
     }
 
     // Run a task at a specific time
     // This is a Spring Cron Expression
     @Scheduled(cron = "${application.scheduler.cron}")
     public void cronTask() {
-        Task task = tasks.get("cronTask");
+        RunnableTask task = runnableTaskMap.get("cronTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
-        schedulerTaskExecutor.submitCompletable(task, null);
+        schedulerTaskExecutor.submitRunnable(task, objectMapper.createObjectNode());
     }
-
 }

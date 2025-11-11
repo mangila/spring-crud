@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.app.model.task.TaskExecutionEntity;
 import com.github.mangila.app.model.task.TaskExecutionStatus;
 import com.github.mangila.app.repository.TaskExecutionJpaRepository;
-import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ public class SchedulerTaskExecutor {
      * <br>
      * If a task needs more stuffs to create better insight, a new method can be created
      */
-    public CompletableFuture<Void> submitCompletable(Task task, @Nullable ObjectNode attributes) {
+    public CompletableFuture<Void> submitRunnable(RunnableTask task, @NonNull ObjectNode attributes) {
         var taskExecution = taskExecutionRepository.persist(
                 TaskExecutionEntity.newExecution(task.name(), attributes)
         );
@@ -43,14 +43,31 @@ public class SchedulerTaskExecutor {
                 .whenComplete((unused, throwable) -> {
                     if (throwable != null) {
                         taskExecution.setStatus(TaskExecutionStatus.FAILURE);
-                        ObjectNode error = attributes == null ? objectMapper.createObjectNode() : attributes;
-                        error.put("error", throwable.getMessage());
-                        taskExecution.setAttributes(attributes);
-                        taskExecutionRepository.merge(taskExecution);
+                        attributes.put("error", throwable.getMessage());
                     } else {
                         taskExecution.setStatus(TaskExecutionStatus.SUCCESS);
-                        taskExecutionRepository.merge(taskExecution);
                     }
+                    taskExecution.setAttributes(attributes);
+                    taskExecutionRepository.merge(taskExecution);
+                });
+    }
+
+    public CompletableFuture<ObjectNode> submitCallable(CallableTask task, @NonNull ObjectNode attributes) {
+        var taskExecution = taskExecutionRepository.persist(
+                TaskExecutionEntity.newExecution(task.name(), attributes)
+        );
+        return taskExecutor.submitCompletable(task)
+                .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                .whenComplete((objectNode, throwable) -> {
+                    if (throwable != null) {
+                        taskExecution.setStatus(TaskExecutionStatus.FAILURE);
+                        attributes.put("error", throwable.getMessage());
+                    } else {
+                        taskExecution.setStatus(TaskExecutionStatus.SUCCESS);
+                        attributes.setAll(objectNode);
+                    }
+                    taskExecution.setAttributes(attributes);
+                    taskExecutionRepository.merge(taskExecution);
                 });
     }
 }

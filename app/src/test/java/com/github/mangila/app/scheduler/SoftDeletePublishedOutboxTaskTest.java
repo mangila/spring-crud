@@ -7,18 +7,15 @@ import com.github.mangila.app.model.outbox.OutboxEntity;
 import com.github.mangila.app.model.outbox.OutboxEventStatus;
 import com.github.mangila.app.repository.OutboxJpaRepository;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Example;
 
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Import(TestcontainersConfiguration.class)
-@ExtendWith(OutputCaptureExtension.class)
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
@@ -37,21 +34,37 @@ class SoftDeletePublishedOutboxTaskTest {
     private OutboxJpaRepository outboxRepository;
 
     @Test
-    void run(CapturedOutput output) {
+    void run() {
         for (int i = 0; i < 55; i++) {
             var entity = ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.PUBLISHED, objectMapper);
             outboxRepository.persist(entity);
         }
         outboxRepository.flush();
-        task.run();
-        assertThat(output)
-                .contains("Soft deleting 50 published outbox events");
-        task.run();
-        assertThat(output)
-                .contains("Soft deleting 5 published outbox events");
-        task.run();
-        assertThat(output)
-                .contains("No published outbox events to soft delete");
+        var node = task.call();
+        assertThatJson(node.toString())
+                .isObject()
+                .containsOnlyKeys(
+                        "message",
+                        "ids"
+                )
+                .containsEntry("message", "Soft deleting 50 published outbox events")
+                .hasSize(2)
+                .node("ids")
+                .isArray()
+                .hasSize(50);
+        node = task.call();
+        assertThatJson(node.toString())
+                .isObject()
+                .containsEntry("message", "Soft deleting 5 published outbox events")
+                .hasSize(2)
+                .node("ids")
+                .isArray()
+                .hasSize(5);
+        node = task.call();
+        assertThatJson(node.toString())
+                .isObject()
+                .containsEntry("message", "No published outbox events to soft delete")
+                .hasSize(1);
         var entities = outboxRepository.findAll(Example.of(new OutboxEntity()));
         assertThat(entities)
                 .hasSize(55);

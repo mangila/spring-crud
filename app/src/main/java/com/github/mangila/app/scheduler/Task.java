@@ -1,5 +1,5 @@
 package com.github.mangila.app.scheduler;
 
-public interface Task extends Runnable {
+public interface Task {
     String name();
 }

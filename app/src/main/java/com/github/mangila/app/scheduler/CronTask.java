@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
-public record CronTask() implements Task {
+public record CronTask() implements RunnableTask {
     @Override
     public void run() {
         log.info("Hello from Cron Task");

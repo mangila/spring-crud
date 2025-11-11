@@ -1,5 +1,7 @@
 package com.github.mangila.app.scheduler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.app.model.outbox.OutboxEntity;
 import com.github.mangila.app.model.outbox.OutboxEventStatus;
 import com.github.mangila.app.repository.OutboxJpaRepository;
@@ -13,12 +15,15 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class SoftDeletePublishedOutboxTask implements Task {
+public class SoftDeletePublishedOutboxTask implements CallableTask {
 
     private final OutboxJpaRepository outboxRepository;
+    private final ObjectMapper objectMapper;
 
-    public SoftDeletePublishedOutboxTask(OutboxJpaRepository outboxRepository) {
+    public SoftDeletePublishedOutboxTask(OutboxJpaRepository outboxRepository,
+                                         ObjectMapper objectMapper) {
         this.outboxRepository = outboxRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -28,27 +33,31 @@ public class SoftDeletePublishedOutboxTask implements Task {
 
     @Override
     @Transactional
-    public void run() {
+    public ObjectNode call() {
         List<OutboxEntity> entities = outboxRepository.findAllByStatusAndAuditMetadataDeleted(
                 OutboxEventStatus.PUBLISHED,
                 false,
                 Sort.by("auditMetadata.created").descending(),
                 Limit.of(50));
+        var node = objectMapper.createObjectNode();
         if (entities.isEmpty()) {
-            log.info("No published outbox events to soft delete");
-            return;
+            return node.put("message", "No published outbox events to soft delete");
         }
-        log.info("Soft deleting {} published outbox events", entities.size());
+        node.put("message", "Soft deleting %d published outbox events".formatted(entities.size()));
+        var arrayNode = node.putArray("ids");
         for (OutboxEntity entity : entities) {
             var audit = entity.getAuditMetadata();
             // Could happen if change in jpql query to include NULL
             if (audit == null) {
                 log.warn("Outbox event {} has no audit metadata", entity.getId());
+                node.put(entity.getId().toString(), "Outbox event has no audit metadata");
                 continue;
             }
+            arrayNode.add(entity.getId().toString());
             audit.setDeleted(true);
         }
         outboxRepository.mergeAll(entities);
         outboxRepository.flush();
+        return node;
     }
 }
