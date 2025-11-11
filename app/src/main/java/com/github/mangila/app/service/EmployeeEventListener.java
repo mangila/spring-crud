@@ -45,7 +45,10 @@ public class EmployeeEventListener {
     public void listen(OutboxEvent event) {
         log.info("Received OutboxEvent: {}", event);
         transactionTemplate.executeWithoutResult(txStatus -> {
-            OutboxSequenceEntity sequence = sequenceRepository.lockById(event.aggregateId(), LockModeType.PESSIMISTIC_WRITE);
+            // Exclusive lock for the aggregateId and handle the event
+            OutboxSequenceEntity sequence = sequenceRepository.lockById(
+                    event.aggregateId(),
+                    LockModeType.PESSIMISTIC_WRITE);
             long expectedSequence = sequence.getLatestSequence() + 1;
             if (event.sequence() == expectedSequence) {
                 eventHandler.handle(event);

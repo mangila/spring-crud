@@ -29,7 +29,10 @@ public class OutboxFactory {
         outbox.setEventName(event.getClass().getSimpleName());
         outbox.setPayload(objectMapper.valueToTree(event));
         outbox.setAuditMetadata(AuditMetadata.EMPTY);
-        OutboxSequenceEntity sequence = sequenceRepository.lockById(aggregateId, LockModeType.PESSIMISTIC_WRITE);
+        // Exclusive lock for the aggregateId and increment sequence
+        OutboxSequenceEntity sequence = sequenceRepository.lockById(
+                aggregateId,
+                LockModeType.PESSIMISTIC_WRITE);
         outbox.setSequence(sequence.getLatestSequence() + 1);
         return outbox;
     }
