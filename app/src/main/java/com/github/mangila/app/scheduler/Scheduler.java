@@ -53,7 +53,7 @@ public class Scheduler {
         CallableTask task = callableTaskMap.get("softDeletePublishedOutboxTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
-        schedulerTaskExecutor.submitCallable(task, objectMapper.createObjectNode());
+        schedulerTaskExecutor.submitCallable(task, node);
     }
 
     /**
@@ -70,7 +70,7 @@ public class Scheduler {
         CallableTask task = callableTaskMap.get("softDeleteSuccessTaskExecutionTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
-        schedulerTaskExecutor.submitCallable(task, objectMapper.createObjectNode());
+        schedulerTaskExecutor.submitCallable(task, node);
     }
 
     // Run a task at a specific time
@@ -80,6 +80,6 @@ public class Scheduler {
         RunnableTask task = runnableTaskMap.get("cronTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
-        schedulerTaskExecutor.submitRunnable(task, objectMapper.createObjectNode());
+        schedulerTaskExecutor.submitRunnable(task, node);
     }
 }

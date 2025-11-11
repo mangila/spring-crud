@@ -1,6 +1,5 @@
 package com.github.mangila.app.scheduler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.app.model.task.TaskExecutionEntity;
 import com.github.mangila.app.model.task.TaskExecutionStatus;
@@ -17,14 +16,11 @@ public class SchedulerTaskExecutor {
 
     private final VirtualThreadTaskExecutor taskExecutor;
     private final TaskExecutionJpaRepository taskExecutionRepository;
-    private final ObjectMapper objectMapper;
 
     public SchedulerTaskExecutor(@Qualifier("virtualThreadTaskExecutor") VirtualThreadTaskExecutor taskExecutor,
-                                 TaskExecutionJpaRepository taskExecutionRepository,
-                                 ObjectMapper objectMapper) {
+                                 TaskExecutionJpaRepository taskExecutionRepository) {
         this.taskExecutor = taskExecutor;
         this.taskExecutionRepository = taskExecutionRepository;
-        this.objectMapper = objectMapper;
     }
 
     /**
