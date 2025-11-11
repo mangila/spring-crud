@@ -40,7 +40,7 @@ public class Scheduler {
     }
 
     /**
-     * Soft delete all published outbox events save the sometime for auditing.
+     * Soft delete all published outbox events
      * For the actual deletion, we can use a separate service with a dedicated Scheduler framework.
      * <br>
      * Run a task every n(timeunit) is the purpose of a fixed-rate scheduling.
