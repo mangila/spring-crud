@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, String> {
+public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, Long> {
     List<OutboxEntity> findAllByStatusAndAuditMetadataDeleted(OutboxEventStatus status, boolean deleted, Sort sort, Limit limit);
 
     List<OutboxEntity> findAllByStatus(OutboxEventStatus status, Sort sort, Limit limit);
