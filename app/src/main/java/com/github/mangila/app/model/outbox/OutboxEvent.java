@@ -6,7 +6,10 @@ import java.util.UUID;
 
 public record OutboxEvent(
         UUID id,
+        String aggregateId,
+        long sequence,
         String eventName,
         OutboxEventStatus status,
-        ObjectNode payload) {
+        ObjectNode payload
+) {
 }

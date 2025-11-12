@@ -4,24 +4,43 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.app.model.AuditMetadata;
 import com.github.mangila.app.model.outbox.OutboxEntity;
 import com.github.mangila.app.model.outbox.OutboxEventStatus;
+import com.github.mangila.app.model.outbox.OutboxNextSequenceEntity;
+import com.github.mangila.app.repository.OutboxNextSequenceJpaRepository;
+import jakarta.persistence.LockModeType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class OutboxFactory {
 
+    private final OutboxNextSequenceJpaRepository nextSequenceRepository;
     private final ObjectMapper objectMapper;
 
-    public OutboxFactory(ObjectMapper objectMapper) {
+    public OutboxFactory(OutboxNextSequenceJpaRepository nextSequenceRepository,
+                         ObjectMapper objectMapper) {
+        this.nextSequenceRepository = nextSequenceRepository;
         this.objectMapper = objectMapper;
     }
 
-    public OutboxEntity from(Object event) {
+    @Transactional
+    public OutboxEntity from(String aggregateId, Object event) {
         var outbox = new OutboxEntity();
+        outbox.setAggregateId(aggregateId);
         outbox.setStatus(OutboxEventStatus.PENDING);
-        // We need the Fully Qualified Name of the event class to be able to check the type later
-        outbox.setEventName(event.getClass().getName());
+        outbox.setEventName(event.getClass().getSimpleName());
         outbox.setPayload(objectMapper.valueToTree(event));
         outbox.setAuditMetadata(AuditMetadata.EMPTY);
+        // Exclusive lock for the aggregateId and increment nextSequenceEntity
+        OutboxNextSequenceEntity nextSequenceEntity = nextSequenceRepository.lockById(
+                aggregateId,
+                LockModeType.PESSIMISTIC_WRITE);
+        if (nextSequenceEntity == null) {
+            nextSequenceEntity = OutboxNextSequenceEntity.from(aggregateId);
+        }
+        long sequence = nextSequenceEntity.getSequence() + 1;
+        nextSequenceEntity.setSequence(sequence);
+        outbox.setSequence(sequence);
+        nextSequenceRepository.merge(nextSequenceEntity);
         return outbox;
     }
 }

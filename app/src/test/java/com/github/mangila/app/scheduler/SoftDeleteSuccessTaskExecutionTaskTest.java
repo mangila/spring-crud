@@ -1,15 +1,21 @@
 package com.github.mangila.app.scheduler;
 
-import com.github.mangila.app.ObjectFactoryUtil;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.mangila.app.TaskExecutionTestFactory;
 import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.model.task.TaskExecutionEntity;
 import com.github.mangila.app.model.task.TaskExecutionStatus;
 import com.github.mangila.app.repository.TaskExecutionJpaRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Sort;
+
+import java.util.List;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "application.scheduler.enabled=false"
         }
 )
+@Slf4j
 class SoftDeleteSuccessTaskExecutionTaskTest {
 
     @Autowired
@@ -29,14 +36,45 @@ class SoftDeleteSuccessTaskExecutionTaskTest {
     @Autowired
     private TaskExecutionJpaRepository taskExecutionRepository;
 
-    @Test
-    void run() {
+    @BeforeEach
+    void beforeEach() {
         for (int i = 0; i < 55; i++) {
-            var entity = ObjectFactoryUtil.createTaskExecutionEntity("test", TaskExecutionStatus.SUCCESS);
+            TaskExecutionEntity entity = TaskExecutionTestFactory.createTaskExecutionEntity("test", TaskExecutionStatus.SUCCESS);
             taskExecutionRepository.persist(entity);
         }
+        for (int i = 0; i < 5; i++) {
+            TaskExecutionEntity entity1 = TaskExecutionTestFactory.createTaskExecutionEntity("test", TaskExecutionStatus.RUNNING);
+            TaskExecutionEntity entity2 = TaskExecutionTestFactory.createTaskExecutionEntity("test", TaskExecutionStatus.FAILURE);
+            TaskExecutionEntity entity3 = TaskExecutionTestFactory.createTaskExecutionEntity("test", TaskExecutionStatus.CANCELLED);
+            taskExecutionRepository.persistAll(
+                    List.of(entity1, entity2, entity3)
+            );
+        }
         taskExecutionRepository.flush();
-        var node = task.call();
+    }
+
+    @Test
+    void run() {
+        assertFirstRun();
+        assertSecondRun();
+        assertEmptyRun();
+        List<TaskExecutionEntity> entities = taskExecutionRepository.findAllByStatusAndAuditMetadataDeleted(
+                TaskExecutionStatus.SUCCESS,
+                true,
+                Sort.unsorted(),
+                Limit.unlimited()
+        );
+        assertThat(entities)
+                .hasSize(55);
+        entities.forEach(entity -> {
+            assertThat(entity.getAuditMetadata().isDeleted())
+                    .isTrue();
+        });
+    }
+
+    private void assertFirstRun() {
+        log.info("Assert first run start");
+        ObjectNode node = task.call();
         assertThatJson(node.toString())
                 .isObject()
                 .containsOnlyKeys(
@@ -48,7 +86,12 @@ class SoftDeleteSuccessTaskExecutionTaskTest {
                 .node("ids")
                 .isArray()
                 .hasSize(50);
-        node = task.call();
+        log.info("Assert first run end");
+    }
+
+    private void assertSecondRun() {
+        log.info("Assert second run start");
+        ObjectNode node = task.call();
         assertThatJson(node.toString())
                 .isObject()
                 .containsEntry("message", "Soft deleting 5 success task executions")
@@ -56,17 +99,17 @@ class SoftDeleteSuccessTaskExecutionTaskTest {
                 .node("ids")
                 .isArray()
                 .hasSize(5);
-        node = task.call();
+        log.info("Assert second run end");
+    }
+
+    private void assertEmptyRun() {
+        log.info("Assert empty run start");
+        ObjectNode node = task.call();
         assertThatJson(node.toString())
                 .isObject()
+                .containsOnlyKeys("message")
                 .containsEntry("message", "No success task executions to soft delete")
                 .hasSize(1);
-        var entities = taskExecutionRepository.findAll(Example.of(new TaskExecutionEntity()));
-        assertThat(entities)
-                .hasSize(55);
-        entities.forEach(entity -> {
-            assertThat(entity.getAuditMetadata().isDeleted())
-                    .isTrue();
-        });
+        log.info("Assert empty run end");
     }
 }

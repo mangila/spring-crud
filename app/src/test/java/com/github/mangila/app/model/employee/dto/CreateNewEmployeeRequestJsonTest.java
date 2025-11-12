@@ -2,8 +2,8 @@ package com.github.mangila.app.model.employee.dto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.mangila.app.EmployeeTestFactory;
 import com.github.mangila.app.FilePathUtil;
-import com.github.mangila.app.ObjectFactoryUtil;
 import com.github.mangila.app.config.JacksonConfig;
 import com.github.mangila.app.model.employee.type.EmploymentActivity;
 import com.github.mangila.app.model.employee.type.EmploymentStatus;
@@ -61,7 +61,7 @@ class CreateNewEmployeeRequestJsonTest {
 
     @Test
     void deserialize() throws IOException {
-        CreateNewEmployeeRequest request = ObjectFactoryUtil.createNewEmployeeRequest(objectMapper);
+        CreateNewEmployeeRequest request = EmployeeTestFactory.createNewEmployeeRequest(objectMapper);
         JsonContent<CreateNewEmployeeRequest> jsonContent = jsonTester.write(request);
         // Assert JSON root keys
         assertThatJson(jsonContent.getJson())
@@ -88,21 +88,15 @@ class CreateNewEmployeeRequestJsonTest {
 
     private static void assertAttributesRoot(JsonAssert jsonAssert) {
         jsonAssert.isObject()
-                .hasSize(7)
+                .hasSize(4)
                 .containsOnlyKeys(
                         "vegan",
                         "pronouns",
-                        "substance_addiction",
-                        "notes",
-                        "secret_number",
                         "evaluation",
                         "licenses"
                 )
                 .containsEntry("vegan", true)
-                .containsEntry("pronouns", "he/him")
-                .containsEntry("substance_addiction", true)
-                .containsEntry("notes", "subject is not approved for field duty, immediate suspension advised")
-                .containsEntry("secret_number", "123");
+                .containsEntry("pronouns", "he/him");
     }
 
     private static void assertLicenses(JsonAssert jsonAssert) {

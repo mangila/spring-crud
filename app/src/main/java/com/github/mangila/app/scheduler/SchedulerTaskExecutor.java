@@ -30,7 +30,7 @@ public class SchedulerTaskExecutor {
      */
     public CompletableFuture<ObjectNode> submit(Task task, @NonNull ObjectNode attributes) {
         var taskExecution = taskExecutionRepository.persist(
-                TaskExecutionEntity.newExecution(task.name(), attributes)
+                TaskExecutionEntity.from(task.name(), attributes)
         );
         return taskExecutor.submitCompletable(task)
                 .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)

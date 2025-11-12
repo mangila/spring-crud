@@ -1,7 +1,7 @@
 package com.github.mangila.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mangila.app.ObjectFactoryUtil;
+import com.github.mangila.app.EmployeeTestFactory;
 import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
 import com.github.mangila.app.service.EmployeeRestFacade;
 import org.junit.jupiter.api.BeforeEach;
@@ -96,23 +96,15 @@ public class EmployeeControllerValidationTest {
         ).flatMap(Function.identity());
     }
 
-    private static Stream<CreateNewEmployeeRequest> validateAttributes(ObjectMapper mapper) {
-        return Stream.of(
-                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
-                        .attributes(null)
-                        .build()
-        );
-    }
-
     private static Stream<CreateNewEmployeeRequest> validateFirstName(ObjectMapper mapper) {
         return Stream.of(
-                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
                         .firstName(null)
                         .build(),
-                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
                         .firstName("")
                         .build(),
-                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
                         .firstName("J")
                         .build()
         );
@@ -120,13 +112,13 @@ public class EmployeeControllerValidationTest {
 
     private static Stream<CreateNewEmployeeRequest> validateLastName(ObjectMapper mapper) {
         return Stream.of(
-                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
                         .lastName(null)
                         .build(),
-                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
                         .lastName("")
                         .build(),
-                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
                         .lastName("D")
                         .build()
         );
@@ -134,23 +126,31 @@ public class EmployeeControllerValidationTest {
 
     private static Stream<CreateNewEmployeeRequest> validateSalary(ObjectMapper mapper) {
         return Stream.of(
-                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
                         .salary(null)
                         .build(),
-                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
                         .salary(BigDecimal.valueOf(1000000))
                         .build(),
-                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
                         .salary(BigDecimal.valueOf(0))
                         .build(),
-                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
                         .salary(BigDecimal.valueOf(-1))
                         .build(),
-                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
                         .salary(BigDecimal.valueOf(-1.00))
                         .build(),
-                ObjectFactoryUtil.createNewEmployeeRequestBuilder(mapper)
+                EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
                         .salary(BigDecimal.valueOf(31.231323223))
+                        .build()
+        );
+    }
+
+    private static Stream<CreateNewEmployeeRequest> validateAttributes(ObjectMapper mapper) {
+        return Stream.of(
+                EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
+                        .nullAttributes()
                         .build()
         );
     }

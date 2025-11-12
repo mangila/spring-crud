@@ -1,31 +1,35 @@
 package com.github.mangila.app.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mangila.app.ObjectFactoryUtil;
+import com.github.mangila.app.ClockTestConfig;
+import com.github.mangila.app.OutboxTestFactory;
 import com.github.mangila.app.TestcontainersConfiguration;
+import com.github.mangila.app.config.JacksonConfig;
 import com.github.mangila.app.config.JpaConfig;
 import com.github.mangila.app.model.outbox.OutboxEntity;
 import com.github.mangila.app.model.outbox.OutboxEventStatus;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Limit;
-import org.springframework.data.domain.Sort;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
-@Import({TestcontainersConfiguration.class,
-        ObjectMapper.class,
-        JpaConfig.class})
+@Import(
+        {
+                TestcontainersConfiguration.class,
+                JacksonConfig.class,
+                ClockTestConfig.class,
+                JpaConfig.class
+        }
+)
+@AutoConfigureJson
 @DataJpaTest
 class OutboxJpaRepositoryTest {
 
@@ -35,60 +39,23 @@ class OutboxJpaRepositoryTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @BeforeEach
-    void beforeEach() {
-        repository.persistAll(
-                List.of(ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.PENDING, objectMapper),
-                        ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.FAILURE, objectMapper),
-                        ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.PUBLISHED, objectMapper),
-                        ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.PUBLISHED, objectMapper),
-                        ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.PUBLISHED, objectMapper),
-                        ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.PUBLISHED, objectMapper),
-                        ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.PUBLISHED, objectMapper)
-                )
-        );
-    }
-
-    @Test
-    @DisplayName("Should find by Status and AuditMedata deleted")
-    void findIdsByStatus() {
-        List<OutboxEntity> entities = repository.findAllByStatusAndAuditMetadataDeleted(
-                OutboxEventStatus.PUBLISHED,
-                false,
-                Sort.by("auditMetadata.created").descending(),
-                Limit.of(3)
-        );
-        assertThat(entities)
-                .hasSize(3);
-        assertThat(entities.getFirst())
-                .isNotNull();
-        entities = repository.findAllByStatusAndAuditMetadataDeleted(
-                OutboxEventStatus.PUBLISHED,
-                true,
-                Sort.by("auditMetadata.created").descending(),
-                Limit.of(3)
-        );
-        assertThat(entities)
-                .isEmpty();
-    }
+    @Autowired
+    private ClockTestConfig.TestClock clock;
 
     @Test
     @DisplayName("Should change status")
     void changeStatus() {
-        var entities = repository.findAll(Example.of(new OutboxEntity()));
-        entities.forEach(entity -> {
-            repository.changeStatus(OutboxEventStatus.FAILURE, entity.getId());
-        });
-        repository.findAll(Example.of(new OutboxEntity()))
-                .forEach(entity -> {
-                    assertThat(entity.getStatus())
-                            .isEqualTo(OutboxEventStatus.FAILURE);
-                });
+        OutboxEntity entity = repository.persist(OutboxTestFactory.createOutboxEntity(OutboxEventStatus.PENDING, objectMapper));
+        repository.changeStatus(OutboxEventStatus.FAILURE, entity.getAggregateId());
+        entity = repository.findById(entity.getId()).orElseThrow();
+        assertThat(entity.getStatus())
+                .isEqualTo(OutboxEventStatus.FAILURE);
     }
 
     @Test
+    @DisplayName("Should audit")
     void shouldAudit() {
-        OutboxEntity entity = repository.persist(ObjectFactoryUtil.createOutboxEntity(OutboxEventStatus.PENDING, objectMapper));
+        OutboxEntity entity = repository.persist(OutboxTestFactory.createOutboxEntity(OutboxEventStatus.PENDING, objectMapper));
         var auditMetadata = entity.getAuditMetadata();
         assertThat(auditMetadata)
                 .isNotNull()
@@ -99,8 +66,26 @@ class OutboxJpaRepositoryTest {
                 )
                 .hasFieldOrPropertyWithValue("deleted", false);
         assertThat(auditMetadata.getCreated())
-                .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
+                .isCloseTo(Instant.now(), within(Duration.ofSeconds(1)));
         assertThat(auditMetadata.getModified())
-                .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
+                .isCloseTo(Instant.now(), within(Duration.ofSeconds(1)));
+        auditMetadata.setDeleted(true);
+        // Advance in time two days
+        clock.advanceTime(Duration.ofDays(2));
+        entity = repository.merge(entity);
+        // we need to flush here to get the new Audit values (JPA lifecycle stuffs), we need to take a trip to the DB
+        repository.flush();
+        auditMetadata = entity.getAuditMetadata();
+        // Check that created should be unchanged
+        assertThat(auditMetadata.getCreated())
+                .isCloseTo(
+                        Instant.now(),
+                        within(Duration.ofSeconds(1)));
+        // Check that modified should be updated with the new Clock time
+        assertThat(auditMetadata.getModified())
+                .isCloseTo(Instant.now().plus(Duration.ofDays(2)),
+                        within(Duration.ofSeconds(1)));
+        assertThat(auditMetadata.isDeleted())
+                .isTrue();
     }
 }

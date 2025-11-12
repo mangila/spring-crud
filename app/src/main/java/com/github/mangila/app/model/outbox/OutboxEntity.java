@@ -32,6 +32,15 @@ public class OutboxEntity {
             nullable = false)
     private UUID id;
 
+    @Column(name = "aggregate_id",
+            updatable = false,
+            nullable = false)
+    private String aggregateId;
+
+    @Column(name = "sequence",
+            nullable = false)
+    private long sequence;
+
     @Column(name = "event_name",
             nullable = false)
     private String eventName;

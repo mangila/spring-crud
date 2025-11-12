@@ -1,11 +1,9 @@
 package com.github.mangila.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.mangila.app.ObjectFactoryUtil;
+import com.github.mangila.app.EmployeeTestFactory;
 import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.model.employee.dto.EmployeeDto;
-import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
 import com.github.mangila.app.model.employee.type.EmploymentActivity;
 import com.github.mangila.app.model.employee.type.EmploymentStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -51,7 +49,7 @@ class EmployeeControllerTest {
     }
 
     private URI create() throws IOException {
-        var request = ObjectFactoryUtil.createNewEmployeeRequest(objectMapper);
+        var request = EmployeeTestFactory.createNewEmployeeRequest(objectMapper);
         return webTestClient.post()
                 .uri("/api/v1/employees")
                 .bodyValue(request)
@@ -106,7 +104,6 @@ class EmployeeControllerTest {
                 .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
         assertThat(dto.modified())
                 .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
-        // Assert the serialized JSON attributes
         // Assert JSON attributes
         var jsonAttributes = dto.attributes().toString();
         assertThatJson(jsonAttributes)
@@ -146,20 +143,11 @@ class EmployeeControllerTest {
     }
 
     private EmployeeDto update(EmployeeDto dto) {
-        // someone got a raise ;)
-        BigDecimal raise = dto.salary().add(new BigDecimal("20.00"));
-        // and became a meat eater again :O
-        ObjectNode updatedAttributes = dto.attributes()
-                .put("vegan", false);
-        var updateRequest = new UpdateEmployeeRequest(
-                dto.employeeId(),
-                dto.firstName(),
-                dto.lastName(),
-                raise,
-                dto.employmentActivity(),
-                dto.employmentStatus(),
-                updatedAttributes
-        );
+        var updateRequest = EmployeeTestFactory.createUpdateEmployeeRequestBuilder(objectMapper)
+                .employeeId(dto.employeeId())
+                .salary(dto.salary().add(new BigDecimal("20.00")))
+                .attributes(dto.attributes().put("vegan", true))
+                .build();
         return webTestClient.put()
                 .uri("/api/v1/employees")
                 .bodyValue(updateRequest)
@@ -176,8 +164,7 @@ class EmployeeControllerTest {
     private void assertUpdatedEmployeeDto(EmployeeDto dto) {
         assertThat(dto)
                 .isNotNull()
-                .extracting(EmployeeDto::salary)
-                .isEqualTo(new BigDecimal("20020.12"));
+                .hasFieldOrPropertyWithValue("salary", new BigDecimal("20020.12"));
         assertThat(dto.created())
                 .isCloseTo(Instant.now(), within(Duration.ofSeconds(5)));
         assertThat(dto.modified())

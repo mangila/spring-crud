@@ -1,22 +1,17 @@
 package com.github.mangila.app.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mangila.app.ObjectFactoryUtil;
+import com.github.mangila.app.EmployeeTestFactory;
 import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.model.employee.domain.Employee;
 import com.github.mangila.app.model.employee.domain.EmployeeId;
 import com.github.mangila.app.model.employee.domain.EmployeeName;
 import com.github.mangila.app.model.employee.domain.EmployeeSalary;
 import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
-import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
-import com.github.mangila.app.model.employee.event.CreateNewEmployeeEvent;
-import com.github.mangila.app.model.employee.event.SoftDeleteEmployeeEvent;
-import com.github.mangila.app.model.employee.event.UpdateEmployeeEvent;
 import com.github.mangila.app.model.employee.type.EmploymentActivity;
 import com.github.mangila.app.model.employee.type.EmploymentStatus;
 import com.github.mangila.app.repository.EmployeeJpaRepository;
-import com.github.mangila.app.shared.SpringEventPublisher;
 import com.github.mangila.app.shared.exception.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -70,7 +65,7 @@ class EmployeeServiceTest {
     private ObjectMapper objectMapper;
 
     @MockitoSpyBean
-    private SpringEventPublisher publisher;
+    private EmployeeEventService eventService;
 
     @MockitoSpyBean
     private EmployeeJpaRepository repository;
@@ -82,12 +77,30 @@ class EmployeeServiceTest {
     private EmployeeEntityMapper entityMapper;
 
     @Test
-    @DisplayName("Should not find Employee by Id and throw")
-    void shouldNotFindEmployeeByIdAndThrow() {
-        EmployeeId id = ObjectFactoryUtil.createEmployeeId();
+    @DisplayName("Find Employee by ID not exists should throw")
+    void findEmployeeByIdNotFound() {
+        EmployeeId id = EmployeeTestFactory.createEmployeeId();
         assertThatThrownBy(() -> service.findEmployeeById(id))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("Employee with id: (EMP-JODO-00000000-0000-0000-0000-000000000000) not found");
+                .hasMessageContaining("Entity with id: EMP-JODO-00000000-0000-0000-0000-000000000000");
+    }
+
+    @Test
+    @DisplayName("Soft delete Employee ID not found should throw")
+    void softDeleteEmployeeByIdNotFound() {
+        EmployeeId id = EmployeeTestFactory.createEmployeeId();
+        assertThatThrownBy(() -> service.softDeleteEmployeeById(id))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Entity with id: EMP-JODO-00000000-0000-0000-0000-000000000000");
+    }
+
+    @Test
+    @DisplayName("Update Employee ID not found should throw")
+    void updateEmployeeByIdNotFound() throws IOException {
+        Employee employee = EmployeeTestFactory.createEmployee(objectMapper);
+        assertThatThrownBy(() -> service.updateEmployee(employee))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Entity with id: EMP-JODO-00000000-0000-0000-0000-000000000000");
     }
 
     @Test
@@ -106,13 +119,13 @@ class EmployeeServiceTest {
     }
 
     private EmployeeId create() throws IOException {
-        CreateNewEmployeeRequest request = ObjectFactoryUtil.createNewEmployeeRequest(objectMapper);
+        CreateNewEmployeeRequest request = EmployeeTestFactory.createNewEmployeeRequest(objectMapper);
         Employee employee = factory.from(request);
         service.createNewEmployee(employee);
-        var inOrder = inOrder(entityMapper, repository, publisher);
+        var inOrder = inOrder(entityMapper, repository, eventService);
         inOrder.verify(entityMapper, times(1)).map(any(Employee.class));
         inOrder.verify(repository, times(1)).persist(any(EmployeeEntity.class));
-        inOrder.verify(publisher, times(1)).publishAsOutboxEvent(any(CreateNewEmployeeEvent.class));
+        inOrder.verify(eventService, times(1)).publishCreateNewEvent(any(Employee.class));
         return employee.id();
     }
 
@@ -207,23 +220,21 @@ class EmployeeServiceTest {
     }
 
     private void update(Employee employee) {
-        var request = new UpdateEmployeeRequest(
-                employee.id().value(),
-                employee.firstName().value(),
-                employee.lastName().value(),
-                employee.salary().value().add(new BigDecimal("20.00")),
-                EmploymentActivity.PART_TIME,
-                employee.employmentStatus(),
-                employee.attributes().value().put("vegan", false)
-        );
+        var request = EmployeeTestFactory.createUpdateEmployeeRequestBuilder(objectMapper)
+                .employeeId(employee.id().value())
+                .salary(employee.salary().value().add(new BigDecimal("20.00")))
+                .employmentActivity(EmploymentActivity.PART_TIME)
+                .attributes(employee.attributes().value().put("vegan", false))
+                .build();
         employee = domainMapper.map(request);
         clearInvocations(domainMapper); // clear here because it is a preparation for the test
         service.updateEmployee(employee);
-        var inOrder = inOrder(repository, entityMapper, publisher);
+        var inOrder = inOrder(repository, entityMapper, domainMapper, eventService);
         inOrder.verify(repository, times(1)).existsById(any(String.class));
         inOrder.verify(entityMapper, times(1)).map(any(Employee.class));
         inOrder.verify(repository, times(1)).merge(any(EmployeeEntity.class));
-        inOrder.verify(publisher, times(1)).publishAsOutboxEvent(any(UpdateEmployeeEvent.class));
+        inOrder.verify(domainMapper, times(1)).map(any(EmployeeEntity.class));
+        inOrder.verify(eventService, times(1)).publishUpdateEvent(any(Employee.class));
     }
 
     private void assertUpdatedEmployee(Employee employee) {
@@ -259,10 +270,11 @@ class EmployeeServiceTest {
 
     private void delete(EmployeeId employeeId) {
         service.softDeleteEmployeeById(employeeId);
-        var inOrder = inOrder(repository, publisher);
-        inOrder.verify(repository, times(1)).existsById(any(String.class));
-        inOrder.verify(repository, times(1)).softDeleteByEmployeeId(any(EmployeeId.class));
-        inOrder.verify(publisher, times(1)).publishAsOutboxEvent(any(SoftDeleteEmployeeEvent.class));
+        var inOrder = inOrder(repository, domainMapper, eventService);
+        inOrder.verify(repository, times(1)).findById(any(String.class));
+        inOrder.verify(repository, times(1)).merge(any(EmployeeEntity.class));
+        inOrder.verify(domainMapper, times(1)).map(any(EmployeeEntity.class));
+        inOrder.verify(eventService, times(1)).publishSoftDeleteEvent(any(Employee.class));
     }
 
     @Test

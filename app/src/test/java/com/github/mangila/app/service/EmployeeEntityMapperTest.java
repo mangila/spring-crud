@@ -1,10 +1,17 @@
 package com.github.mangila.app.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.app.EmployeeTestFactory;
+import com.github.mangila.app.model.employee.domain.Employee;
+import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,14 +22,24 @@ import static org.assertj.core.api.Assertions.assertThat;
  * If there are more dependencies, it can be loaded with {@link ContextConfiguration} or just use the full Spring context.
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = EmployeeEntityMapper.class)
+@ContextConfiguration(
+        classes = {
+                EmployeeEntityMapper.class,
+        }
+)
+@AutoConfigureJson
 class EmployeeEntityMapperTest {
 
     @Autowired
     private EmployeeEntityMapper mapper;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Test
-    void test() {
+    void map() throws IOException {
+        Employee employee = EmployeeTestFactory.createEmployee(objectMapper);
+        EmployeeEntity entity = mapper.map(employee);
         assertThat(1 + 1).isEqualTo(3);
     }
 }

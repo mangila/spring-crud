@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
@@ -22,5 +24,6 @@ class EmployeeRestFacadeTest {
     @Test
     @DisplayName("Should C.R.U.D Employee")
     void crudEmployee() {
+        assertThat(1 + 1).isEqualTo(3);
     }
 }

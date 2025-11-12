@@ -50,7 +50,7 @@ public class SoftDeleteSuccessTaskExecutionTask implements Task {
             // Could happen if change in jpql query to include NULL
             if (audit == null) {
                 log.warn("Task execution {} has no audit metadata", entity.getId());
-                node.put(entity.getId().toString(), "Outbox event has no audit metadata");
+                node.put(entity.getId().toString(), "Task execution event has no audit metadata");
                 continue;
             }
             arrayNode.add(entity.getId().toString());

@@ -21,6 +21,7 @@ public class OutboxActuatorController {
 
     @ReadOperation
     public WebEndpointResponse<Map<String, String>> findOutboxStatus(@Selector String outboxId) {
+        // TODO: implement
         return new WebEndpointResponse<>(
                 Map.of("outbox", outboxId),
                 HttpStatus.OK.value()

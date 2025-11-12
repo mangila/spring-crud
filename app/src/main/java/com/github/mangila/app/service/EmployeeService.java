@@ -3,12 +3,8 @@ package com.github.mangila.app.service;
 import com.github.mangila.app.model.employee.domain.Employee;
 import com.github.mangila.app.model.employee.domain.EmployeeId;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
-import com.github.mangila.app.model.employee.event.CreateNewEmployeeEvent;
-import com.github.mangila.app.model.employee.event.SoftDeleteEmployeeEvent;
-import com.github.mangila.app.model.employee.event.UpdateEmployeeEvent;
 import com.github.mangila.app.repository.EmployeeJpaRepository;
 import com.github.mangila.app.shared.Ensure;
-import com.github.mangila.app.shared.SpringEventPublisher;
 import com.github.mangila.app.shared.exception.EntityNotFoundException;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.data.domain.Example;
@@ -26,42 +22,40 @@ import org.springframework.transaction.annotation.Transactional;
 @NullMarked
 public class EmployeeService {
     private final EmployeeJpaRepository employeeRepository;
+    private final EmployeeEventService eventService;
     private final EmployeeDomainMapper domainMapper;
     private final EmployeeEntityMapper entityMapper;
-    private final SpringEventPublisher publisher;
 
     public EmployeeService(EmployeeJpaRepository employeeRepository,
+                           EmployeeEventService eventService,
                            EmployeeDomainMapper domainMapper,
-                           EmployeeEntityMapper entityMapper,
-                           SpringEventPublisher publisher) {
+                           EmployeeEntityMapper entityMapper) {
         this.employeeRepository = employeeRepository;
+        this.eventService = eventService;
         this.domainMapper = domainMapper;
         this.entityMapper = entityMapper;
-        this.publisher = publisher;
     }
 
-    public boolean existsById(EmployeeId id) {
-        return employeeRepository.existsById(id.value());
-    }
-
-    public Employee findEmployeeById(EmployeeId id) {
+    public Employee findEmployeeById(final EmployeeId id) {
         return employeeRepository.findById(id.value())
                 .map(domainMapper::map)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", id.value())));
+                .orElseThrow(() -> new EntityNotFoundException(id.value()));
     }
 
-    public Page<Employee> findAllEmployeesByPage(Pageable pageable) {
+    public Page<Employee> findAllEmployeesByPage(final Pageable pageable) {
         // TODO: create a Probe for querying
-        var example = Example.of(new EmployeeEntity());
-        return employeeRepository.findAll(example, pageable)
+        var probe = Example.of(new EmployeeEntity());
+        return employeeRepository.findAll(probe, pageable)
                 .map(domainMapper::map);
     }
 
     @Transactional
-    public void createNewEmployee(Employee employee) {
-        EmployeeEntity entity = entityMapper.map(employee);
-        employeeRepository.persist(entity);
-        publisher.publishAsOutboxEvent(new CreateNewEmployeeEvent(employee.id()));
+    public void createNewEmployee(final Employee employee) {
+        final EmployeeEntity mappedEntity = entityMapper.map(employee);
+        final EmployeeEntity persistedEntity = employeeRepository.persist(mappedEntity);
+        // Map back to domain with the new audit values
+        final Employee newEmployee = domainMapper.map(persistedEntity);
+        eventService.publishCreateNewEvent(newEmployee);
     }
 
     /**
@@ -71,17 +65,24 @@ public class EmployeeService {
      * a good reason why not - is to ensure/force employee ID to be created by the application and not by the client
      */
     @Transactional
-    public void updateEmployee(Employee employee) {
-        Ensure.isTrue(existsById(employee.id()), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", employee.id().value())));
-        EmployeeEntity entity = entityMapper.map(employee);
-        employeeRepository.merge(entity);
-        publisher.publishAsOutboxEvent(new UpdateEmployeeEvent(employee.id()));
+    public void updateEmployee(final Employee employee) {
+        final boolean exists = employeeRepository.existsById(employee.id().value());
+        Ensure.isTrue(exists,
+                () -> new EntityNotFoundException(employee.id().value()));
+        final EmployeeEntity mappedEntity = entityMapper.map(employee);
+        final EmployeeEntity updatedEntity = employeeRepository.merge(mappedEntity);
+        // Map back to domain with the new audit values
+        final Employee updatedEmployee = domainMapper.map(updatedEntity);
+        eventService.publishUpdateEvent(updatedEmployee);
     }
 
     @Transactional
-    public void softDeleteEmployeeById(EmployeeId id) {
-        Ensure.isTrue(existsById(id), () -> new EntityNotFoundException(String.format("Employee with id: (%s) not found", id.value())));
-        employeeRepository.softDeleteByEmployeeId(id);
-        publisher.publishAsOutboxEvent(new SoftDeleteEmployeeEvent(id));
+    public void softDeleteEmployeeById(final EmployeeId id) {
+        final EmployeeEntity foundEntity = employeeRepository.findById(id.value())
+                .orElseThrow(() -> new EntityNotFoundException(id.value()));
+        foundEntity.getAuditMetadata().setDeleted(true);
+        final EmployeeEntity softDeletedEntity = employeeRepository.merge(foundEntity);
+        final Employee employee = domainMapper.map(softDeletedEntity);
+        eventService.publishSoftDeleteEvent(employee);
     }
 }

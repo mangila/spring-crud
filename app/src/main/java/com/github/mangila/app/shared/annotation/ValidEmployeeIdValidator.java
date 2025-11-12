@@ -19,7 +19,7 @@ public class ValidEmployeeIdValidator implements ConstraintValidator<ValidEmploy
         if (value == null || value.isEmpty()) {
             return true; // Defer null/empty check to @NotBlank or @NotNull
         } else if (value.length() != ID_LENGTH) {
-            // fixed length for the id, fail fast
+            // fixed length for the aggregateId, fail fast
             return false;
         }
         // EMP-<2 chars first_name><2 chars last_name>

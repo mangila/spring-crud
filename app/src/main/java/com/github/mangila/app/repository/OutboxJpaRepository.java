@@ -13,9 +13,8 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, String> {
-    List<OutboxEntity> findAllByStatusAndAuditMetadataDeleted(OutboxEventStatus status, boolean deleted, Sort sort, Limit limit);
-
+public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, UUID> {
+    List<OutboxEntity> findAllByStatus(OutboxEventStatus status, Sort sort, Limit limit);
     @Modifying(
             clearAutomatically = true,
             flushAutomatically = true
@@ -23,7 +22,7 @@ public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, Str
     @Query("""
             UPDATE OutboxEntity o
             SET o.status = :status
-            WHERE o.id = :id
+            WHERE o.aggregateId = :aggregateId
             """)
-    void changeStatus(OutboxEventStatus status, UUID id);
+    void changeStatus(OutboxEventStatus status, String aggregateId);
 }
