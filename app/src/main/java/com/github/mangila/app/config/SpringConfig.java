@@ -18,7 +18,7 @@ public class SpringConfig {
      * Server = UTC
      * Database = UTC
      * Logs/Audit = UTC
-     * Presentation = Local date time
+     * Presentation = Local date time OR send UTC and let the client work their own logic
      * <br>
      * Nice with Testing to be able to manipulate time instead of do Thread.sleep and other creative stuffs.
      * <br>
