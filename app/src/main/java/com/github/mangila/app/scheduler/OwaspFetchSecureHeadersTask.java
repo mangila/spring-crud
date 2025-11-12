@@ -3,10 +3,13 @@ package com.github.mangila.app.scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.mangila.app.config.WebConfig;
 import com.github.mangila.app.model.owasp.OwaspResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
 import java.net.URI;
@@ -22,17 +25,22 @@ import java.net.http.HttpResponse;
  * The currently recommended http security headers are fetched from this endpoint.
  * </p>
  * <p>
+ * <p>
  * Fetch it via a Cron job to stay up to date.
- * A simpler approach would be to use a static JSON file.
- * Buuuut I wanted to demonstrate how to fetch data from an external source and have a cron job in this application.
- * Plus, we can use the latest data. Not like the static JSON file. But yeah...
+ * </p>
+ * <p>
+ * We have a static JSON with a timestamp for the last update.
+ * to keep up to date, we also have a scheduled task to check if the timestamp has changed.
+ * So it won't be super important to re-deploy the whole app if the static file is not updated regularly.
+ * </p>
+ * <p>
  * We are using the standard lib Java HTTP Client API for this.
  * In Spring, we have {@link RestClient} in favor for {@link org.springframework.web.client.RestTemplate}
  * Also Webclient from Webflux to name a few.
  * </p>
  * <p>
  * Java standard lib HTTP Client is the default underlying client in Spring RestClient.
- * Depends on the Java version, I guess...
+ * Depends on the Java version (Java 11)
  * Set it programmatically if you want to use a different client.
  * </p>
  * <pre>
@@ -78,16 +86,44 @@ public class OwaspFetchSecureHeadersTask implements Task {
         try {
             OwaspResponse response = getOwaspSecureHeaders();
             node.set("response", objectMapper.valueToTree(response));
-            response.headers().forEach(header -> {
-                oWaspSecureHeaders.add(header.name(), header.value());
-            });
             log.info("OWASP secure headers fetched successfully");
+            String lastUpdate = oWaspSecureHeaders.getFirst(WebConfig.OWASP_LAST_UPDATE_UTC_HTTP_HEADER);
+            // last update timestamp header was null, update headers
+            if (lastUpdate == null) {
+                updateHeaders(response);
+            }
+            // there is no new version of the headers, nothing to update
+            else if (lastUpdate.equals(response.timestamp())) {
+                String msg = "Last update timestamp matches, wont update";
+                log.info(msg);
+                node.put("error", msg);
+            }
+            // there is a new version of the headers, time for an update!
+            else {
+                updateHeaders(response);
+            }
             return node;
         } catch (Exception e) {
             log.error("Failed to fetch OWASP secure headers", e);
             node.put("error", e.getMessage());
             return node;
         }
+    }
+
+    private void updateHeaders(OwaspResponse response) {
+        log.info("Updating OWASP secure headers");
+        MultiValueMap<String, String> owasp = new LinkedMultiValueMap<>();
+        response.headers().forEach(header -> {
+            // Add all header key value pairs to the MultiValueMap
+            owasp.add(header.name(), header.value());
+        });
+        // add the last update timestamp
+        owasp.add(WebConfig.OWASP_LAST_UPDATE_UTC_HTTP_HEADER, response.timestamp());
+        // Clear the existing headers
+        oWaspSecureHeaders.clear();
+        // Add the new security headers to the HttpHeaders
+        oWaspSecureHeaders.putAll(owasp);
+        log.info("OWASP secure headers updated successfully - {}", oWaspSecureHeaders.toSingleValueMap());
     }
 
     /**

@@ -10,7 +10,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -29,12 +28,9 @@ import java.net.URI;
 public class EmployeeController {
 
     private final EmployeeRestFacade restFacade;
-    private final HttpHeaders oWaspSecureHeaders;
 
-    public EmployeeController(EmployeeRestFacade restFacade,
-                              HttpHeaders oWaspSecureHeaders) {
+    public EmployeeController(EmployeeRestFacade restFacade) {
         this.restFacade = restFacade;
-        this.oWaspSecureHeaders = oWaspSecureHeaders;
     }
 
     @GetMapping(value = "{employeeId}",
@@ -46,7 +42,6 @@ public class EmployeeController {
             @ValidEmployeeId
             String employeeId) {
         return ResponseEntity.ok()
-                .headers(oWaspSecureHeaders)
                 .body(restFacade.findEmployeeById(employeeId));
     }
 
@@ -68,7 +63,6 @@ public class EmployeeController {
                 .path("/api/v1/employees/{employeeId}")
                 .build(id);
         return ResponseEntity.created(location)
-                .headers(oWaspSecureHeaders)
                 .build();
     }
 
@@ -82,7 +76,6 @@ public class EmployeeController {
     ) {
         EmployeeDto dto = restFacade.updateEmployee(request);
         return ResponseEntity.ok()
-                .headers(oWaspSecureHeaders)
                 .body(dto);
     }
 
@@ -94,7 +87,6 @@ public class EmployeeController {
     ) {
         restFacade.softDeleteEmployeeById(employeeId);
         return ResponseEntity.noContent()
-                .headers(oWaspSecureHeaders)
                 .build();
     }
 }
