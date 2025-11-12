@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.within;
         {
                 TestcontainersConfiguration.class,
                 JacksonConfig.class,
+                ClockTestConfig.class,
                 JpaConfig.class
         }
 )
