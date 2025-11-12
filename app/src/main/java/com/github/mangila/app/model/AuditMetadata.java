@@ -13,7 +13,7 @@ import java.time.Instant;
 public class AuditMetadata {
 
     @CreatedDate
-    @Column(name = "created", updatable = false)
+    @Column(name = "created")
     private Instant created;
 
     @LastModifiedDate

@@ -56,6 +56,12 @@ public class EmployeeTestFactory {
         return entity;
     }
 
+    public static EmployeeEntity createEmployeeEntity(ObjectMapper objectMapper, AuditMetadata metadata) throws IOException {
+        EmployeeEntity entity = createEmployeeEntity(objectMapper);
+        entity.setAuditMetadata(metadata);
+        return entity;
+    }
+
     /**
      * This one derives from employee-dto.json data
      */

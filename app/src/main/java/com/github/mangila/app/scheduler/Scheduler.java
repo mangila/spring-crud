@@ -1,16 +1,10 @@
 package com.github.mangila.app.scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mangila.app.model.outbox.OutboxEventStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Limit;
-import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * Run some tasks, running with the Spring integrated scheduler.
@@ -52,7 +46,8 @@ public class Scheduler {
      */
     @Scheduled(
             initialDelayString = "${application.outbox-relay.initial-delay}",
-            fixedDelayString = "${application.outbox-relay.fixed-delay}")
+            fixedDelayString = "${application.outbox-relay.fixed-delay}"
+    )
     public void outboxMessageRelayTask() {
         Task task = taskMap.get("outboxMessageRelayTask");
         var node = objectMapper.createObjectNode();

@@ -21,12 +21,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class JacksonConfigTest {
 
     @Autowired
-    private JacksonTester<Map<String, BigDecimal>> json;
+    private JacksonTester<Map<String, BigDecimal>> jsonBigDecimalTester;
 
     @Test
     @DisplayName("BigDecimal should use .toPlainString() and be serialized as a JSON String")
     void testBigDecimalSerialization() throws IOException {
-        var jsonContent = json.write(Map.of(
+        var jsonContent = jsonBigDecimalTester.write(Map.of(
                 "value",
                 new BigDecimal("0.0000001"))
         );
