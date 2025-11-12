@@ -57,14 +57,14 @@ import java.net.http.HttpResponse;
  */
 @Component
 @Slf4j
-public class OwaspFetchSecureHeadersTask implements Task {
+public class FetchOwaspSecureHttpHeadersTask implements Task {
 
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
     private final HttpHeaders oWaspSecureHeaders;
 
-    public OwaspFetchSecureHeadersTask(ObjectMapper objectMapper,
-                                       HttpHeaders oWaspSecureHeaders) {
+    public FetchOwaspSecureHttpHeadersTask(ObjectMapper objectMapper,
+                                           HttpHeaders oWaspSecureHeaders) {
         this.objectMapper = objectMapper;
         this.httpClient = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)

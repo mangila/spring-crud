@@ -16,7 +16,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.ZoneId;
-import java.util.UUID;
 
 @Configuration
 @Slf4j
@@ -39,6 +38,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     /**
      * Add the OWASP secure http headers to every response.
+     * OncePerRequestFilter, we can be sure that the headers are only added once per request.
      */
     @Bean
     OncePerRequestFilter owaspSecureHeadersFilter(HttpHeaders oWaspSecureHeaders) {
