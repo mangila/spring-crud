@@ -20,6 +20,8 @@ public class JpaConfig {
 
     /**
      * The JPA AuditingHandler uses the Clock bean provisioned
+     * <br>
+     * Audit in UTC
      */
     @Bean
     DateTimeProvider dateTimeProvider(Clock clock) {

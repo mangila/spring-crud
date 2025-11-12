@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 /**
  * DTO (Data Transfer Object) is a data transfer object often used to
@@ -27,8 +27,8 @@ public record EmployeeDto(
         @NotNull EmploymentActivity employmentActivity,
         @NotNull EmploymentStatus employmentStatus,
         @NotNull ObjectNode attributes,
-        @NotNull Instant created,
-        @NotNull Instant modified,
+        @NotNull LocalDateTime created,
+        @NotNull LocalDateTime modified,
         @NotNull boolean deleted
 ) {
 }

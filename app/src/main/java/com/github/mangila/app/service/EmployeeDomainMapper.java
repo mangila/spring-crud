@@ -6,8 +6,18 @@ import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDateTime;
+
 @Component
 public class EmployeeDomainMapper {
+
+    private final Clock clock;
+
+    public EmployeeDomainMapper(Clock clock) {
+        this.clock = clock;
+    }
 
     public Employee map(UpdateEmployeeRequest dto) {
         return new Employee(
@@ -31,7 +41,11 @@ public class EmployeeDomainMapper {
                 dto.employmentActivity(),
                 dto.employmentStatus(),
                 new EmployeeAttributes(dto.attributes()),
-                new EmployeeAudit(dto.created(), dto.modified(), dto.deleted())
+                new EmployeeAudit(
+                        toZonedTimeInstant(dto.created(), clock),
+                        toZonedTimeInstant(dto.modified(), clock),
+                        dto.deleted()
+                )
         );
     }
 
@@ -50,5 +64,14 @@ public class EmployeeDomainMapper {
                         entity.getAuditMetadata().isDeleted()
                 )
         );
+    }
+
+    /**
+     * Convert a LocalDateTime to an Instant.
+     * Get the zone from the clock.
+     * To get the precise DST (Daylight saving time) to UTC.
+     */
+    private static Instant toZonedTimeInstant(LocalDateTime localDateTime, Clock clock) {
+        return localDateTime.atZone(clock.getZone()).toInstant();
     }
 }

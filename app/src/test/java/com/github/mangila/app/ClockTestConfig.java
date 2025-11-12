@@ -4,10 +4,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.*;
 
 /**
  * Test Configuration for setting a spring bean clock for testing time operations.
@@ -24,7 +21,7 @@ public class ClockTestConfig {
     @Bean
     public TestClock testClock() {
         // just set the clock to the current time, we can use fixed here.
-        return new TestClock(Clock.systemDefaultZone());
+        return new TestClock(Clock.systemUTC());
     }
 
     public static class TestClock extends Clock {
@@ -40,7 +37,7 @@ public class ClockTestConfig {
         public void advanceTime(Duration duration) {
             long millis = duration.toMillis();
             Instant newTime = this.clock.instant().plusMillis(millis);
-            this.clock = Clock.fixed(newTime, ZoneId.systemDefault());
+            this.clock = Clock.fixed(newTime, ZoneOffset.UTC);
         }
 
         /**
@@ -49,7 +46,7 @@ public class ClockTestConfig {
         public void goBackTime(Duration duration) {
             long millis = duration.toMillis();
             Instant newTime = this.clock.instant().minusMillis(millis);
-            this.clock = Clock.fixed(newTime, ZoneId.systemDefault());
+            this.clock = Clock.fixed(newTime, ZoneOffset.UTC);
         }
 
         @Override

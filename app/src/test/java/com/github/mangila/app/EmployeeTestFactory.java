@@ -13,6 +13,8 @@ import com.github.mangila.app.model.employee.type.EmploymentStatus;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.ZoneOffset;
 
 public class EmployeeTestFactory {
 
@@ -49,8 +51,8 @@ public class EmployeeTestFactory {
         entity.setEmploymentStatus(dto.employmentStatus());
         entity.setAttributes(dto.attributes());
         var auditMetadata = new AuditMetadata();
-        auditMetadata.setCreated(dto.created());
-        auditMetadata.setModified(dto.modified());
+        auditMetadata.setCreated(Instant.from(dto.created()));
+        auditMetadata.setModified(Instant.from(dto.modified()));
         auditMetadata.setDeleted(dto.deleted());
         entity.setAuditMetadata(auditMetadata);
         return entity;
@@ -76,8 +78,8 @@ public class EmployeeTestFactory {
                 dto.employmentStatus(),
                 new EmployeeAttributes(dto.attributes()),
                 new EmployeeAudit(
-                        dto.created(),
-                        dto.modified(),
+                        dto.created().toInstant(ZoneOffset.UTC),
+                        dto.modified().toInstant(ZoneOffset.UTC),
                         dto.deleted()
                 )
         );
