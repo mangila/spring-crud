@@ -42,7 +42,7 @@ public class TaskExecutionEntity {
     @Embedded
     private AuditMetadata auditMetadata;
 
-    public static TaskExecutionEntity newExecution(String taskName, @Nullable ObjectNode attributes) {
+    public static TaskExecutionEntity from(String taskName, @Nullable ObjectNode attributes) {
         return new TaskExecutionEntity(taskName, TaskExecutionStatus.RUNNING, attributes);
     }
 

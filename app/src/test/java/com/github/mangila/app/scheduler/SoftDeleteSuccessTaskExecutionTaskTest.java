@@ -1,6 +1,6 @@
 package com.github.mangila.app.scheduler;
 
-import com.github.mangila.app.ObjectFactoryUtil;
+import com.github.mangila.app.TaskExecutionTestFactory;
 import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.model.task.TaskExecutionEntity;
 import com.github.mangila.app.model.task.TaskExecutionStatus;
@@ -32,7 +32,7 @@ class SoftDeleteSuccessTaskExecutionTaskTest {
     @Test
     void run() {
         for (int i = 0; i < 55; i++) {
-            var entity = ObjectFactoryUtil.createTaskExecutionEntity("test", TaskExecutionStatus.SUCCESS);
+            TaskExecutionEntity entity = TaskExecutionTestFactory.createTaskExecutionEntity("test", TaskExecutionStatus.SUCCESS);
             taskExecutionRepository.persist(entity);
         }
         taskExecutionRepository.flush();

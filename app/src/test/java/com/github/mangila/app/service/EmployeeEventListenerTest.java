@@ -1,6 +1,11 @@
 package com.github.mangila.app.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.app.EmployeeTestFactory;
 import com.github.mangila.app.TestcontainersConfiguration;
+import com.github.mangila.app.model.employee.dto.EmployeeDto;
+import com.github.mangila.app.model.employee.event.CreateNewEmployeeEvent;
+import com.github.mangila.app.model.outbox.OutboxEvent;
 import com.github.mangila.app.repository.OutboxJpaRepository;
 import com.github.mangila.app.shared.SpringEventPublisher;
 import org.junit.jupiter.api.Test;
@@ -12,7 +17,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.io.IOException;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.times;
 
 /**
  * Load the whole context and publish events
@@ -34,10 +44,16 @@ class EmployeeEventListenerTest {
     private SpringEventPublisher publisher;
 
     @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
     private TransactionTemplate transactionTemplate;
 
     @MockitoSpyBean
     private EmployeeEventListener listener;
+
+    @MockitoSpyBean
+    private EmployeeEventHandler eventHandler;
 
     @MockitoSpyBean
     private OutboxFactory outboxFactory;
@@ -45,8 +61,25 @@ class EmployeeEventListenerTest {
     @MockitoSpyBean
     private OutboxJpaRepository outboxJpaRepository;
 
+    @MockitoSpyBean
+    private OutboxEventMapper outboxEventMapper;
+
     @Test
-    void test() {
+    void listen() throws IOException {
+        EmployeeDto dto = EmployeeTestFactory.createEmployeeDto(objectMapper);
+        transactionTemplate.executeWithoutResult(txStatus -> {
+            publisher.publish(
+                    dto.employeeId(),
+                    new CreateNewEmployeeEvent(dto)
+            );
+        });
+        var inOrder = inOrder(
+                listener,
+                eventHandler,
+                outboxFactory,
+                outboxJpaRepository,
+                outboxEventMapper);
+        inOrder.verify(listener, times(1)).listen(any(OutboxEvent.class));
         assertThat(1 + 1).isEqualTo(3);
     }
 

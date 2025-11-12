@@ -5,15 +5,14 @@ import jakarta.persistence.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
- * Keep track of the next sequence number for each aggregate.
- * This is used to determine the next sequence number for a new event.
+ * We need a sequence table to keep track of the latest processed sequence number for each aggregate.
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "outbox_next_sequence")
+@Table(name = "outbox_latest_processed_sequence")
 @lombok.NoArgsConstructor
 @lombok.Data
-public class OutboxNextSequenceEntity {
+public class OutboxLatestProcessedSequenceEntity {
 
     @Id
     @Column(name = "aggregate_id",
@@ -28,8 +27,8 @@ public class OutboxNextSequenceEntity {
     @Embedded
     private AuditMetadata auditMetadata;
 
-    public static OutboxNextSequenceEntity from(String aggregateId) {
-        var sequence = new OutboxNextSequenceEntity();
+    public static OutboxLatestProcessedSequenceEntity from(String aggregateId) {
+        var sequence = new OutboxLatestProcessedSequenceEntity();
         sequence.setAggregateId(aggregateId);
         sequence.setAuditMetadata(AuditMetadata.EMPTY);
         return sequence;

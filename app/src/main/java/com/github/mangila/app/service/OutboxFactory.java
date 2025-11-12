@@ -25,18 +25,22 @@ public class OutboxFactory {
     @Transactional
     public OutboxEntity from(String aggregateId, Object event) {
         var outbox = new OutboxEntity();
+        outbox.setAggregateId(aggregateId);
         outbox.setStatus(OutboxEventStatus.PENDING);
         outbox.setEventName(event.getClass().getSimpleName());
         outbox.setPayload(objectMapper.valueToTree(event));
         outbox.setAuditMetadata(AuditMetadata.EMPTY);
-        // Exclusive lock for the aggregateId and increment sequence
-        OutboxNextSequenceEntity sequence = nextSequenceRepository.lockById(
+        // Exclusive lock for the aggregateId and increment nextSequenceEntity
+        OutboxNextSequenceEntity nextSequenceEntity = nextSequenceRepository.lockById(
                 aggregateId,
                 LockModeType.PESSIMISTIC_WRITE);
-        long nextSequence = sequence.getNextSequence() + 1;
-        sequence.setNextSequence(nextSequence);
-        outbox.setSequence(nextSequence);
-        nextSequenceRepository.merge(sequence);
+        if (nextSequenceEntity == null) {
+            nextSequenceEntity = OutboxNextSequenceEntity.from(aggregateId);
+        }
+        long sequence = nextSequenceEntity.getSequence() + 1;
+        nextSequenceEntity.setSequence(sequence);
+        outbox.setSequence(sequence);
+        nextSequenceRepository.merge(nextSequenceEntity);
         return outbox;
     }
 }

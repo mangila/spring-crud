@@ -2,8 +2,8 @@ package com.github.mangila.app.model.employee.dto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.mangila.app.EmployeeTestFactory;
 import com.github.mangila.app.FilePathUtil;
-import com.github.mangila.app.ObjectFactoryUtil;
 import com.github.mangila.app.config.JacksonConfig;
 import com.github.mangila.app.model.employee.type.EmploymentActivity;
 import com.github.mangila.app.model.employee.type.EmploymentStatus;
@@ -64,7 +64,7 @@ class UpdateEmployeeRequestJsonTest {
 
     @Test
     void deserialize() throws IOException {
-        UpdateEmployeeRequest request = ObjectFactoryUtil.createUpdateEmployeeRequest(objectMapper);
+        UpdateEmployeeRequest request = EmployeeTestFactory.createUpdateEmployeeRequest(objectMapper);
         JsonContent<UpdateEmployeeRequest> jsonContent = jsonTester.write(request);
         // Assert JSON root keys
         assertThatJson(jsonContent.getJson())

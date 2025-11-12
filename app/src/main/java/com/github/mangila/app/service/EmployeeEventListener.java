@@ -1,7 +1,7 @@
 package com.github.mangila.app.service;
 
+import com.github.mangila.app.model.outbox.OutboxLatestProcessedSequenceEntity;
 import com.github.mangila.app.model.outbox.OutboxEvent;
-import com.github.mangila.app.model.outbox.OutboxCurrentSequenceEntity;
 import com.github.mangila.app.repository.OutboxCurrentSequenceRepository;
 import jakarta.persistence.LockModeType;
 import lombok.extern.slf4j.Slf4j;
@@ -34,29 +34,32 @@ public class EmployeeEventListener {
     }
 
     /**
-     * Listen for the OutboxEvent after the transaction has been committed
-     * This is a happy path scenario. For immediate handling.
+     * Listen for the OutboxEvent.
+     * Creates an Exclusive lock for the aggregateId sequence and handles the event.
+     * So the event will be processed only once.
      */
-    @TransactionalEventListener(
-            phase = TransactionPhase.AFTER_COMMIT
-    )
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
     public void listen(OutboxEvent event) {
         log.info("Received OutboxEvent: {}", event);
         transactionTemplate.executeWithoutResult(txStatus -> {
             // Exclusive lock for the aggregate and handle the event
-            OutboxCurrentSequenceEntity sequence = sequenceRepository.lockById(
+            OutboxLatestProcessedSequenceEntity latestProcessedSequence = sequenceRepository.lockById(
                     event.aggregateId(),
                     LockModeType.PESSIMISTIC_WRITE);
+            if (latestProcessedSequence == null) {
+                latestProcessedSequence = OutboxLatestProcessedSequenceEntity.from(event.aggregateId());
+            }
             // Try to find the next event in order for the aggregate
-            long expectedSequence = sequence.getCurrentSequence() + 1;
+            long expectedSequence = latestProcessedSequence.getSequence() + 1;
             if (event.sequence() == expectedSequence) {
                 eventHandler.handle(event);
-                sequence.setCurrentSequence(event.sequence());
-                sequenceRepository.merge(sequence);
+                latestProcessedSequence.setSequence(event.sequence());
+                sequenceRepository.merge(latestProcessedSequence);
             } else if (event.sequence() < expectedSequence) {
                 log.warn("OutboxEvent sequence mismatch: {} - {}", event.sequence(), expectedSequence);
                 // do nothing and wait for the next event message relay cycle
+                // TODO: maybe use a staging event cache or something
             } else {
                 log.warn("OutboxEvent sequence duplicate: {} - {}", event.sequence(), expectedSequence);
                 // do nothing and wait for the next event message relay cycle

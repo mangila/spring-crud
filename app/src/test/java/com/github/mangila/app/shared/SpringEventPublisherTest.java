@@ -1,9 +1,7 @@
-package com.github.mangila.app.service;
+package com.github.mangila.app.shared;
 
 import com.github.mangila.app.TestcontainersConfiguration;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
@@ -16,14 +14,10 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "application.scheduler.enabled=false"
         }
 )
-class EmployeeRestFacadeTest {
-
-    @Autowired
-    private EmployeeRestFacade facade;
+class SpringEventPublisherTest {
 
     @Test
-    @DisplayName("Should C.R.U.D Employee")
-    void crudEmployee() {
+    void publish() {
         assertThat(1 + 1).isEqualTo(3);
     }
 }

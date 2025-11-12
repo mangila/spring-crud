@@ -36,17 +36,13 @@ public class EmployeeService {
         this.entityMapper = entityMapper;
     }
 
-    public boolean existsById(EmployeeId id) {
-        return employeeRepository.existsById(id.value());
-    }
-
-    public Employee findEmployeeById(EmployeeId id) {
+    public Employee findEmployeeById(final EmployeeId id) {
         return employeeRepository.findById(id.value())
                 .map(domainMapper::map)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Employee with aggregateId: (%s) not found", id.value())));
+                .orElseThrow(() -> new EntityNotFoundException(id.value()));
     }
 
-    public Page<Employee> findAllEmployeesByPage(Pageable pageable) {
+    public Page<Employee> findAllEmployeesByPage(final Pageable pageable) {
         // TODO: create a Probe for querying
         var probe = Example.of(new EmployeeEntity());
         return employeeRepository.findAll(probe, pageable)
@@ -54,12 +50,12 @@ public class EmployeeService {
     }
 
     @Transactional
-    public void createNewEmployee(Employee employee) {
-        EmployeeEntity entity = entityMapper.map(employee);
-        entity = employeeRepository.persist(entity);
+    public void createNewEmployee(final Employee employee) {
+        final EmployeeEntity mappedEntity = entityMapper.map(employee);
+        final EmployeeEntity persistedEntity = employeeRepository.persist(mappedEntity);
         // Map back to domain with the new audit values
-        employee = domainMapper.map(entity);
-        eventService.publishCreateNewEvent(employee);
+        final Employee newEmployee = domainMapper.map(persistedEntity);
+        eventService.publishCreateNewEvent(newEmployee);
     }
 
     /**
@@ -69,22 +65,24 @@ public class EmployeeService {
      * a good reason why not - is to ensure/force employee ID to be created by the application and not by the client
      */
     @Transactional
-    public void updateEmployee(Employee employee) {
-        Ensure.isTrue(existsById(employee.id()), () -> new EntityNotFoundException(String.format("Employee with aggregateId: (%s) not found", employee.id().value())));
-        EmployeeEntity entity = entityMapper.map(employee);
-        entity = employeeRepository.merge(entity);
+    public void updateEmployee(final Employee employee) {
+        final boolean exists = employeeRepository.existsById(employee.id().value());
+        Ensure.isTrue(exists,
+                () -> new EntityNotFoundException(employee.id().value()));
+        final EmployeeEntity mappedEntity = entityMapper.map(employee);
+        final EmployeeEntity updatedEntity = employeeRepository.merge(mappedEntity);
         // Map back to domain with the new audit values
-        employee = domainMapper.map(entity);
-        eventService.publishUpdateEvent(employee);
+        final Employee updatedEmployee = domainMapper.map(updatedEntity);
+        eventService.publishUpdateEvent(updatedEmployee);
     }
 
     @Transactional
-    public void softDeleteEmployeeById(EmployeeId id) {
-        EmployeeEntity entity = employeeRepository.findById(id.value())
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Employee with aggregateId: (%s) not found", id.value())));
-        entity.getAuditMetadata().setDeleted(true);
-        entity = employeeRepository.merge(entity);
-        Employee employee = domainMapper.map(entity);
+    public void softDeleteEmployeeById(final EmployeeId id) {
+        final EmployeeEntity foundEntity = employeeRepository.findById(id.value())
+                .orElseThrow(() -> new EntityNotFoundException(id.value()));
+        foundEntity.getAuditMetadata().setDeleted(true);
+        final EmployeeEntity softDeletedEntity = employeeRepository.merge(foundEntity);
+        final Employee employee = domainMapper.map(softDeletedEntity);
         eventService.publishSoftDeleteEvent(employee);
     }
 }

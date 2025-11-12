@@ -12,8 +12,6 @@ import java.time.Duration;
 /**
  * The event handling that takes care of all the events.
  * <br>
- * Updates the event to "PROCESSING" status and persists it in the database.
- * <br>
  * Then proceed with the business logic. Can be anything basically, e.g., send an email, put on a Kafka topic, RabbitMQ queue or whatever.
  * <br>
  * If it goes OK, update the event to "PUBLISHED" status and persist it in the database.
@@ -55,7 +53,6 @@ public class EmployeeEventHandler {
      * <br>
      * If it fails here, we just re-deliver from the OutboxMessageRelayTask.
      * <br>
-     *
      */
     private void handleCreateNewEmployeeEvent(OutboxEvent event) {
         log.info("Handling CreateNewEmployeeEvent: {}", event);

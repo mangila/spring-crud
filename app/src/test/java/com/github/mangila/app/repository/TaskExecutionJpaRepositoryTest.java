@@ -1,8 +1,9 @@
 package com.github.mangila.app.repository;
 
-import com.github.mangila.app.ObjectFactoryUtil;
+import com.github.mangila.app.TaskExecutionTestFactory;
 import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.config.JpaConfig;
+import com.github.mangila.app.model.task.TaskExecutionEntity;
 import com.github.mangila.app.model.task.TaskExecutionStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ class TaskExecutionJpaRepositoryTest {
 
     @Test
     void shouldAudit() {
-        var entity = repository.persist(ObjectFactoryUtil.createTaskExecutionEntity("test", TaskExecutionStatus.RUNNING));
+        TaskExecutionEntity entity = repository.persist(TaskExecutionTestFactory.createTaskExecutionEntity("test", TaskExecutionStatus.RUNNING));
         var auditMetadata = entity.getAuditMetadata();
         assertThat(auditMetadata)
                 .isNotNull()

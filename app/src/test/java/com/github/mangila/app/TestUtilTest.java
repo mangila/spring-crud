@@ -12,9 +12,7 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 /**
- * Responsible for testing the {@link FilePathUtil} {@link ObjectFactoryUtil} classes.
- * <br>
- * Test the Testutil :P...
+ * Test the test utility :)
  */
 class TestUtilTest {
 
@@ -22,6 +20,7 @@ class TestUtilTest {
     @ParameterizedTest(name = "{0}")
     @ValueSource(strings = {
             "/json/create-new-employee-request.json",
+            "/json/employee-dto.json",
             "/json/update-employee-request.json"
     })
     void readJson(String resourcesFilePath) throws IOException {
@@ -36,19 +35,23 @@ class TestUtilTest {
     void parseJson() {
         var mapper = new ObjectMapper();
         assertThatCode(() -> {
-            ObjectFactoryUtil.createNewEmployeeRequest(mapper);
-            ObjectFactoryUtil.createUpdateEmployeeRequest(mapper);
+            EmployeeTestFactory.createNewEmployeeRequest(mapper);
+            EmployeeTestFactory.createEmployeeDto(mapper);
+            EmployeeTestFactory.createUpdateEmployeeRequest(mapper);
         }).doesNotThrowAnyException();
     }
 
     @Test
     @DisplayName("Should create Objects")
     void createObjects() {
+        var mapper = new ObjectMapper();
         assertThatCode(() -> {
-            ObjectFactoryUtil.createNewEmployeeRequestBuilder(new ObjectMapper())
+            EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
                     .build();
-            ObjectFactoryUtil.createEmployeeEntity(new ObjectMapper());
-            ObjectFactoryUtil.createEmployeeId();
+            EmployeeTestFactory.createUpdateEmployeeRequestBuilder(mapper)
+                    .build();
+            EmployeeTestFactory.createEmployeeEntity(mapper);
+            EmployeeTestFactory.createEmployeeId();
         }).doesNotThrowAnyException();
     }
 }

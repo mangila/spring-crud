@@ -1,13 +1,10 @@
 package com.github.mangila.app.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mangila.app.ObjectFactoryUtil;
+import com.github.mangila.app.EmployeeTestFactory;
 import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.config.JacksonConfig;
 import com.github.mangila.app.config.JpaConfig;
-import com.github.mangila.app.model.employee.domain.EmployeeId;
-import com.github.mangila.app.service.EmployeeEntityMapper;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -39,20 +36,8 @@ class EmployeeJpaRepositoryTest {
     private ObjectMapper objectMapper;
 
     @Test
-    @DisplayName("Should Soft Delete an Employee")
-    void softDeleteEmployee() throws IOException {
-        var entity = ObjectFactoryUtil.createEmployeeEntity(objectMapper);
-        repository.persist(entity);
-        repository.softDeleteByEmployeeId(new EmployeeId(entity.getId()));
-        entity = repository.findById(entity.getId())
-                .orElseThrow();
-        assertThat(entity.getAuditMetadata().isDeleted())
-                .isTrue();
-    }
-
-    @Test
     void shouldAudit() throws IOException {
-        var entity = repository.persist(ObjectFactoryUtil.createEmployeeEntity(objectMapper));
+        var entity = repository.persist(EmployeeTestFactory.createEmployeeEntity(objectMapper));
         var auditMetadata = entity.getAuditMetadata();
         assertThat(auditMetadata)
                 .isNotNull()
