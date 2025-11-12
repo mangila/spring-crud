@@ -29,9 +29,12 @@ import java.net.http.HttpResponse;
  * Fetch it via a Cron job to stay up to date.
  * </p>
  * <p>
- * We have a static JSON with a timestamp for the last update.
- * to keep up to date, we also have a scheduled task to check if the timestamp has changed.
+ * In the resource folder we have a static JSON with a timestamp for the last update.
+ * Here we run a Cron job to fetch the latest headers and update the HTTP headers bean.
  * So it won't be super important to re-deploy the whole app if the static file is not updated regularly.
+ * The static JSON file is NOT updated! So during a deployment if there is a new version of the headers,
+ * the app will not pick up the new headers. So we need to update the static JSON file manually.
+ * keep it simple; the programmer is actually forced to read the OWASP documentation. :O
  * </p>
  * <p>
  * We are using the standard lib Java HTTP Client API for this.
