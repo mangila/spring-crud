@@ -73,7 +73,7 @@ public class EmployeeDomainMapper {
      * <br>
      * But here it can get issues and confusion.
      * Since LocalDateTime is basically just a timestamp with no timezone information.
-     * So here we do an Optimistic conversion, with no actual information about the origin of the LocalDateTime.
+     * So here we do an Optimistic conversion using our Clock's zone, with no actual information about the origin of the LocalDateTime.
      * <br>
      * What Zone does this LocalDateTime belong to?
      */
