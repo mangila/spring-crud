@@ -70,6 +70,7 @@ public class EmployeeDomainMapper {
      * Convert a LocalDateTime to an Instant.
      * Get the zone from the clock.
      * To get the precise DST (Daylight saving time) to UTC.
+     * <br>
      * But here it can get issues and confusion.
      * Since LocalDateTime is basically just a timestamp with no timezone information.
      * So here we do an Optimistic conversion, with no actual information about the origin of the LocalDateTime.
