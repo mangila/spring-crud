@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Component
 public class EmployeeDtoMapper {
@@ -37,8 +38,16 @@ public class EmployeeDtoMapper {
      * Client requesting from the right Timezone but a Loadbalancer or any other infra delegates to another timezoned server.
      * We would send the wrong local date time to the client.
      * <br>
-     * Set Timezone according to the client request is another way.
+     * Set Clock Timezone according to the client request is another way.
      * https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Preference-Applied
+     * <br>
+     * <br>
+     * <code>
+     *     clock.withZone(ZoneId.of(request.getHeader("Preference-Applied")))
+     *     <br>
+     *     <br>
+     *     clock.withZone("Middle-Earth/Mordor")
+     * </code>
      */
     private static LocalDateTime toLocalDateTime(Instant instant, Clock clock) {
         return LocalDateTime.ofInstant(instant, clock.getZone());
