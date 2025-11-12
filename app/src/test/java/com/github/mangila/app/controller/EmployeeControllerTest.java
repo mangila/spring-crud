@@ -20,6 +20,7 @@ import java.net.URI;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
@@ -105,9 +106,9 @@ class EmployeeControllerTest {
                 .hasFieldOrPropertyWithValue("deleted", false);
         // Verify created and modified dates are somewhere in the last 5 seconds
         assertThat(dto.created())
-                .isCloseTo(LocalDateTime.now(clock), within(Duration.ofSeconds(5)));
+                .isCloseTo(ZonedDateTime.now(clock), within(Duration.ofSeconds(5)));
         assertThat(dto.modified())
-                .isCloseTo(LocalDateTime.now(clock), within(Duration.ofSeconds(5)));
+                .isCloseTo(ZonedDateTime.now(clock), within(Duration.ofSeconds(5)));
         // Assert JSON attributes
         var jsonAttributes = dto.attributes().toString();
         assertThatJson(jsonAttributes)
@@ -170,9 +171,9 @@ class EmployeeControllerTest {
                 .isNotNull()
                 .hasFieldOrPropertyWithValue("salary", new BigDecimal("20020.12"));
         assertThat(dto.created())
-                .isCloseTo(LocalDateTime.now(clock), within(Duration.ofSeconds(5)));
+                .isCloseTo(ZonedDateTime.now(clock), within(Duration.ofSeconds(5)));
         assertThat(dto.modified())
-                .isCloseTo(LocalDateTime.now(clock), within(Duration.ofSeconds(5)));
+                .isCloseTo(ZonedDateTime.now(clock), within(Duration.ofSeconds(5)));
         assertThatJson(dto.attributes().toString())
                 .isObject()
                 .containsEntry("vegan", false);

@@ -1,5 +1,6 @@
 package com.github.mangila.app.model.employee.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.app.model.employee.type.EmploymentActivity;
 import com.github.mangila.app.model.employee.type.EmploymentStatus;
@@ -10,7 +11,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * DTO (Data Transfer Object) is a data transfer object often used to
@@ -27,8 +28,10 @@ public record EmployeeDto(
         @NotNull EmploymentActivity employmentActivity,
         @NotNull EmploymentStatus employmentStatus,
         @NotNull ObjectNode attributes,
-        @NotNull LocalDateTime created,
-        @NotNull LocalDateTime modified,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss z")
+        @NotNull ZonedDateTime created,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss z")
+        @NotNull ZonedDateTime modified,
         @NotNull boolean deleted
 ) {
 }

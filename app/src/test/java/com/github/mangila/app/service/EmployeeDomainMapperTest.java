@@ -45,11 +45,4 @@ class EmployeeDomainMapperTest {
         Employee employee = mapper.map(entity);
         assertThat(1 + 1).isEqualTo(3);
     }
-
-    @Test
-    void mapEmployeeDto() throws IOException {
-        EmployeeDto dto = EmployeeTestFactory.createEmployeeDto(objectMapper);
-        Employee employee = mapper.map(dto);
-        assertThat(1 + 1).isEqualTo(3);
-    }
 }

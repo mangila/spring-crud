@@ -14,7 +14,6 @@ import com.github.mangila.app.model.employee.type.EmploymentStatus;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.ZoneOffset;
 
 public class EmployeeTestFactory {
 
@@ -78,10 +77,27 @@ public class EmployeeTestFactory {
                 dto.employmentStatus(),
                 new EmployeeAttributes(dto.attributes()),
                 new EmployeeAudit(
-                        dto.created().toInstant(ZoneOffset.UTC),
-                        dto.modified().toInstant(ZoneOffset.UTC),
+                        dto.created().toInstant(),
+                        dto.modified().toInstant(),
                         dto.deleted()
                 )
+        );
+    }
+
+    /**
+     * This one derives from employee-dto.json data
+     */
+    public static Employee createEmployee(ObjectMapper objectMapper, EmployeeAudit employeeAudit) throws IOException {
+        EmployeeDto dto = createEmployeeDto(objectMapper);
+        return new Employee(
+                new EmployeeId(dto.employeeId()),
+                new EmployeeName(dto.firstName()),
+                new EmployeeName(dto.lastName()),
+                new EmployeeSalary(dto.salary()),
+                dto.employmentActivity(),
+                dto.employmentStatus(),
+                new EmployeeAttributes(dto.attributes()),
+                employeeAudit
         );
     }
 

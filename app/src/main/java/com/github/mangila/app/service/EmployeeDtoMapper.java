@@ -4,10 +4,7 @@ import com.github.mangila.app.model.employee.domain.Employee;
 import com.github.mangila.app.model.employee.dto.EmployeeDto;
 import org.springframework.stereotype.Component;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 
 @Component
 public class EmployeeDtoMapper {
@@ -27,8 +24,8 @@ public class EmployeeDtoMapper {
                 employee.employmentActivity(),
                 employee.employmentStatus(),
                 employee.attributes().value(),
-                toLocalDateTime(employee.audit().created(), clock),
-                toLocalDateTime(employee.audit().modified(), clock),
+                toZonedDateTime(employee.audit().created(), clock),
+                toZonedDateTime(employee.audit().modified(), clock),
                 employee.audit().deleted()
         );
     }
@@ -49,7 +46,7 @@ public class EmployeeDtoMapper {
      *     clock.withZone("Middle-Earth/Mordor")
      * </code>
      */
-    private static LocalDateTime toLocalDateTime(Instant instant, Clock clock) {
-        return LocalDateTime.ofInstant(instant, clock.getZone());
+    private static ZonedDateTime toZonedDateTime(Instant instant, Clock clock) {
+        return ZonedDateTime.ofInstant(instant, clock.getZone());
     }
 }
