@@ -15,18 +15,19 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 /**
+ * <a href="https://owasp.org/www-project-secure-headers/">OWASP Secure Headers Project</a>
  * <p>
-*    Fetch OWASP secure headers from the OWASP HTTP secure headers project.
-*  <a href="https://owasp.org/www-project-secure-headers/ci/headers_add.json">OWASP Secure HTTP Headers</a>
-*  The currently recommended http security headers are fetched from this endpoint.
+ *    Fetch OWASP secure headers from the OWASP HTTP secure headers project.
+ *  <a href="https://owasp.org/www-project-secure-headers/ci/headers_add.json">OWASP Secure HTTP Headers</a>
+ *  The currently recommended http security headers are fetched from this endpoint.
  * </p>
  * <p>
-*      Fetch it via a Cron job to stay up to date.
-*      A simpler approach would be to use a static JSON file.
+ *      Fetch it via a Cron job to stay up to date.
+ *      A simpler approach would be to use a static JSON file.
  *  Buuuut I wanted to demonstrate how to fetch data from an external source and have a cron job in this application.
  *  Plus, we can use the latest data. Not like the static JSON file. But yeah...
  *  We are using the standard lib Java HTTP Client API for this.
- *  In Spring, we have {@link org.springframework.web.client.RestClient} in favor for {@link org.springframework.web.client.RestTemplate}
+ *  In Spring, we have {@link RestClient} in favor for {@link org.springframework.web.client.RestTemplate}
  *  Also Webclient from Webflux to name a few.
  * </p>
  * <p>
