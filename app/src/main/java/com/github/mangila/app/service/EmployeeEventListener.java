@@ -1,8 +1,8 @@
 package com.github.mangila.app.service;
 
-import com.github.mangila.app.model.outbox.OutboxLatestProcessedSequenceEntity;
+import com.github.mangila.app.model.outbox.OutboxProcessedSequenceEntity;
 import com.github.mangila.app.model.outbox.OutboxEvent;
-import com.github.mangila.app.repository.OutboxCurrentSequenceRepository;
+import com.github.mangila.app.repository.OutboxProcessedSequenceJpaRepository;
 import jakarta.persistence.LockModeType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -22,11 +22,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Slf4j
 public class EmployeeEventListener {
     private final EmployeeEventHandler eventHandler;
-    private final OutboxCurrentSequenceRepository sequenceRepository;
+    private final OutboxProcessedSequenceJpaRepository sequenceRepository;
     private final TransactionTemplate transactionTemplate;
 
     public EmployeeEventListener(EmployeeEventHandler eventHandler,
-                                 OutboxCurrentSequenceRepository sequenceRepository,
+                                 OutboxProcessedSequenceJpaRepository sequenceRepository,
                                  TransactionTemplate transactionTemplate) {
         this.eventHandler = eventHandler;
         this.sequenceRepository = sequenceRepository;
@@ -44,11 +44,11 @@ public class EmployeeEventListener {
         log.info("Received OutboxEvent: {}", event);
         transactionTemplate.executeWithoutResult(txStatus -> {
             // Exclusive lock for the aggregate and handle the event
-            OutboxLatestProcessedSequenceEntity latestProcessedSequence = sequenceRepository.lockById(
+            OutboxProcessedSequenceEntity latestProcessedSequence = sequenceRepository.lockById(
                     event.aggregateId(),
                     LockModeType.PESSIMISTIC_WRITE);
             if (latestProcessedSequence == null) {
-                latestProcessedSequence = OutboxLatestProcessedSequenceEntity.from(event.aggregateId());
+                latestProcessedSequence = OutboxProcessedSequenceEntity.from(event.aggregateId());
             }
             // Try to find the next event in order for the aggregate
             long expectedSequence = latestProcessedSequence.getSequence() + 1;

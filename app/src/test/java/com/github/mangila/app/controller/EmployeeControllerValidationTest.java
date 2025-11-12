@@ -96,14 +96,6 @@ public class EmployeeControllerValidationTest {
         ).flatMap(Function.identity());
     }
 
-    private static Stream<CreateNewEmployeeRequest> validateAttributes(ObjectMapper mapper) {
-        return Stream.of(
-                EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
-                        .attributes(null)
-                        .build()
-        );
-    }
-
     private static Stream<CreateNewEmployeeRequest> validateFirstName(ObjectMapper mapper) {
         return Stream.of(
                 EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
@@ -151,6 +143,14 @@ public class EmployeeControllerValidationTest {
                         .build(),
                 EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
                         .salary(BigDecimal.valueOf(31.231323223))
+                        .build()
+        );
+    }
+
+    private static Stream<CreateNewEmployeeRequest> validateAttributes(ObjectMapper mapper) {
+        return Stream.of(
+                EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
+                        .nullAttributes()
                         .build()
         );
     }

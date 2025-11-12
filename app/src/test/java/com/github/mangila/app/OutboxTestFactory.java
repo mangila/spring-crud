@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.app.model.AuditMetadata;
 import com.github.mangila.app.model.outbox.OutboxEntity;
 import com.github.mangila.app.model.outbox.OutboxEventStatus;
+import com.github.mangila.app.model.outbox.OutboxNextSequenceEntity;
+import com.github.mangila.app.model.outbox.OutboxProcessedSequenceEntity;
 
 public class OutboxTestFactory {
 
@@ -15,6 +17,14 @@ public class OutboxTestFactory {
         entity.setPayload(objectMapper.createObjectNode());
         entity.setAuditMetadata(AuditMetadata.EMPTY);
         return entity;
+    }
+
+    public static OutboxProcessedSequenceEntity createOutboxProcessedSequenceEntity() {
+        return OutboxProcessedSequenceEntity.from("test");
+    }
+
+    public static OutboxNextSequenceEntity createOutboxNextSequenceEntity() {
+        return OutboxNextSequenceEntity.from("test");
     }
 
 }

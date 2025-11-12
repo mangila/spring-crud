@@ -5,7 +5,7 @@ import com.github.mangila.app.model.AuditMetadata;
 import com.github.mangila.app.model.outbox.OutboxEntity;
 import com.github.mangila.app.model.outbox.OutboxEventStatus;
 import com.github.mangila.app.model.outbox.OutboxNextSequenceEntity;
-import com.github.mangila.app.repository.OutboxNextSequenceRepository;
+import com.github.mangila.app.repository.OutboxNextSequenceJpaRepository;
 import jakarta.persistence.LockModeType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,10 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class OutboxFactory {
 
-    private final OutboxNextSequenceRepository nextSequenceRepository;
+    private final OutboxNextSequenceJpaRepository nextSequenceRepository;
     private final ObjectMapper objectMapper;
 
-    public OutboxFactory(OutboxNextSequenceRepository nextSequenceRepository,
+    public OutboxFactory(OutboxNextSequenceJpaRepository nextSequenceRepository,
                          ObjectMapper objectMapper) {
         this.nextSequenceRepository = nextSequenceRepository;
         this.objectMapper = objectMapper;

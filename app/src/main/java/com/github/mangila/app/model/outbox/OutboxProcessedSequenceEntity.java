@@ -6,13 +6,15 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * We need a sequence table to keep track of the latest processed sequence number for each aggregate.
+ * <br>
+ * "The consumer of sequences, because without it, we can't get the events in order"
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "outbox_latest_processed_sequence")
+@Table(name = "outbox_processed_sequence")
 @lombok.NoArgsConstructor
 @lombok.Data
-public class OutboxLatestProcessedSequenceEntity {
+public class OutboxProcessedSequenceEntity {
 
     @Id
     @Column(name = "aggregate_id",
@@ -27,8 +29,8 @@ public class OutboxLatestProcessedSequenceEntity {
     @Embedded
     private AuditMetadata auditMetadata;
 
-    public static OutboxLatestProcessedSequenceEntity from(String aggregateId) {
-        var sequence = new OutboxLatestProcessedSequenceEntity();
+    public static OutboxProcessedSequenceEntity from(String aggregateId) {
+        var sequence = new OutboxProcessedSequenceEntity();
         sequence.setAggregateId(aggregateId);
         sequence.setAuditMetadata(AuditMetadata.EMPTY);
         return sequence;

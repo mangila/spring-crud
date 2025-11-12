@@ -13,7 +13,6 @@ import com.github.mangila.app.model.employee.type.EmploymentStatus;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Map;
 
 public class EmployeeTestFactory {
 
@@ -36,22 +35,32 @@ public class EmployeeTestFactory {
         return new EmployeeId("EMP-JODO-00000000-0000-0000-0000-000000000000");
     }
 
+    /**
+     * This one derives from employee-dto.json data
+     */
     public static EmployeeEntity createEmployeeEntity(ObjectMapper objectMapper) throws IOException {
-        var updateRequest = createUpdateEmployeeRequest(objectMapper);
+        EmployeeDto dto = createEmployeeDto(objectMapper);
         var entity = new EmployeeEntity();
-        entity.setId(updateRequest.employeeId());
-        entity.setFirstName(updateRequest.firstName());
-        entity.setLastName(updateRequest.lastName());
-        entity.setSalary(updateRequest.salary());
-        entity.setEmploymentActivity(updateRequest.employmentActivity());
-        entity.setEmploymentStatus(updateRequest.employmentStatus());
-        entity.setAttributes(updateRequest.attributes());
-        entity.setAuditMetadata(AuditMetadata.EMPTY);
+        entity.setId(dto.employeeId());
+        entity.setFirstName(dto.firstName());
+        entity.setLastName(dto.lastName());
+        entity.setSalary(dto.salary());
+        entity.setEmploymentActivity(dto.employmentActivity());
+        entity.setEmploymentStatus(dto.employmentStatus());
+        entity.setAttributes(dto.attributes());
+        var auditMetadata = new AuditMetadata();
+        auditMetadata.setCreated(dto.created());
+        auditMetadata.setModified(dto.modified());
+        auditMetadata.setDeleted(dto.deleted());
+        entity.setAuditMetadata(auditMetadata);
         return entity;
     }
 
+    /**
+     * This one derives from employee-dto.json data
+     */
     public static Employee createEmployee(ObjectMapper objectMapper) throws IOException {
-        var dto = createEmployeeDto(objectMapper);
+        EmployeeDto dto = createEmployeeDto(objectMapper);
         return new Employee(
                 new EmployeeId(dto.employeeId()),
                 new EmployeeName(dto.firstName()),
@@ -112,12 +121,13 @@ public class EmployeeTestFactory {
             return this;
         }
 
-        public CreateNewEmployeeRequestBuilder attributes(Map<String, Object> attributes) {
-            if (attributes == null) {
-                this.attributes = null;
-                return this;
-            }
-            this.attributes = objectMapper.valueToTree(attributes);
+        public CreateNewEmployeeRequestBuilder nullAttributes() {
+            this.attributes = null;
+            return this;
+        }
+
+        public CreateNewEmployeeRequestBuilder attributes(ObjectNode attributes) {
+            this.attributes = attributes;
             return this;
         }
 

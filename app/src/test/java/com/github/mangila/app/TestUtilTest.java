@@ -52,6 +52,7 @@ class TestUtilTest {
                     .build();
             EmployeeTestFactory.createEmployeeEntity(mapper);
             EmployeeTestFactory.createEmployeeId();
+            EmployeeTestFactory.createEmployee(mapper);
         }).doesNotThrowAnyException();
     }
 }

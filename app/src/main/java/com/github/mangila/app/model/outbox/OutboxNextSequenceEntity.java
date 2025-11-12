@@ -7,6 +7,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 /**
  * Keep track of the next sequence number for each aggregate.
  * This is used to determine the next sequence number for a new event.
+ * <br>
+ * "The producer of sequences, because without it, we can't get the events in order"
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
