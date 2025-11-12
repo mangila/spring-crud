@@ -8,7 +8,7 @@ application:
     initial-delay: 30s
     fixed-rate: 5s
     fixed-delay: 10
-    cron: 0 0 0 * * *
+    cron: "0 * * * * *"
 # Spring Properties
 spring:
   task:

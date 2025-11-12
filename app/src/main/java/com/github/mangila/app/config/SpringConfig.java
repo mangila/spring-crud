@@ -2,9 +2,11 @@ package com.github.mangila.app.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 
 import java.time.Clock;
 import java.time.ZoneId;
+import java.util.Map;
 
 @Configuration
 public class SpringConfig {
@@ -28,4 +30,10 @@ public class SpringConfig {
     Clock clock() {
         return Clock.system(ZoneId.of("Europe/Stockholm"));
     }
+
+    @Bean
+    HttpHeaders oWaspSecureHeaders() {
+        return new HttpHeaders();
+    }
+
 }

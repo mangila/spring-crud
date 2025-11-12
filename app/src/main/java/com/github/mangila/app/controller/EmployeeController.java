@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -28,9 +29,12 @@ import java.net.URI;
 public class EmployeeController {
 
     private final EmployeeRestFacade restFacade;
+    private final HttpHeaders oWaspSecureHeaders;
 
-    public EmployeeController(EmployeeRestFacade restFacade) {
+    public EmployeeController(EmployeeRestFacade restFacade,
+                              HttpHeaders oWaspSecureHeaders) {
         this.restFacade = restFacade;
+        this.oWaspSecureHeaders = oWaspSecureHeaders;
     }
 
     @GetMapping(value = "{employeeId}",
@@ -41,7 +45,9 @@ public class EmployeeController {
             @NotBlank
             @ValidEmployeeId
             String employeeId) {
-        return ResponseEntity.ok(restFacade.findEmployeeById(employeeId));
+        return ResponseEntity.ok()
+                .headers(oWaspSecureHeaders)
+                .body(restFacade.findEmployeeById(employeeId));
     }
 
     @GetMapping
@@ -62,6 +68,7 @@ public class EmployeeController {
                 .path("/api/v1/employees/{employeeId}")
                 .build(id);
         return ResponseEntity.created(location)
+                .headers(oWaspSecureHeaders)
                 .build();
     }
 
@@ -74,7 +81,9 @@ public class EmployeeController {
             @Valid UpdateEmployeeRequest request
     ) {
         EmployeeDto dto = restFacade.updateEmployee(request);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok()
+                .headers(oWaspSecureHeaders)
+                .body(dto);
     }
 
     @DeleteMapping("{employeeId}")
@@ -84,6 +93,8 @@ public class EmployeeController {
             @ValidEmployeeId String employeeId
     ) {
         restFacade.softDeleteEmployeeById(employeeId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent()
+                .headers(oWaspSecureHeaders)
+                .build();
     }
 }

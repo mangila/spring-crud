@@ -54,7 +54,7 @@ class SoftDeleteSuccessTaskExecutionTaskTest {
     }
 
     @Test
-    void run() {
+    void call() {
         assertFirstRun();
         assertSecondRun();
         assertEmptyRun();
