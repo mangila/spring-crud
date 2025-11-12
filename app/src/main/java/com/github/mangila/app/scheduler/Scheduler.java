@@ -74,9 +74,11 @@ public class Scheduler {
 
     // Run a task at a specific time
     // This is a Spring Cron Expression
-    @Scheduled(cron = "${application.scheduler.cron}")
-    public void cronTask() {
-        Task task = taskMap.get("cronTask");
+    @Scheduled(
+            cron = "${application.scheduler.cron}"
+    )
+    public void owaspFetchSecureHeadersTask() {
+        Task task = taskMap.get("owaspFetchSecureHeadersTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
         schedulerTaskExecutor.submit(task, node);

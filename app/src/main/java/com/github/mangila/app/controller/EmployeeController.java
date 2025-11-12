@@ -41,7 +41,8 @@ public class EmployeeController {
             @NotBlank
             @ValidEmployeeId
             String employeeId) {
-        return ResponseEntity.ok(restFacade.findEmployeeById(employeeId));
+        return ResponseEntity.ok()
+                .body(restFacade.findEmployeeById(employeeId));
     }
 
     @GetMapping
@@ -74,7 +75,8 @@ public class EmployeeController {
             @Valid UpdateEmployeeRequest request
     ) {
         EmployeeDto dto = restFacade.updateEmployee(request);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok()
+                .body(dto);
     }
 
     @DeleteMapping("{employeeId}")
@@ -84,6 +86,7 @@ public class EmployeeController {
             @ValidEmployeeId String employeeId
     ) {
         restFacade.softDeleteEmployeeById(employeeId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent()
+                .build();
     }
 }
