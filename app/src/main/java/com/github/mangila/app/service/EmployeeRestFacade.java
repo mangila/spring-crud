@@ -88,9 +88,10 @@ public class EmployeeRestFacade {
                     return entity.getPayload();
                 })
                 .map(objectNode -> {
-                    // the event payload key "dto" is what we are looking for
-                    if (objectNode.has("dto") && objectNode.get("dto").isObject()) {
-                        objectNode = (ObjectNode) objectNode.get("dto");
+                    // the event payloads JSON root key "dto" is what we are looking for
+                    String key = "dto";
+                    if (objectNode.has(key) && objectNode.get(key).isObject()) {
+                        objectNode = (ObjectNode) objectNode.get(key);
                         EmployeeEventDto eventDto = eventMapper.map(objectNode);
                         return dtoMapper.map(eventDto);
                     }
