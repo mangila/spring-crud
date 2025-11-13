@@ -7,6 +7,7 @@ import com.github.mangila.app.service.OutboxEventMapper;
 import com.github.mangila.app.service.OutboxFactory;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -26,6 +27,7 @@ import org.springframework.validation.annotation.Validated;
  */
 @Service
 @Validated
+@NullMarked
 public class SpringEventPublisher {
 
     private final ApplicationEventPublisher publisher;
@@ -62,7 +64,7 @@ public class SpringEventPublisher {
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
-    public void publish(OutboxEvent event) {
+    public void publish(@Valid @NotNull OutboxEvent event) {
         publisher.publishEvent(event);
     }
 }
