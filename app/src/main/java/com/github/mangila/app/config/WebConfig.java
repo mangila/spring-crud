@@ -70,7 +70,7 @@ public class WebConfig implements WebMvcConfigurer {
                         .forEach((key, value) -> {
                             if (response.containsHeader(key)) {
                                 response.setHeader(key, null);
-                                log.warn("Removed non-recommended OWASP security header {} with value {}", key, value);
+                                log.warn("OWASP recommended header to be removed detected in response - {} - {}", key, value);
                             }
                         });
                 filterChain.doFilter(request, response);
