@@ -54,6 +54,12 @@ public class Bootstrap implements CommandLineRunner {
         applyHeaders(owaspResponse, oWaspSecureHeaders);
     }
 
+    /**
+     * <p>
+     * Apply the OWASP secure headers to the Spring HttpHeaders MultivalueMap
+     * Method will clear the most recent headers and add the new ones.
+     * </p>
+     */
     public static void applyHeaders(OwaspResponse response, HttpHeaders oWaspSecureHeaders) {
         log.info("Apply OWASP secure headers");
         MultiValueMap<String, String> owasp = new LinkedMultiValueMap<>();
