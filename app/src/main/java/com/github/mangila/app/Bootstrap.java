@@ -44,7 +44,7 @@ public class Bootstrap implements CommandLineRunner {
 
     /**
      * <p>
-     * Load the OWASP secure headers as a static resource
+     * Load the OWASP secure headers from a static resource
      * </p>
      */
     private void loadStaticOwaspSecureHeader() throws IOException {
