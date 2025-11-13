@@ -3,7 +3,7 @@ package com.github.mangila.app.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.app.EmployeeTestFactory;
 import com.github.mangila.app.TestcontainersConfiguration;
-import com.github.mangila.app.model.employee.dto.EmployeeDto;
+import com.github.mangila.app.model.employee.dto.EmployeeEventDto;
 import com.github.mangila.app.model.employee.event.CreateNewEmployeeEvent;
 import com.github.mangila.app.model.outbox.OutboxEvent;
 import com.github.mangila.app.repository.OutboxJpaRepository;
@@ -66,7 +66,7 @@ class EmployeeEventListenerTest {
 
     @Test
     void listen() throws IOException {
-        EmployeeDto dto = EmployeeTestFactory.createEmployeeDto(objectMapper);
+        EmployeeEventDto dto = EmployeeTestFactory.createEmployeeEventDto(objectMapper);
         transactionTemplate.executeWithoutResult(txStatus -> {
             publisher.publish(
                     dto.employeeId(),

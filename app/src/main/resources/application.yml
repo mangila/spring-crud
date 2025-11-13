@@ -9,6 +9,18 @@ application:
     fixed-rate: 5s
     fixed-delay: 10
     cron: "@weekly"
+# Tomcat Server Properties
+server:
+  compression:
+    enabled: true
+    min-response-size: 2KB
+    mime-types: "application/json"
+  # https://docs.spring.io/spring-boot/how-to/webserver.html#howto.webserver.configure-http2
+  # Tomcat supports both H2 (Http2 w TLS) and H2C (Http2 without TLS)
+  ssl:
+    enabled: false
+  http2:
+    enabled: true
 # Spring Properties
 spring:
   task:
