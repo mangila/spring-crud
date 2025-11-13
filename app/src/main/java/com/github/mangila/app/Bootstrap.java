@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.app.config.OwaspHeaders;
 import com.github.mangila.app.model.owasp.OwaspAddResponse;
 import com.github.mangila.app.model.owasp.OwaspRemoveResponse;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -21,11 +21,10 @@ import java.nio.charset.StandardCharsets;
  * Fetch the Owasp secure headers from the OWASP HTTP secure headers project.
  * So the Controller can return the latest secure headers.
  * </p>
- *
  */
 @Component
 @Slf4j
-public class Bootstrap implements CommandLineRunner {
+public class Bootstrap {
 
     private final ObjectMapper objectMapper;
     private final OwaspHeaders headersToAdd;
@@ -39,20 +38,21 @@ public class Bootstrap implements CommandLineRunner {
         this.headersToRemove = headersToRemove;
     }
 
-
-    @Override
-    public void run(String... args) throws Exception {
-        loadStaticOwaspSecureHeadersToAdd();
-        loadStaticOwaspSecureHeadersToRemove();
-    }
-
     /**
      * <p>
      * Load the OWASP secure headers from a static resource
      * </p>
      */
+    @PostConstruct
+    public void loadStaticResources() throws IOException {
+        loadStaticOwaspSecureHeadersToAdd();
+        loadStaticOwaspSecureHeadersToRemove();
+    }
+
     private void loadStaticOwaspSecureHeadersToAdd() throws IOException {
-        ClassPathResource resource = new ClassPathResource("owasp-secure-headers-add.json");
+        String fileName = "owasp-secure-headers-add.json";
+        log.info("Loading static OWASP secure headers to add - {}", fileName);
+        ClassPathResource resource = new ClassPathResource(fileName);
         String json = resource.getContentAsString(StandardCharsets.UTF_8);
         OwaspAddResponse owaspAddResponse = objectMapper.readValue(json, OwaspAddResponse.class);
         HttpHeaders httpHeaders = owaspAddResponse.extractHeaders();
@@ -60,7 +60,9 @@ public class Bootstrap implements CommandLineRunner {
     }
 
     private void loadStaticOwaspSecureHeadersToRemove() throws IOException {
-        ClassPathResource resource = new ClassPathResource("owasp-secure-headers-remove.json");
+        String fileName = "owasp-secure-headers-remove.json";
+        log.info("Loading static OWASP secure headers to remove - {}", fileName);
+        ClassPathResource resource = new ClassPathResource(fileName);
         String json = resource.getContentAsString(StandardCharsets.UTF_8);
         OwaspRemoveResponse owaspRemoveResponse = objectMapper.readValue(json, OwaspRemoveResponse.class);
         HttpHeaders httpHeaders = owaspRemoveResponse.extractHeaders();
