@@ -3,13 +3,12 @@ package com.github.mangila.app.scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.mangila.app.Bootstrap;
 import com.github.mangila.app.config.WebConfig;
 import com.github.mangila.app.model.owasp.OwaspResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
@@ -93,7 +92,7 @@ public class FetchOwaspSecureHeadersTask implements Task {
             log.info("OWASP secure headers fetched successfully");
             String lastUpdate = oWaspSecureHeaders.getFirst(WebConfig.OWASP_LAST_UPDATE_UTC_HTTP_HEADER);
             if (shouldUpdate(lastUpdate, response)) {
-                updateHeaders(response);
+                Bootstrap.applyHeaders(response, oWaspSecureHeaders);
             } else {
                 String msg = "Last update timestamp matches, wont update";
                 log.info(msg);
@@ -118,22 +117,6 @@ public class FetchOwaspSecureHeadersTask implements Task {
                 .GET()
                 .build(), HttpResponse.BodyHandlers.ofString());
         return objectMapper.readValue(response.body(), OwaspResponse.class);
-    }
-
-    private void updateHeaders(OwaspResponse response) {
-        log.info("Updating OWASP secure headers");
-        MultiValueMap<String, String> owasp = new LinkedMultiValueMap<>();
-        response.headers().forEach(header -> {
-            // Add all header key value pairs to the MultiValueMap
-            owasp.add(header.name(), header.value());
-        });
-        // add the last update timestamp
-        owasp.add(WebConfig.OWASP_LAST_UPDATE_UTC_HTTP_HEADER, response.timestamp());
-        // Clear the existing headers
-        oWaspSecureHeaders.clear();
-        // Add the new security headers to the HttpHeaders
-        oWaspSecureHeaders.putAll(owasp);
-        log.info("OWASP secure headers updated successfully - {}", oWaspSecureHeaders.toSingleValueMap());
     }
 
     /**

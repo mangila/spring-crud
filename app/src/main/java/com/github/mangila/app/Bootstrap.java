@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -38,16 +39,23 @@ public class Bootstrap implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // The json file needs to have a check in for some time, it's being updated anyway but still.
+        loadStaticOwaspSecureHeader();
+    }
+
+    /**
+     * <p>
+     * Load the OWASP secure headers as a static resource
+     * </p>
+     */
+    private void loadStaticOwaspSecureHeader() throws IOException {
         ClassPathResource resource = new ClassPathResource("owasp-secure-headers.json");
         String json = resource.getContentAsString(StandardCharsets.UTF_8);
         OwaspResponse owaspResponse = objectMapper.readValue(json, OwaspResponse.class);
-        updateHeaders(owaspResponse);
-        log.info("OWASP secure headers loaded successfully - {}", oWaspSecureHeaders.toSingleValueMap());
+        applyHeaders(owaspResponse, oWaspSecureHeaders);
     }
 
-    private void updateHeaders(OwaspResponse response) {
-        log.info("Updating OWASP secure headers");
+    public static void applyHeaders(OwaspResponse response, HttpHeaders oWaspSecureHeaders) {
+        log.info("Apply OWASP secure headers");
         MultiValueMap<String, String> owasp = new LinkedMultiValueMap<>();
         response.headers().forEach(header -> {
             // Add all header key value pair to the MultiValueMap
@@ -59,5 +67,6 @@ public class Bootstrap implements CommandLineRunner {
         oWaspSecureHeaders.clear();
         // Add the new security headers to the HttpHeaders
         oWaspSecureHeaders.putAll(owasp);
+        log.info("OWASP secure headers applied successfully - {}", oWaspSecureHeaders.toSingleValueMap());
     }
 }
