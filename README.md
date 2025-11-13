@@ -32,7 +32,11 @@ purposes)
 
 ##### Owasp Secure Headers
 
-Project is deployed with the current recommended OWASP secure headers from the OWASP HTTP secure headers project.
+Project is configured to fetch the latest OWASP secure headers reference collections
+
+The latest headers are fetched from the following URL:
+- https://owasp.org/www-project-secure-headers/ci/headers_add.json
+- https://owasp.org/www-project-secure-headers/ci/headers_remove.json
 
 - https://owasp.org/www-project-secure-headers/
 
