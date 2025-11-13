@@ -68,4 +68,8 @@ public class EmployeeRestFacade {
         EmployeeId id = new EmployeeId(employeeId);
         service.softDeleteEmployeeById(id);
     }
+
+    public EmployeeDto replay(String employeeId) {
+        throw new UnsupportedOperationException("Replay not yet implemented");
+    }
 }

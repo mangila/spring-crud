@@ -45,6 +45,18 @@ public class EmployeeController {
                 .body(restFacade.findEmployeeById(employeeId));
     }
 
+    @GetMapping(value = "replay/{employeeId}",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<EmployeeDto> replay(
+            @PathVariable
+            @NotBlank
+            @ValidEmployeeId
+            String employeeId) {
+        return ResponseEntity.ok()
+                .body(restFacade.replay(employeeId));
+    }
+
     @GetMapping
     public ResponseEntity<Page<EmployeeDto>> findAllEmployeesByPage(Pageable pageable) {
         return ResponseEntity.ok(restFacade.findAllEmployeesByPage(pageable));

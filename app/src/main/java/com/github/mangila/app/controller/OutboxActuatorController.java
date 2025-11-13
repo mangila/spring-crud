@@ -6,7 +6,6 @@ import org.springframework.boot.actuate.endpoint.annotation.Selector;
 import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 import org.springframework.boot.actuate.endpoint.web.WebEndpointResponse;
 import org.springframework.boot.actuate.endpoint.web.annotation.WebEndpoint;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -21,19 +20,12 @@ public class OutboxActuatorController {
 
     @ReadOperation
     public WebEndpointResponse<Map<String, String>> findOutboxStatus(@Selector String outboxId) {
-        // TODO: implement
-        return new WebEndpointResponse<>(
-                Map.of("outbox", outboxId),
-                HttpStatus.OK.value()
-        );
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @WriteOperation
     public WebEndpointResponse<Map<String, Object>> execute(@Selector String outboxId) {
-        return new WebEndpointResponse<>(
-                Map.of("outbox", outboxId),
-                HttpStatus.ACCEPTED.value()
-        );
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
 }
