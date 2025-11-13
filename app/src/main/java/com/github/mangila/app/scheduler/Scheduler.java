@@ -72,13 +72,27 @@ public class Scheduler {
         schedulerTaskExecutor.submit(task, node);
     }
 
-    // Run a task at a specific time
-    // This is a Spring Cron Expression
+    /**
+     * Fetch secure headers from OWASP.
+     */
     @Scheduled(
             cron = "${application.scheduler.cron}"
     )
-    public void owaspFetchSecureHeadersTask() {
-        Task task = taskMap.get("owaspFetchSecureHeadersTask");
+    public void fetchOwaspSecureHeadersAddTask() {
+        Task task = taskMap.get("fetchOwaspSecureHeadersAddTask");
+        var node = objectMapper.createObjectNode();
+        node.put("executedBy", "Scheduler");
+        schedulerTaskExecutor.submit(task, node);
+    }
+
+    /**
+     * Fetch secure headers from OWASP.
+     */
+    @Scheduled(
+            cron = "${application.scheduler.cron}"
+    )
+    public void fetchOwaspSecureHeadersRemoveTask() {
+        Task task = taskMap.get("fetchOwaspSecureHeadersRemoveTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
         schedulerTaskExecutor.submit(task, node);

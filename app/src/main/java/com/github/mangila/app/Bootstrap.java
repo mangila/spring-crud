@@ -1,15 +1,13 @@
 package com.github.mangila.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mangila.app.config.WebConfig;
-import com.github.mangila.app.model.owasp.OwaspResponse;
+import com.github.mangila.app.model.owasp.OwaspAddResponse;
+import com.github.mangila.app.model.owasp.OwaspRemoveResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -29,17 +27,21 @@ import java.nio.charset.StandardCharsets;
 public class Bootstrap implements CommandLineRunner {
 
     private final ObjectMapper objectMapper;
-    private final HttpHeaders oWaspSecureHeaders;
+    private final HttpHeaders oWaspSecureHeadersToAdd;
+    private final HttpHeaders oWaspSecureHeadersToRemove;
 
     public Bootstrap(ObjectMapper objectMapper,
-                     HttpHeaders oWaspSecureHeaders) {
+                     HttpHeaders oWaspSecureHeadersToAdd,
+                     HttpHeaders oWaspSecureHeadersToRemove) {
         this.objectMapper = objectMapper;
-        this.oWaspSecureHeaders = oWaspSecureHeaders;
+        this.oWaspSecureHeadersToAdd = oWaspSecureHeadersToAdd;
+        this.oWaspSecureHeadersToRemove = oWaspSecureHeadersToRemove;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        loadStaticOwaspSecureHeader();
+        loadStaticOwaspSecureHeadersToAdd();
+        loadStaticOwaspSecureHeadersToRemove();
     }
 
     /**
@@ -47,32 +49,19 @@ public class Bootstrap implements CommandLineRunner {
      * Load the OWASP secure headers from a static resource
      * </p>
      */
-    private void loadStaticOwaspSecureHeader() throws IOException {
-        ClassPathResource resource = new ClassPathResource("owasp-secure-headers.json");
+    private void loadStaticOwaspSecureHeadersToAdd() throws IOException {
+        ClassPathResource resource = new ClassPathResource("owasp-secure-headers-add.json");
         String json = resource.getContentAsString(StandardCharsets.UTF_8);
-        OwaspResponse owaspResponse = objectMapper.readValue(json, OwaspResponse.class);
-        applyHeaders(owaspResponse, oWaspSecureHeaders);
+        OwaspAddResponse owaspAddResponse = objectMapper.readValue(json, OwaspAddResponse.class);
+        HttpHeaders httpHeaders = owaspAddResponse.extractHeaders();
+        oWaspSecureHeadersToAdd.putAll(httpHeaders);
     }
 
-    /**
-     * <p>
-     * Apply the OWASP secure headers to the Spring HttpHeaders MultivalueMap
-     * Method will clear the most recent headers and add the new ones.
-     * </p>
-     */
-    public static void applyHeaders(OwaspResponse response, HttpHeaders oWaspSecureHeaders) {
-        log.info("Apply OWASP secure headers");
-        MultiValueMap<String, String> owasp = new LinkedMultiValueMap<>();
-        response.headers().forEach(header -> {
-            // Add all header key value pair to the MultiValueMap
-            owasp.add(header.name(), header.value());
-        });
-        // add the last update timestamp
-        owasp.add(WebConfig.OWASP_LAST_UPDATE_UTC_HTTP_HEADER, response.timestamp());
-        // Clear the existing headers
-        oWaspSecureHeaders.clear();
-        // Add the new security headers to the HttpHeaders
-        oWaspSecureHeaders.putAll(owasp);
-        log.info("OWASP secure headers applied successfully - {}", oWaspSecureHeaders.toSingleValueMap());
+    private void loadStaticOwaspSecureHeadersToRemove() throws IOException {
+        ClassPathResource resource = new ClassPathResource("owasp-secure-headers-remove.json");
+        String json = resource.getContentAsString(StandardCharsets.UTF_8);
+        OwaspRemoveResponse owaspRemoveResponse = objectMapper.readValue(json, OwaspRemoveResponse.class);
+        HttpHeaders httpHeaders = owaspRemoveResponse.extractHeaders();
+        oWaspSecureHeadersToRemove.putAll(httpHeaders);
     }
 }

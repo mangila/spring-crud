@@ -34,8 +34,19 @@ public class WebConfig implements WebMvcConfigurer {
                 .combine(cors);
     }
 
-    @Bean
-    HttpHeaders oWaspSecureHeaders() {
+    /**
+     * Should contain OWASP headers from - <a href="https://owasp.org/www-project-secure-headers/ci/headers_add.json">Headers to Add</a>
+     */
+    @Bean("oWaspSecureHeadersToAdd")
+    HttpHeaders oWaspSecureHeadersToAdd() {
+        return new HttpHeaders();
+    }
+
+    /**
+     * Should contain OWASP headers from - <a href="https://owasp.org/www-project-secure-headers/ci/headers_remove.json">Headers to Remove</a>
+     */
+    @Bean("oWaspSecureHeadersToRemove")
+    HttpHeaders oWaspSecureHeadersToRemove() {
         return new HttpHeaders();
     }
 
@@ -44,14 +55,24 @@ public class WebConfig implements WebMvcConfigurer {
      * OncePerRequestFilter, we can be sure that the headers are only added once per request.
      */
     @Bean
-    OncePerRequestFilter owaspSecureHeadersFilter(HttpHeaders oWaspSecureHeaders) {
+    OncePerRequestFilter owaspSecureHeadersFilter(
+            HttpHeaders oWaspSecureHeadersToAdd,
+            HttpHeaders oWaspSecureHeadersToRemove
+    ) {
         return new OncePerRequestFilter() {
             @Override
             protected void doFilterInternal(HttpServletRequest request,
                                             HttpServletResponse response,
                                             FilterChain filterChain) throws ServletException, IOException {
-                oWaspSecureHeaders.asSingleValueMap()
+                oWaspSecureHeadersToAdd.asSingleValueMap()
                         .forEach(response::setHeader);
+                oWaspSecureHeadersToRemove.asSingleValueMap()
+                        .forEach((key, value) -> {
+                            if (response.containsHeader(key)) {
+                                response.setHeader(key, null);
+                                log.warn("Removed non-recommended OWASP security header {} with value {}", key, value);
+                            }
+                        });
                 filterChain.doFilter(request, response);
             }
         };

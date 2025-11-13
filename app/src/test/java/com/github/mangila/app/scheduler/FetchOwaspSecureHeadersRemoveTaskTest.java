@@ -1,11 +1,16 @@
 package com.github.mangila.app.scheduler;
 
 import com.github.mangila.app.TestcontainersConfiguration;
+import com.github.mangila.app.service.OwaspRestClient;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest(
@@ -15,12 +20,22 @@ import org.springframework.context.annotation.Import;
         }
 )
 @Slf4j
-class FetchOwaspSecureHeadersTaskTest {
+class FetchOwaspSecureHeadersRemoveTaskTest {
 
     @Autowired
-    private FetchOwaspSecureHeadersTask task;
+    private FetchOwaspSecureHeadersRemoveTask task;
+
+    @MockitoBean
+    private OwaspRestClient owaspRestClient;
 
     @Test
     void call() {
+        assertThat(1 + 1).isEqualTo(3);
+    }
+
+    @Test
+    @Disabled
+    void callRemote() {
+
     }
 }
