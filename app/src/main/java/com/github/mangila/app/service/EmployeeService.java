@@ -3,15 +3,17 @@ package com.github.mangila.app.service;
 import com.github.mangila.app.model.employee.domain.Employee;
 import com.github.mangila.app.model.employee.domain.EmployeeId;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
+import com.github.mangila.app.model.outbox.OutboxEntity;
 import com.github.mangila.app.repository.EmployeeJpaRepository;
-import com.github.mangila.app.shared.Ensure;
+import com.github.mangila.app.repository.OutboxJpaRepository;
 import com.github.mangila.app.shared.exception.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NullMarked;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * Service layer for Employee CRUD operations.
@@ -20,17 +22,21 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @NullMarked
+@Slf4j
 public class EmployeeService {
     private final EmployeeJpaRepository employeeRepository;
+    private final OutboxJpaRepository outboxJpaRepository;
     private final EmployeeEventService eventService;
     private final EmployeeDomainMapper domainMapper;
     private final EmployeeEntityMapper entityMapper;
 
     public EmployeeService(EmployeeJpaRepository employeeRepository,
+                           OutboxJpaRepository outboxJpaRepository,
                            EmployeeEventService eventService,
                            EmployeeDomainMapper domainMapper,
                            EmployeeEntityMapper entityMapper) {
         this.employeeRepository = employeeRepository;
+        this.outboxJpaRepository = outboxJpaRepository;
         this.eventService = eventService;
         this.domainMapper = domainMapper;
         this.entityMapper = entityMapper;
@@ -53,7 +59,7 @@ public class EmployeeService {
     public void createNewEmployee(final Employee employee) {
         final EmployeeEntity mappedEntity = entityMapper.map(employee);
         final EmployeeEntity persistedEntity = employeeRepository.persist(mappedEntity);
-        // Map back to domain with the new audit values
+        // Map back to domain to prepare for event publishing
         final Employee newEmployee = domainMapper.map(persistedEntity);
         eventService.publishCreateNewEvent(newEmployee);
     }
@@ -66,12 +72,10 @@ public class EmployeeService {
      */
     @Transactional
     public void updateEmployee(final Employee employee) {
-        final boolean exists = employeeRepository.existsById(employee.id().value());
-        Ensure.isTrue(exists,
-                () -> new EntityNotFoundException(employee.id().value()));
-        final EmployeeEntity mappedEntity = entityMapper.map(employee);
-        final EmployeeEntity updatedEntity = employeeRepository.merge(mappedEntity);
-        // Map back to domain with the new audit values
+        final EmployeeEntity foundEntity = employeeRepository.findById(employee.id().value())
+                .orElseThrow(() -> new EntityNotFoundException(employee.id().value()));
+        final EmployeeEntity updatedEntity = employeeRepository.merge(foundEntity);
+        // Map back to domain to prepare for event publishing
         final Employee updatedEmployee = domainMapper.map(updatedEntity);
         eventService.publishUpdateEvent(updatedEmployee);
     }
@@ -82,7 +86,17 @@ public class EmployeeService {
                 .orElseThrow(() -> new EntityNotFoundException(id.value()));
         foundEntity.getAuditMetadata().setDeleted(true);
         final EmployeeEntity softDeletedEntity = employeeRepository.merge(foundEntity);
+        // Map back to domain to prepare for event publishing
         final Employee employee = domainMapper.map(softDeletedEntity);
         eventService.publishSoftDeleteEvent(employee);
+    }
+
+    public List<OutboxEntity> replayEmployee(EmployeeId id) {
+        log.info("Replaying events for aggregateId {}", id.value());
+        return outboxJpaRepository.findAllByAggregateId(
+                id.value(),
+                Sort.by("sequence").descending(),
+                Limit.unlimited()
+        );
     }
 }

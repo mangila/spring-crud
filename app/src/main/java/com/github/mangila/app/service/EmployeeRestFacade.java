@@ -1,13 +1,19 @@
 package com.github.mangila.app.service;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.app.model.employee.domain.Employee;
 import com.github.mangila.app.model.employee.domain.EmployeeId;
 import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
 import com.github.mangila.app.model.employee.dto.EmployeeDto;
+import com.github.mangila.app.model.employee.dto.EmployeeEventDto;
 import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Facade for REST endpoints.
@@ -21,19 +27,23 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
+@Slf4j
 public class EmployeeRestFacade {
 
     private final EmployeeService service;
     private final EmployeeDtoMapper dtoMapper;
+    private final EmployeeEventMapper eventMapper;
     private final EmployeeDomainMapper domainMapper;
     private final EmployeeFactory factory;
 
     public EmployeeRestFacade(EmployeeService service,
                               EmployeeDtoMapper dtoMapper,
+                              EmployeeEventMapper eventMapper,
                               EmployeeDomainMapper domainMapper,
                               EmployeeFactory factory) {
         this.service = service;
         this.dtoMapper = dtoMapper;
+        this.eventMapper = eventMapper;
         this.domainMapper = domainMapper;
         this.factory = factory;
     }
@@ -69,7 +79,24 @@ public class EmployeeRestFacade {
         service.softDeleteEmployeeById(id);
     }
 
-    public EmployeeDto replay(String employeeId) {
-        throw new UnsupportedOperationException("Replay not yet implemented");
+    public List<@Nullable EmployeeDto> replayEmployee(String employeeId) {
+        EmployeeId id = new EmployeeId(employeeId);
+        return service.replayEmployee(id)
+                .stream()
+                .map(entity -> {
+                    log.info("Outbox event: {}", entity);
+                    return entity.getPayload();
+                })
+                .map(objectNode -> {
+                    // the event payload key "dto" is what we are looking for
+                    if (objectNode.has("dto") && objectNode.get("dto").isObject()) {
+                        objectNode = (ObjectNode) objectNode.get("dto");
+                        EmployeeEventDto eventDto = eventMapper.map(objectNode);
+                        return dtoMapper.map(eventDto);
+                    }
+                    // here if we get null values, the event is missing the "dto" key
+                    return null;
+                })
+                .toList();
     }
 }

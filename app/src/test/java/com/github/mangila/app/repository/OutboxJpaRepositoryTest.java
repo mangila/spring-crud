@@ -43,6 +43,18 @@ class OutboxJpaRepositoryTest {
     private ClockTestConfig.TestClock clock;
 
     @Test
+    @DisplayName("Should find all by status")
+    void findAllByStatus() {
+        assertThat(1 + 1).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("Should find all by Aggregate ID")
+    void findAllByAggregateId() {
+        assertThat(1 + 1).isEqualTo(3);
+    }
+
+    @Test
     @DisplayName("Should change status")
     void changeStatus() {
         OutboxEntity entity = repository.persist(OutboxTestFactory.createOutboxEntity(OutboxEventStatus.PENDING, objectMapper));

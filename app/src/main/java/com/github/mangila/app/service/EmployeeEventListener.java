@@ -1,7 +1,7 @@
 package com.github.mangila.app.service;
 
-import com.github.mangila.app.model.outbox.OutboxProcessedSequenceEntity;
 import com.github.mangila.app.model.outbox.OutboxEvent;
+import com.github.mangila.app.model.outbox.OutboxProcessedSequenceEntity;
 import com.github.mangila.app.repository.OutboxProcessedSequenceJpaRepository;
 import jakarta.persistence.LockModeType;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,6 @@ public class EmployeeEventListener {
     }
 
     /**
-     * Listen for the OutboxEvent.
      * Creates an Exclusive lock for the aggregateId sequence and handles the event.
      * So the event will be processed only once.
      */
@@ -52,18 +51,47 @@ public class EmployeeEventListener {
             }
             // Try to find the next event in order for the aggregate
             long expectedSequence = latestProcessedSequence.getSequence() + 1;
-            if (event.sequence() == expectedSequence) {
+            if (canProcess(event.sequence(), expectedSequence)) {
                 eventHandler.handle(event);
                 latestProcessedSequence.setSequence(event.sequence());
                 sequenceRepository.merge(latestProcessedSequence);
-            } else if (event.sequence() < expectedSequence) {
-                log.warn("OutboxEvent sequence mismatch: {} - {}", event.sequence(), expectedSequence);
-                // do nothing and wait for the next event message relay cycle
-                // TODO: maybe use a staging event cache or something
+            } else if (isDuplicate(event.sequence(), expectedSequence)) {
+                log.warn("Duplicate event detected - {}", event);
+                // duplicate event, do nothing
+            } else if (isEarly(event.sequence(), expectedSequence)) {
+                log.warn("Event arrived too early - {}", event);
+                // event arrived too early, do nothing
+                // TODO: maybe create a staging area for early events
             } else {
-                log.warn("OutboxEvent sequence duplicate: {} - {}", event.sequence(), expectedSequence);
-                // do nothing and wait for the next event message relay cycle
+                // this is a critical, sequence-ordering mismatch. Might need manual intervention.
+                log.error("Outbox event ordering mismatch - Event seq:{} Expected seq:{} Latest seq:{}",
+                        event.sequence(),
+                        expectedSequence,
+                        latestProcessedSequence.getSequence());
             }
         });
+    }
+
+    /**
+     * Process the event if the sequence is the same as the last processed event + 1
+     */
+    private boolean canProcess(long eventSequence, long expectedSequence) {
+        return eventSequence == expectedSequence;
+    }
+
+    /**
+     * Duplicate events are not processed.
+     */
+    private static boolean isDuplicate(long eventSequence, long expectedSequence) {
+        return eventSequence == expectedSequence - 1;
+    }
+
+    /**
+     * Early bird catches the worm...
+     * But not in this case.
+     * Events arrived before the expected event.
+     */
+    private static boolean isEarly(long eventSequence, long expectedSequence) {
+        return eventSequence > expectedSequence;
     }
 }

@@ -5,10 +5,12 @@ import com.github.mangila.app.model.outbox.OutboxEvent;
 import com.github.mangila.app.repository.OutboxJpaRepository;
 import com.github.mangila.app.service.OutboxEventMapper;
 import com.github.mangila.app.service.OutboxFactory;
+import jakarta.validation.Valid;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Wrapper for Spring's ApplicationEventPublisher.
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  * But this is not the focus of this example.
  */
 @Service
+@Validated
 public class SpringEventPublisher {
 
     private final ApplicationEventPublisher publisher;
@@ -50,7 +53,7 @@ public class SpringEventPublisher {
      * MANDATORY transaction propagation is used to ensure that the event is persisted inside a tx
      */
     @Transactional(propagation = Propagation.MANDATORY)
-    public void publish(String aggregateId, Object event) {
+    public void publish(String aggregateId, @Valid Object event) {
         OutboxEntity entity = outboxFactory.from(aggregateId, event);
         outboxRepository.persist(entity);
         OutboxEvent outboxEvent = eventMapper.map(entity);
