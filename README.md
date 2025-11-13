@@ -1,14 +1,21 @@
 # spring-crud
 
-Spring Web app demonstrating C.R.U.D (Create, Read, Update, Delete) operations in a Layered Architecture,
-with event handling using Outbox Transactional Pattern. Event sourcing is used via the Outbox table.
+Spring Web app demonstrating C.R.U.D (Create, Read, Update, Delete) operations in a Layered Architecture
+
+## Architecture
+
+Postgres database is used as the persistence layer.
+
+Transactional Outbox pattern is used to send events, the outbox table can be used for event sourcing replays.
+
+[JobRunr](https://www.jobrunr.io) is being used for background tasks scheduling in the background module.
 
 Deployed to AWS and automated with IaC (Infrastructure as Code) and CM (Configuration Management) using Terraform and
 Ansible.
 
 **NOTE: This project is just for demonstration purposes. With a POC value**
 
-### Spring Boot
+### App
 
 Spring RESTful service with CRUD operations for the Employee domain. (The famous Employee CRUD, great for demonstration
 purposes)
@@ -37,6 +44,10 @@ Project is configured to fetch the latest [OWASP secure headers project](https:/
 The latest headers are fetched from the following URL:
 - https://owasp.org/www-project-secure-headers/ci/headers_add.json
 - https://owasp.org/www-project-secure-headers/ci/headers_remove.json
+
+### Background
+
+Spring Boot with JobRunr background tasks scheduler.
 
 ### Terraform
 

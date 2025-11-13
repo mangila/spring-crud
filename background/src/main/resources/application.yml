@@ -1,0 +1,15 @@
+spring:
+  main:
+    web-application-type: none
+    keep-alive: true
+  application:
+    name: spring-crud-background
+  threads:
+    virtual:
+      enabled: true
+  docker:
+    compose:
+      enabled: true
+      file: ${user.dir}/infrastructure/local/compose.yaml
+      skip:
+        in-tests: true

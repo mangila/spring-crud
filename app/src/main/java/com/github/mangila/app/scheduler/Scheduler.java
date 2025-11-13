@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Run some tasks, running with the Spring integrated scheduler.
  * Since the scheduler is running during the JVM lifecycle of the application, it's a good idea to use a separate service with a dedicated Scheduler framework.
- * To prevent resource exhaustion.
+ * To prevent resource exhaustion and not to disrupt important scheduled tasks during an application upgrade.
  * <br>
  * For minor stuff that belongs inside the application infra use the Spring scheduler. Because of its lightweight nature
  * <br>
