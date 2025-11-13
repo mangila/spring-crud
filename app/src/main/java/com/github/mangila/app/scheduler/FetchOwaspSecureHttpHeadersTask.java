@@ -34,7 +34,7 @@ import java.net.http.HttpResponse;
  * So it won't be super important to re-deploy the whole app if the static file is not updated regularly.
  * The static JSON file is NOT updated! So during a deployment if there is a new version of the headers,
  * the app will not pick up the new headers. So we need to update the static JSON file manually.
- * keep it simple; the programmer is actually forced to read the OWASP documentation. :O
+ * Keep it simple; the programmer is actually forced to read the OWASP documentation. :O
  * </p>
  * <p>
  * We are using the standard lib Java HTTP Client API for this.

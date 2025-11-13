@@ -30,6 +30,12 @@ purposes)
 - Swagger UI is available at http://localhost:8080/swagger-ui.html
 - Swagger JSON is available at http://localhost:8080/v3/api-docs
 
+##### Owasp Secure Headers
+
+Project is deployed with the current recommended OWASP secure headers from the OWASP HTTP secure headers project.
+
+- https://owasp.org/www-project-secure-headers/
+
 ### Terraform
 
 In this example we use the Terraform Cloud remote state backend.
