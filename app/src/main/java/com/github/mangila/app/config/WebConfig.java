@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -27,6 +28,8 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         var cors = new CorsConfiguration()
                 .applyPermitDefaultValues();
+        cors.addAllowedMethod(HttpMethod.PUT);
+        cors.addAllowedMethod(HttpMethod.DELETE);
         registry.addMapping("/**")
                 .combine(cors);
     }

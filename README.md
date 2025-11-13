@@ -32,13 +32,11 @@ purposes)
 
 ##### Owasp Secure Headers
 
-Project is configured to fetch the latest OWASP secure headers reference collections
+Project is configured to fetch the latest [OWASP secure headers project](https://owasp.org/www-project-secure-headers) reference collections
 
 The latest headers are fetched from the following URL:
 - https://owasp.org/www-project-secure-headers/ci/headers_add.json
 - https://owasp.org/www-project-secure-headers/ci/headers_remove.json
-
-- https://owasp.org/www-project-secure-headers/
 
 ### Terraform
 

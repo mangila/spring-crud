@@ -12,6 +12,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -60,14 +61,14 @@ import java.net.http.HttpResponse;
  */
 @Component
 @Slf4j
-public class FetchOwaspSecureHttpHeadersTask implements Task {
+public class FetchOwaspSecureHeadersTask implements Task {
 
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
     private final HttpHeaders oWaspSecureHeaders;
 
-    public FetchOwaspSecureHttpHeadersTask(ObjectMapper objectMapper,
-                                           HttpHeaders oWaspSecureHeaders) {
+    public FetchOwaspSecureHeadersTask(ObjectMapper objectMapper,
+                                       HttpHeaders oWaspSecureHeaders) {
         this.objectMapper = objectMapper;
         this.httpClient = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
@@ -87,23 +88,16 @@ public class FetchOwaspSecureHttpHeadersTask implements Task {
         log.info("Fetching OWASP secure headers");
         var node = objectMapper.createObjectNode();
         try {
-            OwaspResponse response = getOwaspSecureHeaders();
+            OwaspResponse response = fetchOwaspSecureHeaders();
             node.set("response", objectMapper.valueToTree(response));
             log.info("OWASP secure headers fetched successfully");
             String lastUpdate = oWaspSecureHeaders.getFirst(WebConfig.OWASP_LAST_UPDATE_UTC_HTTP_HEADER);
-            // last update timestamp header was null, update headers
-            if (lastUpdate == null) {
+            if (shouldUpdate(lastUpdate, response)) {
                 updateHeaders(response);
-            }
-            // there is no new version of the headers, nothing to update
-            else if (lastUpdate.equals(response.timestamp())) {
+            } else {
                 String msg = "Last update timestamp matches, wont update";
                 log.info(msg);
                 node.put("error", msg);
-            }
-            // there is a new version of the headers, time for an update!
-            else {
-                updateHeaders(response);
             }
             return node;
         } catch (Exception e) {
@@ -111,6 +105,19 @@ public class FetchOwaspSecureHttpHeadersTask implements Task {
             node.put("error", e.getMessage());
             return node;
         }
+    }
+
+    /**
+     * <p>
+     * Fetch The Latest OWASP secure http headers from the OWASP HTTP secure headers project.
+     * </p>
+     */
+    private OwaspResponse fetchOwaspSecureHeaders() throws IOException, InterruptedException {
+        var response = httpClient.send(HttpRequest.newBuilder()
+                .uri(URI.create("https://owasp.org/www-project-secure-headers/ci/headers_add.json"))
+                .GET()
+                .build(), HttpResponse.BodyHandlers.ofString());
+        return objectMapper.readValue(response.body(), OwaspResponse.class);
     }
 
     private void updateHeaders(OwaspResponse response) {
@@ -130,17 +137,11 @@ public class FetchOwaspSecureHttpHeadersTask implements Task {
     }
 
     /**
-     * Get Latest OWASP secure headers, from the OWASP HTTP secure headers project.
+     * <p>
+     * No value found in the header or timestamp mismatch, time for an update!
+     * </p>
      */
-    public OwaspResponse getOwaspSecureHeaders() {
-        try {
-            var response = httpClient.send(HttpRequest.newBuilder()
-                    .uri(URI.create("https://owasp.org/www-project-secure-headers/ci/headers_add.json"))
-                    .GET()
-                    .build(), HttpResponse.BodyHandlers.ofString());
-            return objectMapper.readValue(response.body(), OwaspResponse.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    private static boolean shouldUpdate(String lastUpdate, OwaspResponse response) {
+        return lastUpdate == null || !lastUpdate.equals(response.timestamp());
     }
 }

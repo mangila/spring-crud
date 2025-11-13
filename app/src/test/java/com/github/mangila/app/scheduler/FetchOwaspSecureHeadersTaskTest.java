@@ -15,10 +15,10 @@ import org.springframework.context.annotation.Import;
         }
 )
 @Slf4j
-class FetchOwaspSecureHttpHeadersTaskTest {
+class FetchOwaspSecureHeadersTaskTest {
 
     @Autowired
-    private FetchOwaspSecureHttpHeadersTask task;
+    private FetchOwaspSecureHeadersTask task;
 
     @Test
     void call() {
