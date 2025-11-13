@@ -53,7 +53,7 @@ class EmployeeEventListenerTest {
     private EmployeeEventListener listener;
 
     @MockitoSpyBean
-    private EmployeeEventHandler eventHandler;
+    private OutboxEventHandler eventHandler;
 
     @MockitoSpyBean
     private OutboxFactory outboxFactory;

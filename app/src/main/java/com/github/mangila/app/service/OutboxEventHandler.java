@@ -19,10 +19,10 @@ import java.time.Duration;
  */
 @Service
 @Slf4j
-public class EmployeeEventHandler {
+public class OutboxEventHandler {
     private final OutboxJpaRepository repository;
 
-    public EmployeeEventHandler(OutboxJpaRepository repository) {
+    public OutboxEventHandler(OutboxJpaRepository repository) {
         this.repository = repository;
     }
 

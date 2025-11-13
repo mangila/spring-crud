@@ -21,11 +21,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 @Slf4j
 public class EmployeeEventListener {
-    private final EmployeeEventHandler eventHandler;
+    private final OutboxEventHandler eventHandler;
     private final OutboxProcessedSequenceJpaRepository sequenceRepository;
     private final TransactionTemplate transactionTemplate;
 
-    public EmployeeEventListener(EmployeeEventHandler eventHandler,
+    public EmployeeEventListener(OutboxEventHandler eventHandler,
                                  OutboxProcessedSequenceJpaRepository sequenceRepository,
                                  TransactionTemplate transactionTemplate) {
         this.eventHandler = eventHandler;
@@ -34,10 +34,28 @@ public class EmployeeEventListener {
     }
 
     /**
-     * Creates an Exclusive lock for the aggregateId sequence and handles the event.
-     * So the event will be processed only once.
+     * <p>
+     * Creates an Exclusive lock for the aggregateId sequence and determine if the event can be processed.
+     * </p>
+     * <p>
+     * Now we are only handling one Employee Domain. But if there should be more domains, an extra condition needs to be added.
+     * And an extra field on the OutboxEvent to specify the domain.
+     * TransactionalEventListener can use a condition to filter the events.
+     * </p>
+     * <br>
+     * <pre>
+     *       {@code
+     *            @TransactionalEventListener(
+     *                   phase = TransactionPhase.AFTER_COMMIT,
+     *                   condition = "#event.domain == employee"
+     *           )
+     *           public void listen(OutboxEvent event) {}
+     *      }
+     * </pre>
      */
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @TransactionalEventListener(
+            phase = TransactionPhase.AFTER_COMMIT
+    )
     @Async
     public void listen(OutboxEvent event) {
         log.info("Received OutboxEvent: {}", event);
@@ -80,6 +98,7 @@ public class EmployeeEventListener {
     }
 
     /**
+     * Check for duplicate events.
      * Duplicate events are not processed.
      */
     private static boolean isDuplicate(long eventSequence, long expectedSequence) {
@@ -87,9 +106,9 @@ public class EmployeeEventListener {
     }
 
     /**
+     * Check for Events arrived before the expected event.
      * Early bird catches the worm...
      * But not in this case.
-     * Events arrived before the expected event.
      */
     private static boolean isEarly(long eventSequence, long expectedSequence) {
         return eventSequence > expectedSequence;
