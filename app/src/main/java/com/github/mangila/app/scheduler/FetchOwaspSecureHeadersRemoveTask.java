@@ -3,6 +3,7 @@ package com.github.mangila.app.scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.mangila.app.config.OwaspHeaders;
 import com.github.mangila.app.config.WebConfig;
 import com.github.mangila.app.model.owasp.OwaspRemoveResponse;
 import com.github.mangila.app.service.OwaspRestClient;
@@ -16,14 +17,14 @@ public class FetchOwaspSecureHeadersRemoveTask implements Task {
 
     private final ObjectMapper objectMapper;
     private final OwaspRestClient owaspRestClient;
-    private final HttpHeaders oWaspSecureHeadersToAdd;
+    private final OwaspHeaders headersToRemove;
 
     public FetchOwaspSecureHeadersRemoveTask(ObjectMapper objectMapper,
                                              OwaspRestClient owaspRestClient,
-                                             HttpHeaders oWaspSecureHeadersToAdd) {
+                                             OwaspHeaders headersToRemove) {
         this.objectMapper = objectMapper;
         this.owaspRestClient = owaspRestClient;
-        this.oWaspSecureHeadersToAdd = oWaspSecureHeadersToAdd;
+        this.headersToRemove = headersToRemove;
     }
 
     @Override
@@ -39,12 +40,12 @@ public class FetchOwaspSecureHeadersRemoveTask implements Task {
             OwaspRemoveResponse owaspRemoveResponse = owaspRestClient.fetchOwaspSecureHeadersToRemove();
             node.set("response", objectMapper.valueToTree(owaspRemoveResponse));
             log.info("OWASP secure headers fetched successfully");
-            String lastUpdate = oWaspSecureHeadersToAdd.getFirst(WebConfig.OWASP_LAST_UPDATE_UTC_HTTP_HEADER);
+            String lastUpdate = headersToRemove.getHeader(WebConfig.OWASP_LAST_UPDATE_UTC_HTTP_HEADER);
             if (shouldUpdate(lastUpdate, owaspRemoveResponse)) {
                 HttpHeaders httpHeaders = owaspRemoveResponse.extractHeaders();
-                oWaspSecureHeadersToAdd.clear();
-                oWaspSecureHeadersToAdd.putAll(httpHeaders);
-                log.info("OWASP secure headers to add applied successfully - {}", oWaspSecureHeadersToAdd.toSingleValueMap());
+                headersToRemove.clear();
+                headersToRemove.putAll(httpHeaders);
+                log.info("OWASP secure headers to remove applied successfully - {}", headersToRemove.getHeaders());
             } else {
                 String msg = "Last update timestamp matches, wont update";
                 log.info(msg);
@@ -64,6 +65,9 @@ public class FetchOwaspSecureHeadersRemoveTask implements Task {
      * </p>
      */
     private static boolean shouldUpdate(String lastUpdate, OwaspRemoveResponse response) {
-        return lastUpdate == null || !lastUpdate.equals(response.timestamp());
+        if (lastUpdate == null) {
+            return true;
+        }
+        return response.isUpdated(lastUpdate);
     }
 }

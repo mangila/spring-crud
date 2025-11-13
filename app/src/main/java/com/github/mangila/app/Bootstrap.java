@@ -1,6 +1,7 @@
 package com.github.mangila.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.app.config.OwaspHeaders;
 import com.github.mangila.app.model.owasp.OwaspAddResponse;
 import com.github.mangila.app.model.owasp.OwaspRemoveResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -27,16 +28,17 @@ import java.nio.charset.StandardCharsets;
 public class Bootstrap implements CommandLineRunner {
 
     private final ObjectMapper objectMapper;
-    private final HttpHeaders oWaspSecureHeadersToAdd;
-    private final HttpHeaders oWaspSecureHeadersToRemove;
+    private final OwaspHeaders headersToAdd;
+    private final OwaspHeaders headersToRemove;
 
     public Bootstrap(ObjectMapper objectMapper,
-                     HttpHeaders oWaspSecureHeadersToAdd,
-                     HttpHeaders oWaspSecureHeadersToRemove) {
+                     OwaspHeaders headersToAdd,
+                     OwaspHeaders headersToRemove) {
         this.objectMapper = objectMapper;
-        this.oWaspSecureHeadersToAdd = oWaspSecureHeadersToAdd;
-        this.oWaspSecureHeadersToRemove = oWaspSecureHeadersToRemove;
+        this.headersToAdd = headersToAdd;
+        this.headersToRemove = headersToRemove;
     }
+
 
     @Override
     public void run(String... args) throws Exception {
@@ -54,7 +56,7 @@ public class Bootstrap implements CommandLineRunner {
         String json = resource.getContentAsString(StandardCharsets.UTF_8);
         OwaspAddResponse owaspAddResponse = objectMapper.readValue(json, OwaspAddResponse.class);
         HttpHeaders httpHeaders = owaspAddResponse.extractHeaders();
-        oWaspSecureHeadersToAdd.putAll(httpHeaders);
+        headersToAdd.putAll(httpHeaders);
     }
 
     private void loadStaticOwaspSecureHeadersToRemove() throws IOException {
@@ -62,6 +64,6 @@ public class Bootstrap implements CommandLineRunner {
         String json = resource.getContentAsString(StandardCharsets.UTF_8);
         OwaspRemoveResponse owaspRemoveResponse = objectMapper.readValue(json, OwaspRemoveResponse.class);
         HttpHeaders httpHeaders = owaspRemoveResponse.extractHeaders();
-        oWaspSecureHeadersToRemove.putAll(httpHeaders);
+        headersToRemove.putAll(httpHeaders);
     }
 }

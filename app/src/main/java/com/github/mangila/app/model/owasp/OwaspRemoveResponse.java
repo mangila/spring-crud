@@ -23,4 +23,8 @@ public record OwaspRemoveResponse(
         httpHeaders.add(WebConfig.OWASP_LAST_UPDATE_UTC_HTTP_HEADER, timestamp());
         return httpHeaders;
     }
+
+    public boolean isUpdated(String oldTimestamp) {
+        return !timestamp.equals(oldTimestamp);
+    }
 }

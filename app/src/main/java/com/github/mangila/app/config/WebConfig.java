@@ -37,17 +37,17 @@ public class WebConfig implements WebMvcConfigurer {
     /**
      * Should contain OWASP headers from - <a href="https://owasp.org/www-project-secure-headers/ci/headers_add.json">Headers to Add</a>
      */
-    @Bean("oWaspSecureHeadersToAdd")
-    HttpHeaders oWaspSecureHeadersToAdd() {
-        return new HttpHeaders();
+    @Bean("headersToAdd")
+    OwaspHeaders headersToAdd() {
+        return new OwaspHeaders(new HttpHeaders());
     }
 
     /**
      * Should contain OWASP headers from - <a href="https://owasp.org/www-project-secure-headers/ci/headers_remove.json">Headers to Remove</a>
      */
-    @Bean("oWaspSecureHeadersToRemove")
-    HttpHeaders oWaspSecureHeadersToRemove() {
-        return new HttpHeaders();
+    @Bean("headersToRemove")
+    OwaspHeaders headersToRemove() {
+        return new OwaspHeaders(new HttpHeaders());
     }
 
     /**
@@ -56,18 +56,21 @@ public class WebConfig implements WebMvcConfigurer {
      */
     @Bean
     OncePerRequestFilter owaspSecureHeadersFilter(
-            HttpHeaders oWaspSecureHeadersToAdd,
-            HttpHeaders oWaspSecureHeadersToRemove
+            OwaspHeaders headersToAdd,
+            OwaspHeaders headersToRemove
     ) {
         return new OncePerRequestFilter() {
             @Override
             protected void doFilterInternal(HttpServletRequest request,
                                             HttpServletResponse response,
                                             FilterChain filterChain) throws ServletException, IOException {
-                oWaspSecureHeadersToAdd.asSingleValueMap()
-                        .forEach(response::setHeader);
-                oWaspSecureHeadersToRemove.asSingleValueMap()
+                headersToAdd.getHeaders().forEach(response::setHeader);
+                headersToRemove.getHeaders()
                         .forEach((key, value) -> {
+                            // No need to remove our custom timestamp header
+                            if (response.containsHeader(OWASP_LAST_UPDATE_UTC_HTTP_HEADER)) {
+                                return;
+                            }
                             if (response.containsHeader(key)) {
                                 response.setHeader(key, null);
                                 log.warn("OWASP recommended header to be removed detected in response - {} - {}", key, value);
