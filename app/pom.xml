@@ -16,6 +16,7 @@
 
     <properties>
         <java.version>21</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
         <!-- START:: NOT SPRING MANAGED -->
@@ -44,6 +45,13 @@
             <artifactId>resilience4j-spring-boot3</artifactId>
             <version>2.3.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.tngtech.archunit/archunit-junit5 -->
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <version>1.4.1</version>
+            <scope>test</scope>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/net.javacrumbs.json-unit/json-unit-assertj -->
         <dependency>
             <groupId>net.javacrumbs.json-unit</groupId>
@@ -52,7 +60,6 @@
             <scope>test</scope>
         </dependency>
         <!-- END:: NOT SPRING MANAGED -->
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
