@@ -85,17 +85,16 @@ public class EmployeeRestFacade {
                 .stream()
                 .map(entity -> {
                     log.info("Outbox event: {}", entity);
-                    return entity.getPayload();
-                })
-                .map(objectNode -> {
+                    ObjectNode payload = entity.getPayload();
                     // the event payloads JSON root key "dto" is what we are looking for
                     String key = "dto";
-                    if (objectNode.has(key) && objectNode.get(key).isObject()) {
-                        objectNode = (ObjectNode) objectNode.get(key);
-                        EmployeeEventDto eventDto = eventMapper.map(objectNode);
+                    if (payload.has(key) && payload.get(key).isObject()) {
+                        payload = (ObjectNode) payload.get(key);
+                        EmployeeEventDto eventDto = eventMapper.map(payload);
                         return dtoMapper.map(eventDto);
                     }
                     // here if we get null values, the event is missing the "dto" key
+                    log.warn("Event missing 'dto' key: {} - {}", entity.getEventName(), entity.getId());
                     return null;
                 })
                 .toList();
