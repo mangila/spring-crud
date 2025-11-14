@@ -19,11 +19,23 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
+/**
+ * <p>
+ *     Use a noun or no noun for the resource is the question.
+ *     The noun fit well in this domain, if you think about it, we are basically querying a collection of employees as a REST endpoint.
+ *     The endpoints are created how we want to use the employee collection.
+ * </p>
+ * <p>
+ *    The api versioning is very convenient, if huge breaking changes occur, a new controller v2 can be created.
+ *    <br>
+ *    e.g., /api/v1/employees, /api/v2/employees
+ *    <br>
+ *    e.g., A brand new DTO is introduced, and we still have consumers of the old DTO.
+ *    <br>
+ *    Can be anything really that breaks the current REST contract
+ * </p>
+ */
 @RestController
-// Use a nouns or no noun for the resource is the question.
-// the noun fit well in this domain, if you think of it we are basically querying a collection of employees as a REST endpoint.
-// and creating endpoints how we want to query the employee collection.
-// the api versioning is very convenient, if huge breaking changes would occur a new controller v2 can be created.
 @RequestMapping("api/v1/employees")
 @Validated
 public class EmployeeController {
