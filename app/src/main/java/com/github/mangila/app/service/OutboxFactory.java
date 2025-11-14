@@ -31,6 +31,7 @@ public class OutboxFactory {
         outbox.setPayload(objectMapper.valueToTree(event));
         outbox.setAuditMetadata(AuditMetadata.EMPTY);
         // Exclusive lock for the aggregateId and increment nextSequenceEntity
+        // TODO: lock timeout
         OutboxNextSequenceEntity nextSequenceEntity = nextSequenceRepository.lockById(
                 aggregateId,
                 LockModeType.PESSIMISTIC_WRITE);

@@ -61,6 +61,8 @@ public class EmployeeEventListener {
         log.info("Received OutboxEvent: {}", event);
         transactionTemplate.executeWithoutResult(txStatus -> {
             // Exclusive lock for the aggregate and handle the event
+            // Other Events will be added to an internal wait queue
+            // TODO: lock timeout
             OutboxProcessedSequenceEntity latestProcessedSequence = sequenceRepository.lockById(
                     event.aggregateId(),
                     LockModeType.PESSIMISTIC_WRITE);
