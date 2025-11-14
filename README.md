@@ -13,6 +13,8 @@ Transactional Outbox pattern is used to send events, the outbox table can be use
 Deployed to AWS and automated with IaC (Infrastructure as Code) and CM (Configuration Management) using Terraform and
 Ansible.
 
+Live Integration testing is done with [Venom](https://github.com/ovh/venom).
+
 **NOTE: This project is just for demonstration purposes. With a POC value**
 
 ### App
@@ -39,9 +41,11 @@ purposes)
 
 ##### Owasp Secure Headers
 
-Project is configured to fetch the latest [OWASP secure headers project](https://owasp.org/www-project-secure-headers) reference collections
+Project is configured to fetch the latest [OWASP secure headers project](https://owasp.org/www-project-secure-headers)
+reference collections
 
 The latest headers are fetched from the following URL:
+
 - https://owasp.org/www-project-secure-headers/ci/headers_add.json
 - https://owasp.org/www-project-secure-headers/ci/headers_remove.json
 
@@ -49,11 +53,15 @@ The latest headers are fetched from the following URL:
 
 Spring Boot with JobRunr background tasks scheduler.
 
-### Terraform
+### Infrastructure
+
+Terraform and Ansible are used for provisioning the infrastructure.
+
+#### Terraform
 
 In this example we use the Terraform Cloud remote state backend.
 
-#### Terraform AWS
+##### AWS
 
 Resource created by Terraform is in the scope of the AWS free tier.
 
@@ -65,9 +73,13 @@ Resource created by Terraform is in the scope of the AWS free tier.
 In the local folder is a Terraform local state project that runs some python and .tftpl(Terraform Template File) to
 manage the Ansible Control Node and provision the EC2 instance.
 
-### Ansible
+#### Ansible
 
 The Ansible Control Node is managed from our local machine.
+
+### Test
+
+Live testing suites
 
 
 
