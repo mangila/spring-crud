@@ -12,6 +12,12 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+/**
+ * <p>
+ *     DTO for employee domain events.
+ *     This is a representation of the event payload as it is sent to the event bus.
+ * </p>
+ */
 public record EmployeeEventDto(
         @NotBlank @ValidEmployeeId String employeeId,
         @ValidEmployeeName String firstName,
