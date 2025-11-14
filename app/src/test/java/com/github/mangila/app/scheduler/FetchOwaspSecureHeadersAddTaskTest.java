@@ -1,7 +1,7 @@
 package com.github.mangila.app.scheduler;
 
 import com.github.mangila.app.TestcontainersConfiguration;
-import com.github.mangila.app.service.OwaspRestClient;
+import com.github.mangila.app.shared.OwaspRestClient;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

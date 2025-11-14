@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.app.config.OwaspHeaders;
 import com.github.mangila.app.config.WebConfig;
 import com.github.mangila.app.model.owasp.OwaspRemoveResponse;
-import com.github.mangila.app.service.OwaspRestClient;
+import com.github.mangila.app.shared.OwaspRestClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;

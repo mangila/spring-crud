@@ -1,24 +1,22 @@
-package com.github.mangila.app.scheduler;
+package com.github.mangila.app.shared;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.app.model.task.TaskExecutionEntity;
 import com.github.mangila.app.model.task.TaskExecutionStatus;
 import com.github.mangila.app.repository.TaskExecutionJpaRepository;
+import com.github.mangila.app.scheduler.Task;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.task.VirtualThreadTaskExecutor;
-import org.springframework.stereotype.Service;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import java.util.concurrent.CompletableFuture;
 
-@Service
-public class SchedulerTaskExecutor {
+public class ApplicationTaskExecutor {
 
-    private final VirtualThreadTaskExecutor taskExecutor;
+    private final SimpleAsyncTaskExecutor taskExecutor;
     private final TaskExecutionJpaRepository taskExecutionRepository;
 
-    public SchedulerTaskExecutor(@Qualifier("virtualThreadTaskExecutor") VirtualThreadTaskExecutor taskExecutor,
-                                 TaskExecutionJpaRepository taskExecutionRepository) {
+    public ApplicationTaskExecutor(SimpleAsyncTaskExecutor taskExecutor,
+                                   TaskExecutionJpaRepository taskExecutionRepository) {
         this.taskExecutor = taskExecutor;
         this.taskExecutionRepository = taskExecutionRepository;
     }
