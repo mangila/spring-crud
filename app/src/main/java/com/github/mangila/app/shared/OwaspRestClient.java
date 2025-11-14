@@ -8,6 +8,11 @@ import org.springframework.web.client.RestClient;
 
 import java.net.http.HttpClient;
 
+/**
+ * This is an optional approach to stay updated with the OWASP Secure Headers project.
+ * Static file in the resources folder should "be good enough" and of course, not all headers are required.
+ * Depends on the use case.
+ */
 @Service
 public class OwaspRestClient {
 
