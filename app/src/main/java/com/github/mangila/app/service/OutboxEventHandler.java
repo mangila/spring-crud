@@ -8,6 +8,7 @@ import com.github.mangila.app.model.outbox.OutboxEventStatus;
 import com.github.mangila.app.repository.OutboxJpaRepository;
 import com.github.mangila.app.shared.exception.UnprocessableEventException;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -31,7 +32,7 @@ public class OutboxEventHandler {
 
     public void handle(OutboxEvent event) {
         try {
-            Class<?> eventType = Class.forName(event.eventName());
+            Class<?> eventType = getEventType(event.eventName());
             if (eventType == CreateNewEmployeeEvent.class) {
                 handleCreateNewEmployeeEvent(event);
             } else if (eventType == UpdateEmployeeEvent.class) {
@@ -49,6 +50,23 @@ public class OutboxEventHandler {
             log.error("Error handling event: {}", event, e);
             repository.changeStatus(OutboxEventStatus.FAILURE, event.aggregateId());
         }
+    }
+
+    /**
+     * <p>
+     * The class needs to be in our classpath to be loaded.
+     * <br>
+     * Explicitly avoids running static blocks (initialization phase)
+     * since we are just doing a reference check.
+     * Just using Class.forName() can cause some issues if there is some static initialization code.
+     * </p>
+     */
+    private static Class<?> getEventType(String eventName) throws ClassNotFoundException {
+        boolean init = false;
+        return Class.forName(
+                eventName,
+                init,
+                Thread.currentThread().getContextClassLoader());
     }
 
     /**
