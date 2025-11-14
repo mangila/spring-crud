@@ -21,7 +21,7 @@ public class JpaConfig {
     /**
      * The JPA AuditingHandler uses the Clock bean provisioned
      * <br>
-     * Audit in UTC
+     * Audit in UTC, the default dateTimeProvider provided by Spring is in the local date time zone.
      */
     @Bean
     DateTimeProvider dateTimeProvider(Clock clock) {

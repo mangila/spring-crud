@@ -1,4 +1,4 @@
-package com.github.mangila.app.service;
+package com.github.mangila.app.shared;
 
 import com.github.mangila.app.model.owasp.OwaspAddResponse;
 import com.github.mangila.app.model.owasp.OwaspRemoveResponse;

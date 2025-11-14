@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 // Use a nouns or no noun for the resource is the question.
@@ -48,13 +49,12 @@ public class EmployeeController {
     @GetMapping(value = "replay/{employeeId}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<EmployeeDto> replay(
+    public ResponseEntity<List<EmployeeDto>> replayEmployee(
             @PathVariable
             @NotBlank
             @ValidEmployeeId
             String employeeId) {
-        return ResponseEntity.ok()
-                .body(restFacade.replay(employeeId));
+        return ResponseEntity.ok().body(restFacade.replayEmployee(employeeId));
     }
 
     @GetMapping

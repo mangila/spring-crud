@@ -35,7 +35,7 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     /**
-     * Should contain OWASP headers from - <a href="https://owasp.org/www-project-secure-headers/ci/headers_add.json">Headers to Add</a>
+     * Contains OWASP headers from - <a href="https://owasp.org/www-project-secure-headers/ci/headers_add.json">Headers to Add</a>
      */
     @Bean("headersToAdd")
     OwaspHeaders headersToAdd() {
@@ -43,7 +43,7 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     /**
-     * Should contain OWASP headers from - <a href="https://owasp.org/www-project-secure-headers/ci/headers_remove.json">Headers to Remove</a>
+     * Contains OWASP headers from - <a href="https://owasp.org/www-project-secure-headers/ci/headers_remove.json">Headers to Remove</a>
      */
     @Bean("headersToRemove")
     OwaspHeaders headersToRemove() {

@@ -1,7 +1,7 @@
 package com.github.mangila.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mangila.app.scheduler.SchedulerTaskExecutor;
+import com.github.mangila.app.shared.ApplicationTaskExecutor;
 import com.github.mangila.app.scheduler.Task;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Selector;
@@ -23,11 +23,11 @@ import java.util.Map;
 @Component
 public class TaskActuatorController {
 
-    private final SchedulerTaskExecutor taskExecutor;
+    private final ApplicationTaskExecutor taskExecutor;
     private final ObjectMapper objectMapper;
     private final Map<String, Task> taskMap;
 
-    public TaskActuatorController(SchedulerTaskExecutor taskExecutor,
+    public TaskActuatorController(ApplicationTaskExecutor taskExecutor,
                                   ObjectMapper objectMapper,
                                   Map<String, Task> taskMap) {
         this.taskExecutor = taskExecutor;

@@ -6,6 +6,7 @@ import com.github.mangila.app.model.outbox.OutboxEntity;
 import com.github.mangila.app.model.outbox.OutboxEventStatus;
 import com.github.mangila.app.repository.OutboxJpaRepository;
 import com.github.mangila.app.service.OutboxEventMapper;
+import com.github.mangila.app.shared.ApplicationContextHolder;
 import com.github.mangila.app.shared.SpringEventPublisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Limit;
@@ -43,6 +44,7 @@ public class OutboxMessageRelayTask implements Task {
     @Override
     @Transactional
     public ObjectNode call() {
+        log.info("Message from ApplicationContextHolder: - {}", ApplicationContextHolder.getEntry("message"));
         List<OutboxEntity> pendingEntities = repository.findAllByStatus(
                 OutboxEventStatus.PENDING,
                 Sort.by("auditMetadata.created").descending(),

@@ -1,6 +1,7 @@
 package com.github.mangila.app.scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.app.shared.ApplicationTaskExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -22,16 +23,16 @@ import java.util.Map;
 @Slf4j
 public class Scheduler {
 
-    private final SchedulerTaskExecutor schedulerTaskExecutor;
+    private final ApplicationTaskExecutor applicationTaskExecutor;
     private final ObjectMapper objectMapper;
 
     // Spring magic, wires a map of tasks with their bean names.
     private final Map<String, Task> taskMap;
 
-    public Scheduler(SchedulerTaskExecutor schedulerTaskExecutor,
+    public Scheduler(ApplicationTaskExecutor applicationTaskExecutor,
                      ObjectMapper objectMapper,
                      Map<String, Task> taskMap) {
-        this.schedulerTaskExecutor = schedulerTaskExecutor;
+        this.applicationTaskExecutor = applicationTaskExecutor;
         this.objectMapper = objectMapper;
         this.taskMap = taskMap;
     }
@@ -52,7 +53,7 @@ public class Scheduler {
         Task task = taskMap.get("outboxMessageRelayTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
-        schedulerTaskExecutor.submit(task, node);
+        applicationTaskExecutor.submit(task, node);
     }
 
     /**
@@ -66,10 +67,11 @@ public class Scheduler {
             fixedRateString = "${application.scheduler.fixed-rate}"
     )
     void softDeleteSuccessTaskExecutionTask() {
+        log.info("Running softDeleteSuccessTaskExecutionTask");
         Task task = taskMap.get("softDeleteSuccessTaskExecutionTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
-        schedulerTaskExecutor.submit(task, node);
+        applicationTaskExecutor.submit(task, node);
     }
 
     /**
@@ -82,7 +84,7 @@ public class Scheduler {
         Task task = taskMap.get("fetchOwaspSecureHeadersAddTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
-        schedulerTaskExecutor.submit(task, node);
+        applicationTaskExecutor.submit(task, node);
     }
 
     /**
@@ -95,6 +97,6 @@ public class Scheduler {
         Task task = taskMap.get("fetchOwaspSecureHeadersRemoveTask");
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
-        schedulerTaskExecutor.submit(task, node);
+        applicationTaskExecutor.submit(task, node);
     }
 }

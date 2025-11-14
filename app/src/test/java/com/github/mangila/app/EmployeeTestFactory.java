@@ -6,6 +6,7 @@ import com.github.mangila.app.model.AuditMetadata;
 import com.github.mangila.app.model.employee.domain.*;
 import com.github.mangila.app.model.employee.dto.CreateNewEmployeeRequest;
 import com.github.mangila.app.model.employee.dto.EmployeeDto;
+import com.github.mangila.app.model.employee.dto.EmployeeEventDto;
 import com.github.mangila.app.model.employee.dto.UpdateEmployeeRequest;
 import com.github.mangila.app.model.employee.entity.EmployeeEntity;
 import com.github.mangila.app.model.employee.type.EmploymentActivity;
@@ -30,6 +31,11 @@ public class EmployeeTestFactory {
     public static EmployeeDto createEmployeeDto(ObjectMapper objectMapper) throws IOException {
         var jsonString = FilePathUtil.readJsonFileToString("/json/employee-dto.json");
         return objectMapper.readValue(jsonString, EmployeeDto.class);
+    }
+
+    public static EmployeeEventDto createEmployeeEventDto(ObjectMapper objectMapper) throws IOException {
+        var jsonString = FilePathUtil.readJsonFileToString("/json/employee-event-dto.json");
+        return objectMapper.readValue(jsonString, EmployeeEventDto.class);
     }
 
     public static EmployeeId createEmployeeId() {

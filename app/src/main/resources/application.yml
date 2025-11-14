@@ -9,16 +9,20 @@ application:
     fixed-rate: 5s
     fixed-delay: 10
     cron: "@weekly"
+# Tomcat Server Properties
+# https://docs.spring.io/spring-boot/how-to/webserver.html
+server:
+  compression:
+    enabled: true
+    min-response-size: 2KB
+    mime-types: "application/json"
+  ssl:
+    enabled: false
+  # Tomcat supports both H2 (Http2 w TLS) and H2C (Http2 without TLS)
+  http2:
+    enabled: true
 # Spring Properties
 spring:
-  task:
-    scheduling:
-      thread-name-prefix: "scheduler-"
-      shutdown:
-        await-termination: true
-        await-termination-period: 30s
-    execution:
-      thread-name-prefix: "async-"
   application:
     name: spring-crud
   threads:
@@ -63,8 +67,6 @@ management:
     web:
       exposure:
         include: "health, scheduledtasks, task, outbox"
-      cors:
-        exposed-headers: "X-Total-Count"
 # SpringDoc Properties
 springdoc:
   show-actuator: true
