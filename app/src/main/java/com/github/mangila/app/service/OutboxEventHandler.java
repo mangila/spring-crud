@@ -48,6 +48,8 @@ public class OutboxEventHandler {
     /**
      * This is where the event handling logic goes for the event.
      * Here we simulate a 500-ms-second task.
+     * If there is more complex event handling logic, this can be split up into multiple Beans
+     * e.g., CreateNewEmployeeEventHandler, UpdateEmployeeEventHandler, SoftDeleteEmployeeEventHandler.
      * <br>
      * This is where the event leaves our "Outbox" and hopefully enters someone's "Inbox" :)
      * <br>
