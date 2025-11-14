@@ -35,9 +35,6 @@ public class OutboxFactory {
         OutboxNextSequenceEntity nextSequenceEntity = nextSequenceRepository.lockById(
                 aggregateId,
                 LockModeType.PESSIMISTIC_WRITE);
-        if (nextSequenceEntity == null) {
-            nextSequenceEntity = OutboxNextSequenceEntity.from(aggregateId);
-        }
         long sequence = nextSequenceEntity.getSequence() + 1;
         nextSequenceEntity.setSequence(sequence);
         outbox.setSequence(sequence);

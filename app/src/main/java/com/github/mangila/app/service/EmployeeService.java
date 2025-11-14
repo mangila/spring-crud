@@ -92,7 +92,6 @@ public class EmployeeService {
     }
 
     public List<OutboxEntity> replayEmployee(EmployeeId id) {
-        log.info("Replaying events for aggregateId {}", id.value());
         return outboxJpaRepository.findAllByAggregateId(
                 id.value(),
                 Sort.by("sequence").descending(),

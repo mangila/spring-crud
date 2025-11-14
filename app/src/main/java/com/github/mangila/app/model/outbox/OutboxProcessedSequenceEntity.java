@@ -32,6 +32,7 @@ public class OutboxProcessedSequenceEntity {
     public static OutboxProcessedSequenceEntity from(String aggregateId) {
         var sequence = new OutboxProcessedSequenceEntity();
         sequence.setAggregateId(aggregateId);
+        sequence.setSequence(0);
         sequence.setAuditMetadata(AuditMetadata.EMPTY);
         return sequence;
     }

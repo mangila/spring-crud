@@ -33,6 +33,7 @@ public class OutboxNextSequenceEntity {
     public static OutboxNextSequenceEntity from(String aggregateId) {
         var sequence = new OutboxNextSequenceEntity();
         sequence.setAggregateId(aggregateId);
+        sequence.setSequence(0);
         sequence.setAuditMetadata(AuditMetadata.EMPTY);
         return sequence;
     }
