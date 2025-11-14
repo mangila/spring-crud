@@ -1,5 +1,8 @@
 package com.github.mangila.app.service;
 
+import com.github.mangila.app.model.employee.event.CreateNewEmployeeEvent;
+import com.github.mangila.app.model.employee.event.SoftDeleteEmployeeEvent;
+import com.github.mangila.app.model.employee.event.UpdateEmployeeEvent;
 import com.github.mangila.app.model.outbox.OutboxEvent;
 import com.github.mangila.app.model.outbox.OutboxEventStatus;
 import com.github.mangila.app.repository.OutboxJpaRepository;
@@ -28,12 +31,15 @@ public class OutboxEventHandler {
 
     public void handle(OutboxEvent event) {
         try {
-            switch (event.eventName()) {
-                case "CreateNewEmployeeEvent" -> handleCreateNewEmployeeEvent(event);
-                case "UpdateEmployeeEvent" -> handleUpdateEmployeeEvent(event);
-                case "SoftDeleteEmployeeEvent" -> handleSoftDeleteEmployeeEvent(event);
-                default ->
-                        throw new UnprocessableEventException("Event unprocessable: %s".formatted(event.eventName()));
+            Class<?> eventType = Class.forName(event.eventName());
+            if (eventType == CreateNewEmployeeEvent.class) {
+                handleCreateNewEmployeeEvent(event);
+            } else if (eventType == UpdateEmployeeEvent.class) {
+                handleUpdateEmployeeEvent(event);
+            } else if (eventType == SoftDeleteEmployeeEvent.class) {
+                handleSoftDeleteEmployeeEvent(event);
+            } else {
+                throw new UnprocessableEventException("Event unprocessable: %s".formatted(event.eventName()));
             }
             repository.changeStatus(OutboxEventStatus.PUBLISHED, event.aggregateId());
         } catch (UnprocessableEventException e) {

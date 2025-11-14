@@ -31,10 +31,9 @@ public class OutboxNextSequenceEntity {
     private AuditMetadata auditMetadata;
 
     public static OutboxNextSequenceEntity from(String aggregateId) {
-        var sequence = new OutboxNextSequenceEntity();
-        sequence.setAggregateId(aggregateId);
-        sequence.setSequence(0);
-        sequence.setAuditMetadata(AuditMetadata.EMPTY);
-        return sequence;
+        var entity = new OutboxNextSequenceEntity();
+        entity.setAggregateId(aggregateId);
+        entity.setAuditMetadata(AuditMetadata.EMPTY);
+        return entity;
     }
 }
