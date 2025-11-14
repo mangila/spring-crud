@@ -38,7 +38,7 @@ public class EmployeeEventListener {
      * Creates an Exclusive lock for the aggregateId sequence and determine if the event can be processed.
      * </p>
      * <p>
-     * Now we are only handling one Employee Domain. But if there should be more domains, an extra condition needs to be added.
+     * Now we are only handling one Employee Domain. But if there are more domains, an extra condition needs to be added.
      * And an extra field on the OutboxEvent to specify the domain.
      * TransactionalEventListener can use a condition to filter the events.
      * </p>
