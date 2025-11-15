@@ -25,6 +25,10 @@ server:
 spring:
   application:
     name: spring-crud
+  web:
+    resources:
+      # No need to serve static resources as a REST API
+      add-mappings: false
   threads:
     virtual:
       enabled: true

@@ -1,10 +1,14 @@
 package com.github.mangila.app.service;
 
+import com.github.mangila.app.model.employee.event.CreateNewEmployeeEvent;
+import com.github.mangila.app.model.employee.event.SoftDeleteEmployeeEvent;
+import com.github.mangila.app.model.employee.event.UpdateEmployeeEvent;
 import com.github.mangila.app.model.outbox.OutboxEvent;
 import com.github.mangila.app.model.outbox.OutboxEventStatus;
 import com.github.mangila.app.repository.OutboxJpaRepository;
 import com.github.mangila.app.shared.exception.UnprocessableEventException;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -28,12 +32,15 @@ public class OutboxEventHandler {
 
     public void handle(OutboxEvent event) {
         try {
-            switch (event.eventName()) {
-                case "CreateNewEmployeeEvent" -> handleCreateNewEmployeeEvent(event);
-                case "UpdateEmployeeEvent" -> handleUpdateEmployeeEvent(event);
-                case "SoftDeleteEmployeeEvent" -> handleSoftDeleteEmployeeEvent(event);
-                default ->
-                        throw new UnprocessableEventException("Event unprocessable: %s".formatted(event.eventName()));
+            Class<?> eventType = getEventType(event.eventName());
+            if (eventType == CreateNewEmployeeEvent.class) {
+                handleCreateNewEmployeeEvent(event);
+            } else if (eventType == UpdateEmployeeEvent.class) {
+                handleUpdateEmployeeEvent(event);
+            } else if (eventType == SoftDeleteEmployeeEvent.class) {
+                handleSoftDeleteEmployeeEvent(event);
+            } else {
+                throw new UnprocessableEventException("Event unprocessable: %s".formatted(event.eventName()));
             }
             repository.changeStatus(OutboxEventStatus.PUBLISHED, event.aggregateId());
         } catch (UnprocessableEventException e) {
@@ -43,6 +50,23 @@ public class OutboxEventHandler {
             log.error("Error handling event: {}", event, e);
             repository.changeStatus(OutboxEventStatus.FAILURE, event.aggregateId());
         }
+    }
+
+    /**
+     * <p>
+     * The class needs to be in our classpath to be loaded.
+     * <br>
+     * Explicitly avoids running static blocks (initialization phase)
+     * since we are just doing a reference check.
+     * Just using Class.forName() can cause some issues if there is some static initialization code.
+     * </p>
+     */
+    private static Class<?> getEventType(String eventName) throws ClassNotFoundException {
+        boolean init = false;
+        return Class.forName(
+                eventName,
+                init,
+                Thread.currentThread().getContextClassLoader());
     }
 
     /**

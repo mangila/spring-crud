@@ -27,7 +27,7 @@ public class OutboxFactory {
         var outbox = new OutboxEntity();
         outbox.setAggregateId(aggregateId);
         outbox.setStatus(OutboxEventStatus.PENDING);
-        outbox.setEventName(event.getClass().getSimpleName());
+        outbox.setEventName(event.getClass().getName());
         outbox.setPayload(objectMapper.valueToTree(event));
         outbox.setAuditMetadata(AuditMetadata.EMPTY);
         // Exclusive lock for the aggregateId and increment nextSequenceEntity
@@ -35,9 +35,6 @@ public class OutboxFactory {
         OutboxNextSequenceEntity nextSequenceEntity = nextSequenceRepository.lockById(
                 aggregateId,
                 LockModeType.PESSIMISTIC_WRITE);
-        if (nextSequenceEntity == null) {
-            nextSequenceEntity = OutboxNextSequenceEntity.from(aggregateId);
-        }
         long sequence = nextSequenceEntity.getSequence() + 1;
         nextSequenceEntity.setSequence(sequence);
         outbox.setSequence(sequence);

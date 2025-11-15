@@ -38,7 +38,7 @@ public class EmployeeEventListener {
      * Creates an Exclusive lock for the aggregateId sequence and determine if the event can be processed.
      * </p>
      * <p>
-     * Now we are only handling one Employee Domain. But if there should be more domains, an extra condition needs to be added.
+     * Now we are only handling one Employee Domain. But if there are more domains, an extra condition needs to be added.
      * And an extra field on the OutboxEvent to specify the domain.
      * TransactionalEventListener can use a condition to filter the events.
      * </p>
@@ -61,14 +61,11 @@ public class EmployeeEventListener {
         log.info("Received OutboxEvent: {}", event);
         transactionTemplate.executeWithoutResult(txStatus -> {
             // Exclusive lock for the aggregate and handle the event
-            // Other Events will be added to an internal wait queue
+            // Other Events will be added to an internal wait queue in pg
             // TODO: lock timeout
             OutboxProcessedSequenceEntity latestProcessedSequence = sequenceRepository.lockById(
                     event.aggregateId(),
                     LockModeType.PESSIMISTIC_WRITE);
-            if (latestProcessedSequence == null) {
-                latestProcessedSequence = OutboxProcessedSequenceEntity.from(event.aggregateId());
-            }
             // Try to find the next event in order for the aggregate
             long expectedSequence = latestProcessedSequence.getSequence() + 1;
             if (canProcess(event.sequence(), expectedSequence)) {

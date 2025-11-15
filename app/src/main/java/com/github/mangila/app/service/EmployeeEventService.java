@@ -5,6 +5,10 @@ import com.github.mangila.app.model.employee.dto.EmployeeEventDto;
 import com.github.mangila.app.model.employee.event.CreateNewEmployeeEvent;
 import com.github.mangila.app.model.employee.event.SoftDeleteEmployeeEvent;
 import com.github.mangila.app.model.employee.event.UpdateEmployeeEvent;
+import com.github.mangila.app.model.outbox.OutboxNextSequenceEntity;
+import com.github.mangila.app.model.outbox.OutboxProcessedSequenceEntity;
+import com.github.mangila.app.repository.OutboxNextSequenceJpaRepository;
+import com.github.mangila.app.repository.OutboxProcessedSequenceJpaRepository;
 import com.github.mangila.app.shared.SpringEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,19 +19,28 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class EmployeeEventService {
 
+    private final OutboxNextSequenceJpaRepository nextSequenceRepository;
+    private final OutboxProcessedSequenceJpaRepository processedSequenceRepository;
     private final EmployeeEventMapper eventMapper;
     private final SpringEventPublisher publisher;
 
-    public EmployeeEventService(EmployeeEventMapper eventMapper,
+    public EmployeeEventService(OutboxNextSequenceJpaRepository nextSequenceRepository,
+                                OutboxProcessedSequenceJpaRepository processedSequenceRepository,
+                                EmployeeEventMapper eventMapper,
                                 SpringEventPublisher publisher) {
+        this.nextSequenceRepository = nextSequenceRepository;
+        this.processedSequenceRepository = processedSequenceRepository;
         this.eventMapper = eventMapper;
         this.publisher = publisher;
     }
+
 
     @Transactional
     public void publishCreateNewEvent(Employee employee) {
         EmployeeEventDto dto = eventMapper.map(employee);
         var event = new CreateNewEmployeeEvent(dto);
+        processedSequenceRepository.persist(OutboxProcessedSequenceEntity.from(employee.id().value()));
+        nextSequenceRepository.persist(OutboxNextSequenceEntity.from(employee.id().value()));
         publisher.publish(employee.id().value(), event);
     }
 

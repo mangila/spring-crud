@@ -8,6 +8,7 @@ import com.github.mangila.app.config.WebConfig;
 import com.github.mangila.app.model.owasp.OwaspAddResponse;
 import com.github.mangila.app.shared.OwaspRestClient;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
@@ -49,14 +50,14 @@ public class FetchOwaspSecureHeadersAddTask implements Task {
 
     private final ObjectMapper objectMapper;
     private final OwaspRestClient owaspRestClient;
-    private final OwaspHeaders headersToAdd;
+    private final OwaspHeaders headers;
 
     public FetchOwaspSecureHeadersAddTask(ObjectMapper objectMapper,
                                           OwaspRestClient owaspRestClient,
-                                          OwaspHeaders headersToAdd) {
+                                          @Qualifier("headersToAdd") OwaspHeaders headers) {
         this.objectMapper = objectMapper;
         this.owaspRestClient = owaspRestClient;
-        this.headersToAdd = headersToAdd;
+        this.headers = headers;
     }
 
     @Override
@@ -72,12 +73,12 @@ public class FetchOwaspSecureHeadersAddTask implements Task {
             OwaspAddResponse owaspAddResponse = owaspRestClient.fetchOwaspSecureHeadersToAdd();
             node.set("response", objectMapper.valueToTree(owaspAddResponse));
             log.info("OWASP secure headers fetched successfully");
-            String lastUpdate = headersToAdd.getHeader(WebConfig.OWASP_LAST_UPDATE_UTC_HTTP_HEADER);
+            String lastUpdate = headers.getHeader(WebConfig.OWASP_LAST_UPDATE_UTC_HTTP_HEADER);
             if (shouldUpdate(lastUpdate, owaspAddResponse)) {
                 HttpHeaders httpHeaders = owaspAddResponse.extractHeaders();
-                headersToAdd.clear();
-                headersToAdd.putAll(httpHeaders);
-                log.info("OWASP secure headers to add applied successfully - {}", headersToAdd.getHeaders());
+                headers.clear();
+                headers.putAll(httpHeaders);
+                log.info("OWASP secure headers to add applied successfully - {}", headers.getHeaders());
             } else {
                 String msg = "Last update timestamp matches, wont update";
                 log.info(msg);

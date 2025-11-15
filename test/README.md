@@ -34,4 +34,4 @@ Find weaknesses in the system and how they can be exploited.
 - How much damage can a malicious actor do to the system?
 - How much technical information about the system can we get as a client that can be exploited?
 - GDPR?
-- [Burp Suite](http://evil.com)
+- Burp Suite - https://portswigger.net/burp 

@@ -65,17 +65,28 @@ public class EmployeeService {
     }
 
     /**
+     * <p>
      * Update an already existing employee.
      * <br>
      * Some APIs accept Upsert-Insert to be done here, but not this one. :)
      * a good reason why not - is to ensure/force employee ID to be created by the application and not by the client
+     * </p>
+     * <p>
+     * We are creating the UpdateRequest with empty audit fields, and we want to use them in the same transaction.
+     * Then we have to face a complex JPA corner case because of the managed/detached state of the entity.
+     * <br>
+     * First we fetch the "old" entity, and then we map the new entity and set the "old" audit fields.
+     * To make sure the entity is managing those fields when we merge()
+     * All because we want the audit fields in the event in the same transaction.
+     * </p>
      */
     @Transactional
     public void updateEmployee(final Employee employee) {
-        final EmployeeEntity foundEntity = employeeRepository.findById(employee.id().value())
+        final EmployeeEntity oldEntity = employeeRepository.findById(employee.id().value())
                 .orElseThrow(() -> new EntityNotFoundException(employee.id().value()));
-        final EmployeeEntity updatedEntity = employeeRepository.merge(foundEntity);
-        // Map back to domain to prepare for event publishing
+        final EmployeeEntity mappedEntity = entityMapper.map(employee);
+        mappedEntity.setAuditMetadata(oldEntity.getAuditMetadata());
+        final EmployeeEntity updatedEntity = employeeRepository.merge(mappedEntity);
         final Employee updatedEmployee = domainMapper.map(updatedEntity);
         eventService.publishUpdateEvent(updatedEmployee);
     }
@@ -92,7 +103,6 @@ public class EmployeeService {
     }
 
     public List<OutboxEntity> replayEmployee(EmployeeId id) {
-        log.info("Replaying events for aggregateId {}", id.value());
         return outboxJpaRepository.findAllByAggregateId(
                 id.value(),
                 Sort.by("sequence").descending(),

@@ -1,6 +1,7 @@
 package com.github.mangila.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.app.ClockTestConfig;
 import com.github.mangila.app.EmployeeTestFactory;
 import com.github.mangila.app.TestcontainersConfiguration;
 import com.github.mangila.app.model.employee.dto.EmployeeDto;
@@ -11,13 +12,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -26,7 +27,12 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
-@Import(TestcontainersConfiguration.class)
+@Import(
+        {
+                TestcontainersConfiguration.class,
+                ClockTestConfig.class,
+        }
+)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class EmployeeControllerTest {
 
@@ -37,7 +43,7 @@ class EmployeeControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private Clock clock;
+    private ClockTestConfig.TestClock clock;
 
     @Test
     @DisplayName("Should C.R.U.D Employee")
@@ -45,6 +51,8 @@ class EmployeeControllerTest {
         URI location = create();
         EmployeeDto dto = read(location.toString());
         assertNewEmployeeDto(dto);
+        // Advance time by 3 hours to simulate some timelapse
+        clock.advanceTime(Duration.ofHours(3));
         dto = update(dto);
         assertUpdatedEmployeeDto(dto);
         delete(dto.employeeId());
@@ -105,9 +113,9 @@ class EmployeeControllerTest {
                 .hasFieldOrPropertyWithValue("deleted", false);
         // Verify created and modified dates are somewhere in the last 5 seconds
         assertThat(dto.created())
-                .isCloseTo(ZonedDateTime.now(clock), within(Duration.ofSeconds(5)));
+                .isCloseTo(ZonedDateTime.now(), within(Duration.ofSeconds(5)));
         assertThat(dto.modified())
-                .isCloseTo(ZonedDateTime.now(clock), within(Duration.ofSeconds(5)));
+                .isCloseTo(ZonedDateTime.now(), within(Duration.ofSeconds(5)));
         // Assert JSON attributes
         var jsonAttributes = dto.attributes().toString();
         assertThatJson(jsonAttributes)
@@ -115,34 +123,28 @@ class EmployeeControllerTest {
                 .containsOnlyKeys(
                         "vegan",
                         "pronouns",
+                        "lizard_people",
                         "licenses",
-                        "evaluation",
-                        "substance_addiction",
-                        "secret_number",
-                        "notes"
+                        "evaluation"
                 )
-                .hasSize(7)
+                .hasSize(5)
                 .containsEntry("vegan", true)
                 .containsEntry("pronouns", "he/him")
-                .containsEntry("substance_addiction", true)
-                .containsEntry("secret_number", "123")
-                .containsEntry("notes", "subject is not approved for field duty, immediate suspension advised")
+                .containsEntry("lizard_people", null)
                 .node("") // just to be able to walk nodes on the JSON tree, maybe there is a better way to do this
                 .and(jsonAssert -> jsonAssert.node("licenses")
                         .isArray()
-                        .hasSize(3)
+                        .hasSize(2)
                         .containsExactly(
                                 "PP7",
-                                "Klobb",
-                                "DD44 Dostovei"
+                                "Klobb"
                         ))
                 .and(jsonAssert -> jsonAssert.node("evaluation")
                         .isObject()
-                        .hasSize(3)
+                        .hasSize(2)
                         .containsExactly(
                                 Map.entry("medical", "FAIL"),
-                                Map.entry("physical", "FAIL"),
-                                Map.entry("psychological", "FAIL")
+                                Map.entry("physical", "FAIL")
                         ));
     }
 
@@ -150,7 +152,7 @@ class EmployeeControllerTest {
         var updateRequest = EmployeeTestFactory.createUpdateEmployeeRequestBuilder(objectMapper)
                 .employeeId(dto.employeeId())
                 .salary(dto.salary().add(new BigDecimal("20.00")))
-                .attributes(dto.attributes().put("vegan", true))
+                .attributes(dto.attributes().put("vegan", false))
                 .build();
         return webTestClient.put()
                 .uri("/api/v1/employees")
@@ -170,9 +172,9 @@ class EmployeeControllerTest {
                 .isNotNull()
                 .hasFieldOrPropertyWithValue("salary", new BigDecimal("20020.12"));
         assertThat(dto.created())
-                .isCloseTo(ZonedDateTime.now(clock), within(Duration.ofSeconds(5)));
+                .isCloseTo(ZonedDateTime.now(), within(Duration.ofSeconds(5)));
         assertThat(dto.modified())
-                .isCloseTo(ZonedDateTime.now(clock), within(Duration.ofSeconds(5)));
+                .isCloseTo(ZonedDateTime.now().plusHours(3), within(Duration.ofSeconds(5)));
         assertThatJson(dto.attributes().toString())
                 .isObject()
                 .containsEntry("vegan", false);

@@ -7,6 +7,7 @@ import com.github.mangila.app.repository.TaskExecutionJpaRepository;
 import com.github.mangila.app.scheduler.Task;
 import org.jspecify.annotations.NonNull;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.util.Assert;
 
 import java.util.concurrent.CompletableFuture;
 

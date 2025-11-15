@@ -4,15 +4,40 @@ import com.github.mangila.app.shared.exception.EnsureException;
 import com.github.mangila.app.shared.exception.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 @RestControllerAdvice
 @Slf4j
 public class RestErrorHandler {
+
+    /**
+     * Display a friendly error message to the client when requesting a resource that doesn't exist.
+     */
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ProblemDetail handleNoHandlerFoundException(NoHandlerFoundException e) {
+        log.error("ERR", e);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND,
+                e.getMessage()
+        );
+        return problemDetail;
+    }
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ProblemDetail handlePropertyReferenceException(PropertyReferenceException e) {
+        log.error("ERR", e);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                e.getMessage()
+        );
+        return problemDetail;
+    }
 
     /**
      * Log this or not, that's the question. Might create a lot of noise in the logs.
@@ -81,8 +106,8 @@ public class RestErrorHandler {
     }
 
     /**
-     * This one might be a security concern to since it might expose internal details to the client.
-     * Uncontrollable runtime exceptions not thrown by the programmer
+     * General sec practice to doesn't expose internal server errors to the client.
+     * This is a RuntimeException, but it can leak internal information to the client.
      */
     @ExceptionHandler(RuntimeException.class)
     public ProblemDetail handleRuntimeException(RuntimeException e) {

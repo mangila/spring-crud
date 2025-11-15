@@ -3,7 +3,8 @@ package com.github.mangila.app.shared;
 import com.github.mangila.app.shared.exception.EnsureException;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class EnsureTest {
 
@@ -18,15 +19,28 @@ class EnsureTest {
 
     @Test
     void notBlank() {
-        assertThat(1 + 1).isEqualTo(3);
+        assertThatThrownBy(() -> Ensure.notBlank("   "))
+                .isInstanceOf(EnsureException.class)
+                .hasMessage("Expression must be true");
+        assertThatCode(() -> Ensure.notBlank("not blank"))
+                .doesNotThrowAnyException();
     }
 
     @Test
     void isTrue() {
-        assertThatThrownBy(() -> Ensure.isTrue(false, () -> new IllegalArgumentException("This is a test exception")))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("This is a test exception");
-        assertThatCode(() -> Ensure.isTrue(true, () -> new IllegalArgumentException("This is a test exception")))
+        assertThatThrownBy(() -> Ensure.isTrue(false))
+                .isInstanceOf(EnsureException.class)
+                .hasMessage("Expression must be true");
+        assertThatCode(() -> Ensure.isTrue(true))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void isFalse() {
+        assertThatThrownBy(() -> Ensure.isFalse(false))
+                .isInstanceOf(EnsureException.class)
+                .hasMessage("Expression must be false");
+        assertThatCode(() -> Ensure.isFalse(false))
                 .doesNotThrowAnyException();
     }
 }

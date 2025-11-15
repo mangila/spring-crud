@@ -30,9 +30,9 @@ public class OutboxProcessedSequenceEntity {
     private AuditMetadata auditMetadata;
 
     public static OutboxProcessedSequenceEntity from(String aggregateId) {
-        var sequence = new OutboxProcessedSequenceEntity();
-        sequence.setAggregateId(aggregateId);
-        sequence.setAuditMetadata(AuditMetadata.EMPTY);
-        return sequence;
+        var entity = new OutboxProcessedSequenceEntity();
+        entity.setAggregateId(aggregateId);
+        entity.setAuditMetadata(AuditMetadata.EMPTY);
+        return entity;
     }
 }
