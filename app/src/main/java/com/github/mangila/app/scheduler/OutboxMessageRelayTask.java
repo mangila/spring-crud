@@ -59,9 +59,6 @@ public class OutboxMessageRelayTask implements Task {
                 Limit.of(25));
         var node = objectMapper.createObjectNode();
         var lists = List.of(pendingEntities, failureEntities, unprocessableEntities);
-        if (isEmpty(lists)) {
-            return node.put("message", "No outbox events to relay");
-        }
         lists.stream()
                 .flatMap(Collection::stream)
                 .map(eventMapper::map)
@@ -76,9 +73,5 @@ public class OutboxMessageRelayTask implements Task {
         var unprocessableArray = node.putArray("unprocessable");
         unprocessableEntities.forEach(entity -> unprocessableArray.add(entity.getId().toString()));
         return node;
-    }
-
-    public static boolean isEmpty(List<List<OutboxEntity>> lists) {
-        return lists.stream().allMatch(List::isEmpty);
     }
 }
