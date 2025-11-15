@@ -8,6 +8,7 @@ import com.github.mangila.app.config.WebConfig;
 import com.github.mangila.app.model.owasp.OwaspRemoveResponse;
 import com.github.mangila.app.shared.OwaspRestClient;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
@@ -17,14 +18,14 @@ public class FetchOwaspSecureHeadersRemoveTask implements Task {
 
     private final ObjectMapper objectMapper;
     private final OwaspRestClient owaspRestClient;
-    private final OwaspHeaders headersToRemove;
+    private final OwaspHeaders headers;
 
     public FetchOwaspSecureHeadersRemoveTask(ObjectMapper objectMapper,
                                              OwaspRestClient owaspRestClient,
-                                             OwaspHeaders headersToRemove) {
+                                             @Qualifier("headersToRemove") OwaspHeaders headers) {
         this.objectMapper = objectMapper;
         this.owaspRestClient = owaspRestClient;
-        this.headersToRemove = headersToRemove;
+        this.headers = headers;
     }
 
     @Override
@@ -40,12 +41,12 @@ public class FetchOwaspSecureHeadersRemoveTask implements Task {
             OwaspRemoveResponse owaspRemoveResponse = owaspRestClient.fetchOwaspSecureHeadersToRemove();
             node.set("response", objectMapper.valueToTree(owaspRemoveResponse));
             log.info("OWASP secure headers fetched successfully");
-            String lastUpdate = headersToRemove.getHeader(WebConfig.OWASP_LAST_UPDATE_UTC_HTTP_HEADER);
+            String lastUpdate = headers.getHeader(WebConfig.OWASP_LAST_UPDATE_UTC_HTTP_HEADER);
             if (shouldUpdate(lastUpdate, owaspRemoveResponse)) {
                 HttpHeaders httpHeaders = owaspRemoveResponse.extractHeaders();
-                headersToRemove.clear();
-                headersToRemove.putAll(httpHeaders);
-                log.info("OWASP secure headers to remove applied successfully - {}", headersToRemove.getHeaders());
+                headers.clear();
+                headers.putAll(httpHeaders);
+                log.info("OWASP secure headers to remove applied successfully - {}", headers.getHeaders());
             } else {
                 String msg = "Last update timestamp matches, wont update";
                 log.info(msg);
