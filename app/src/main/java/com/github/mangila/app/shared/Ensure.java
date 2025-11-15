@@ -14,23 +14,38 @@ import java.util.function.Supplier;
  */
 public final class Ensure {
 
-    public static void notNull(Object value) throws EnsureException {
+    private Ensure() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    public static void notNull(Object value, Supplier<RuntimeException> supplier) throws RuntimeException {
+        notNull(value);
         if (value == null) {
-            throw new EnsureException("Value must not be null");
+            throw supplier.get();
         }
     }
 
     public static void notNull(Object value, String message) throws EnsureException {
-        if (value == null) {
-            throw new EnsureException(message);
+        notNull(value, () -> new EnsureException(message));
+    }
+
+    public static void notNull(Object value) throws EnsureException {
+        notNull(value, "Value must not be null");
+    }
+
+    public static void notBlank(String value, Supplier<RuntimeException> supplier) throws EnsureException {
+        notNull(value, supplier);
+        if (value.isBlank()) {
+            throw supplier.get();
         }
     }
 
     public static void notBlank(String value, String message) throws EnsureException {
-        notNull(value, message);
-        if (value.isBlank()) {
-            throw new EnsureException(message);
-        }
+        notBlank(value, () -> new EnsureException(message));
+    }
+
+    public static void notBlank(String value) throws EnsureException {
+        notBlank(value, "Value must not be blank");
     }
 
     public static void isTrue(boolean expression,
@@ -40,9 +55,26 @@ public final class Ensure {
         }
     }
 
-    public static void isFalse(boolean expression, String message) throws EnsureException {
+    public static void isTrue(boolean expression, String message) throws EnsureException {
+        isTrue(expression, () -> new EnsureException(message));
+    }
+
+    public static void isTrue(boolean expression) throws EnsureException {
+        isTrue(expression, "Expression must be true");
+    }
+
+    public static void isFalse(boolean expression,
+                               Supplier<RuntimeException> exceptionSupplier) throws RuntimeException {
         if (expression) {
-            throw new EnsureException(message);
+            throw exceptionSupplier.get();
         }
+    }
+
+    public static void isFalse(boolean expression, String message) throws EnsureException {
+        isTrue(expression, () -> new EnsureException(message));
+    }
+
+    public static void isFalse(boolean expression) throws EnsureException {
+        isTrue(expression, "Expression must be false");
     }
 }
