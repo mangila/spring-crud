@@ -19,7 +19,6 @@ public final class Ensure {
     }
 
     public static void notNull(Object value, Supplier<RuntimeException> supplier) throws RuntimeException {
-        notNull(value);
         if (value == null) {
             throw supplier.get();
         }
