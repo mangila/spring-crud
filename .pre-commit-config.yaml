@@ -1,0 +1,20 @@
+fail_fast: false
+repos:
+  - repo: local
+    hooks:
+      - id: app-test
+        name: App pre commit test
+        entry: cmd.exe /c mvnw.cmd
+        args: [ "-f", "app/pom.xml", "clean", "test" ]
+        language: system
+        files: ^app/src
+        require_serial: true
+        pass_filenames: false
+      - id: background-test
+        name: Background pre commit test
+        entry: cmd.exe /c mvnw.cmd
+        args: [ "-f", "background/pom.xml", "clean", "test" ]
+        language: system
+        files: ^background/src
+        require_serial: true
+        pass_filenames: false
