@@ -1,6 +1,7 @@
 # This is pre-commit git hooks that run before a git commit to ensure test is being runned
 # this automation is running on my local Windows system, so it might not work if you are using linux/macOS,
 # but it can be changed to use the mvnw bash script instead.
+
 fail_fast: false
 repos:
   - repo: local

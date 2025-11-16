@@ -83,6 +83,14 @@ The Ansible Control Node is managed from our local machine.
 
 Live testing suites
 
+### Project Automation with Python
+
+Python virtual environment is created in the root of the project, so it can run python automation scripts.
+
+The virtual env is being .gitignore, so it is not pushed to the repository.
+
+Pre-commit hooks are used to run tests before a git commit.
+
 
 
 
