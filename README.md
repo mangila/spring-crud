@@ -89,7 +89,7 @@ Python virtual environment is created in the root of the project, so it can run 
 
 The virtual env is being .gitignore, so it is not pushed to the repository.
 
-Pre-commit hooks are used to run tests before a git commit.
+Pre-commit hooks are used to run tests before a git commit. [.pre-commit-config.yaml](.pre-commit-config.yaml)
 
 
 
