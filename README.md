@@ -2,6 +2,9 @@
 
 Spring Web app demonstrating C.R.U.D (Create, Read, Update, Delete) operations in a Layered Architecture
 
+**NOTE: This project is just for demonstration purposes. Just me setting up a project, nothing fancy.
+I mostly use this kind of repos as my flashcards.**
+
 ## Architecture
 
 Postgres database is used as the persistence layer.
@@ -16,9 +19,6 @@ Ansible.
 Live Integration testing is done with [Venom](https://github.com/ovh/venom).
 
 [Pre-commit](https://pre-commit.com/) hooks are used to run tests before a git commit.
-
-**NOTE: This project is just for demonstration purposes. Just me setting up a project, nothing fancy.
-I mostly use this kind of repos as my flashcards.**
 
 ### Api
 
