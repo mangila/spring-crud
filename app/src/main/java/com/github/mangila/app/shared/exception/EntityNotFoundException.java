@@ -1,8 +1,0 @@
-package com.github.mangila.app.shared.exception;
-
-public class EntityNotFoundException extends RuntimeException {
-
-    public EntityNotFoundException(String message) {
-        super("Entity with id: %s".formatted(message));
-    }
-}

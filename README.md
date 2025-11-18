@@ -19,9 +19,9 @@ Live Integration testing is done with [Venom](https://github.com/ovh/venom).
 
 **NOTE: This project is just for demonstration purposes. With a POC value**
 
-### App
+### Api
 
-Spring RESTful service with CRUD operations for the Employee domain. (The famous Employee CRUD, great for demonstration
+Spring RESTful API with CRUD operations for the Employee domain. (The famous Employee CRUD, great for demonstration
 purposes)
 
 - Spring Web
