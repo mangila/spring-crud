@@ -7,7 +7,7 @@ repos:
   - repo: local
     hooks:
       - id: api-test
-        name: Api pre commit test
+        name: Api test
         entry: cmd.exe /c mvnw.cmd
         args: [ "-f", "api/pom.xml", "clean", "test" ]
         language: system
@@ -15,7 +15,7 @@ repos:
         require_serial: true
         pass_filenames: false
       - id: background-test
-        name: Background pre commit test
+        name: Background test
         entry: cmd.exe /c mvnw.cmd
         args: [ "-f", "background/pom.xml", "clean", "test" ]
         language: system
