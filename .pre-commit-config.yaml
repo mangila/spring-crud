@@ -6,12 +6,12 @@ fail_fast: false
 repos:
   - repo: local
     hooks:
-      - id: app-test
+      - id: api-test
         name: App pre commit test
         entry: cmd.exe /c mvnw.cmd
-        args: [ "-f", "app/pom.xml", "clean", "test" ]
+        args: [ "-f", "api/pom.xml", "clean", "test" ]
         language: system
-        files: ^app/src
+        files: ^api/src
         require_serial: true
         pass_filenames: false
       - id: background-test
