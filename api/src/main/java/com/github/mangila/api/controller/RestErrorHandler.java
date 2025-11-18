@@ -1,7 +1,7 @@
 package com.github.mangila.api.controller;
 
-import com.github.mangila.api.shared.exception.EnsureException;
 import com.github.mangila.api.shared.exception.EntityNotFoundException;
+import io.github.mangila.ensure4j.EnsureException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -29,6 +29,9 @@ public class RestErrorHandler {
         return problemDetail;
     }
 
+    /**
+     * Thrown when a client is requesting pageable stuffs
+     */
     @ExceptionHandler(PropertyReferenceException.class)
     public ProblemDetail handlePropertyReferenceException(PropertyReferenceException e) {
         log.error("ERR", e);
