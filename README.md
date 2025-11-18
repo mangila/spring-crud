@@ -17,7 +17,8 @@ Live Integration testing is done with [Venom](https://github.com/ovh/venom).
 
 [Pre-commit](https://pre-commit.com/) hooks are used to run tests before a git commit.
 
-**NOTE: This project is just for demonstration purposes. With a POC value**
+**NOTE: This project is just for demonstration purposes. Just me setting up a project, nothing fancy.
+I mostly use this kind of repos as my flashcards.**
 
 ### Api
 
@@ -34,6 +35,7 @@ purposes)
 - Postgres w Flyway
 - Resilience4j
 - JSpecify
+- Ensure4j
 - Spring Test with Testcontainers and JsonUnit
 
 ##### Swagger
