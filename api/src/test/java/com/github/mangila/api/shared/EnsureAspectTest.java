@@ -1,6 +1,6 @@
 package com.github.mangila.api.shared;
 
-import com.github.mangila.api.shared.exception.EnsureException;
+import io.github.mangila.ensure4j.EnsureException;
 import org.aspectj.lang.JoinPoint;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

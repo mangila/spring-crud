@@ -9,6 +9,9 @@ import java.util.Map;
  * <p>
  * When playing around with concurrency and the thread need some context, this is a good place to put your stuff.
  * </p>
+ * <p>
+ *    Use this class for any type Context propagation
+ * </p>
  */
 public class ApplicationContextHolder {
 

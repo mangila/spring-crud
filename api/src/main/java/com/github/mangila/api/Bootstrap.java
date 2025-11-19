@@ -14,12 +14,14 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import static java.nio.charset.StandardCharsets.*;
+
 /**
  * <p>
  * Bootstrap class to run some tasks on application startup.
  * </p>
  * <p>
- * Fetch the Owasp secure headers from the OWASP HTTP secure headers project.
+ * Load the static files that contain the Owasp secure headers from the OWASP HTTP secure headers project.
  * So the Controller can return the latest secure headers.
  * </p>
  */
@@ -54,7 +56,7 @@ public class Bootstrap {
         String fileName = "owasp-secure-headers-add.json";
         log.info("Loading static OWASP secure headers to add - {}", fileName);
         ClassPathResource resource = new ClassPathResource(fileName);
-        String json = resource.getContentAsString(StandardCharsets.UTF_8);
+        String json = resource.getContentAsString(UTF_8);
         OwaspAddResponse owaspAddResponse = objectMapper.readValue(json, OwaspAddResponse.class);
         HttpHeaders httpHeaders = owaspAddResponse.extractHeaders();
         headersToAdd.putAll(httpHeaders);
@@ -64,7 +66,7 @@ public class Bootstrap {
         String fileName = "owasp-secure-headers-remove.json";
         log.info("Loading static OWASP secure headers to remove - {}", fileName);
         ClassPathResource resource = new ClassPathResource(fileName);
-        String json = resource.getContentAsString(StandardCharsets.UTF_8);
+        String json = resource.getContentAsString(UTF_8);
         OwaspRemoveResponse owaspRemoveResponse = objectMapper.readValue(json, OwaspRemoveResponse.class);
         HttpHeaders httpHeaders = owaspRemoveResponse.extractHeaders();
         headersToRemove.putAll(httpHeaders);

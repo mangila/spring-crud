@@ -11,8 +11,8 @@
     <groupId>com.github.mangila.app</groupId>
     <artifactId>api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>app</name>
-    <description>app</description>
+    <name>api</name>
+    <description>Spring Boot C.R.U.D is amazing</description>
 
     <properties>
         <java.version>21</java.version>
@@ -44,7 +44,7 @@
         <dependency>
             <groupId>io.github.mangila</groupId>
             <artifactId>ensure4j</artifactId>
-            <version>0.0.4</version>
+            <version>0.0.6</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.github.resilience4j/resilience4j-spring-boot3 -->
         <dependency>
@@ -160,6 +160,28 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
+                    <!-- Fork it and make it run on another process -->
+                    <fork>true</fork>
+                    <encoding>UTF-8</encoding>
+                    <!-- Fail or compilation warnings is a good practice - but might get some unique issues to especially when dependent on libraries-->
+                    <failOnWarning>true</failOnWarning>
+                    <compilerArgs>
+                        <arg>-XDcompilePolicy=simple</arg>
+                        <arg>--should-stop=ifError=FLOW</arg>
+                        <arg>-Xplugin:ErrorProne -XepOpt:NullAway:AnnotatedPackages=com.github.mangila.api
+                        </arg>
+                        <!-- <arg>-Werror</arg>-->
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+                    </compilerArgs>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.springframework.boot</groupId>
@@ -169,6 +191,36 @@
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                         </path>
+                        <path>
+                            <!-- https://mvnrepository.com/artifact/com.google.errorprone/error_prone_core -->
+                            <groupId>com.google.errorprone</groupId>
+                            <artifactId>error_prone_core</artifactId>
+                            <version>2.44.0</version>
+                        </path>
+                        <path>
+                            <!-- Probably the most famous error-prone extension works well with jspecify -->
+                            <!-- https://mvnrepository.com/artifact/com.uber.nullaway/nullaway -->
+                            <groupId>com.uber.nullaway</groupId>
+                            <artifactId>nullaway</artifactId>
+                            <version>0.12.12</version>
+                        </path>
+                        <!-- Error Prone extensions might be useful,
+                         but can also cause more issues since code is getting adapted for just that extension
+                         opinionated approach
+                        -->
+                        <!-- https://github.com/PicnicSupermarket/error-prone-support -->
+                        <!-- https://mvnrepository.com/artifact/tech.picnic.error-prone-support/error-prone-contrib -->
+                        <!--                        <path>-->
+                        <!--                            <groupId>tech.picnic.error-prone-support</groupId>-->
+                        <!--                            <artifactId>error-prone-contrib</artifactId>-->
+                        <!--                            <version>0.26.0</version>-->
+                        <!--                        </path>-->
+                        <!--                        &lt;!&ndash; https://mvnrepository.com/artifact/tech.picnic.error-prone-support/refaster-runner &ndash;&gt;-->
+                        <!--                        <path>-->
+                        <!--                            <groupId>tech.picnic.error-prone-support</groupId>-->
+                        <!--                            <artifactId>refaster-runner</artifactId>-->
+                        <!--                            <version>0.26.0</version>-->
+                        <!--                        </path>-->
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
