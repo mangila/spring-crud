@@ -163,7 +163,7 @@
                     <!-- Fork it and make it run on another process -->
                     <fork>true</fork>
                     <encoding>UTF-8</encoding>
-                    <!-- Fail or compilation warnings is a good practice - but might get some unique issues to especially when dependent on libraries-->
+                    <!-- Fail on compilation warnings is a good practice - but might cause some unique issues, especially when dependent on libraries-->
                     <failOnWarning>true</failOnWarning>
                     <compilerArgs>
                         <arg>-XDcompilePolicy=simple</arg>
