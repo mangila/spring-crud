@@ -167,7 +167,10 @@
                     <failOnWarning>true</failOnWarning>
                     <compilerArgs>
                         <arg>-XDcompilePolicy=simple</arg>
+                        <!-- Continue compiling so ErrorProne can display a list of error instead of try to fix it one by one-->
                         <arg>--should-stop=ifError=FLOW</arg>
+                        <!-- -Xplugin = Add the annotation processor ErrorProne -->
+                        <!-- XepOpt = ErrorProne option add NullAway - https://errorprone.info/docs/flags -->
                         <arg>-Xplugin:ErrorProne -XepOpt:NullAway:AnnotatedPackages=com.github.mangila.api
                         </arg>
                         <!-- <arg>-Werror</arg>-->
