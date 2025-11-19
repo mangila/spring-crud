@@ -199,6 +199,7 @@
                         </path>
                         <path>
                             <!-- Probably the most famous error-prone extension works well with jspecify -->
+                            <!-- https://github.com/uber/NullAway -->
                             <!-- https://mvnrepository.com/artifact/com.uber.nullaway/nullaway -->
                             <groupId>com.uber.nullaway</groupId>
                             <artifactId>nullaway</artifactId>
