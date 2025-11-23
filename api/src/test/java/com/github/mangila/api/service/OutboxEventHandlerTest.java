@@ -1,11 +1,16 @@
 package com.github.mangila.api.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.api.OutboxTestFactory;
 import com.github.mangila.api.PostgresTestContainerConfiguration;
+import com.github.mangila.api.ReusablePostgresTestContainerConfiguration;
+import com.github.mangila.api.model.employee.event.CreateNewEmployeeEvent;
 import com.github.mangila.api.model.outbox.OutboxEntity;
 import com.github.mangila.api.model.outbox.OutboxEvent;
 import com.github.mangila.api.model.outbox.OutboxEventStatus;
 import com.github.mangila.api.repository.OutboxJpaRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -24,7 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 
-@Import(PostgresTestContainerConfiguration.class)
+@Import(ReusablePostgresTestContainerConfiguration.class)
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
@@ -36,30 +41,46 @@ class OutboxEventHandlerTest {
     @MockitoSpyBean
     private OutboxEventHandler handler;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @MockitoSpyBean
     private OutboxJpaRepository outboxJpaRepository;
 
     @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
     private OutboxEventMapper eventMapper;
+
+    private OutboxEntity reusableEntity;
+
+    @BeforeEach
+    void setup() {
+        OutboxEntity entity = OutboxTestFactory.createOutboxEntity(
+                "test",
+                CreateNewEmployeeEvent.class.getName(),
+                OutboxEventStatus.PUBLISHED,
+                objectMapper.createObjectNode()
+        );
+        this.reusableEntity = outboxJpaRepository.persist(entity);
+    }
+
+    @AfterEach
+    void cleanup() {
+        outboxJpaRepository.deleteById(reusableEntity.getId());
+    }
 
     @Test
     @DisplayName("Should handle event and set to PUBLISHED")
     void handle() {
-        OutboxEntity entity = outboxJpaRepository.findAllByAggregateId(
-                        "test",
-                        Sort.unsorted(),
-                        Limit.unlimited())
-                .getFirst();
-        OutboxEvent event = eventMapper.map(entity);
+        // Setup
+        OutboxEvent event = eventMapper.map(reusableEntity);
+        // Act
         assertThatCode(() -> handler.handle(event))
                 .doesNotThrowAnyException();
         List<OutboxEntity> outboxEntities = outboxJpaRepository.findAllByAggregateId(
-                entity.getAggregateId(),
+                event.aggregateId(),
                 Sort.unsorted(),
                 Limit.unlimited());
+        // Assert
         assertThat(outboxEntities)
                 .hasSize(1);
         assertThat(outboxEntities.getFirst())
@@ -72,19 +93,17 @@ class OutboxEventHandlerTest {
     @Test
     @DisplayName("Should handle event and set to UNPROCESSABLE_EVENT")
     void handle1() {
-        OutboxEntity entity = outboxJpaRepository.findAllByAggregateId(
-                        "test",
-                        Sort.unsorted(),
-                        Limit.unlimited())
-                .getFirst();
-        entity.setEventName("UnknownEvent");
-        OutboxEvent event = eventMapper.map(entity);
+        // Setup
+        reusableEntity.setEventName("UNKNOWN_EVENT");
+        OutboxEvent event = eventMapper.map(reusableEntity);
+        // Act
         assertThatCode(() -> handler.handle(event))
                 .doesNotThrowAnyException();
         List<OutboxEntity> outboxEntities = outboxJpaRepository.findAllByAggregateId(
-                entity.getAggregateId(),
+                event.aggregateId(),
                 Sort.unsorted(),
                 Limit.unlimited());
+        // Assert
         assertThat(outboxEntities)
                 .hasSize(1);
         assertThat(outboxEntities.getFirst())
@@ -97,21 +116,19 @@ class OutboxEventHandlerTest {
     @Test
     @DisplayName("Should handle event and set to FAILURE")
     void handle2() {
+        // Setup
         Mockito.doThrow(new RuntimeException("Test exception"))
                 .when(handler)
                 .handleCreateNewEmployeeEvent(any());
-        OutboxEntity entity = outboxJpaRepository.findAllByAggregateId(
-                        "test",
-                        Sort.unsorted(),
-                        Limit.unlimited())
-                .getFirst();
-        OutboxEvent event = eventMapper.map(entity);
+        OutboxEvent event = eventMapper.map(reusableEntity);
+        // Act
         assertThatCode(() -> handler.handle(event))
                 .doesNotThrowAnyException();
         List<OutboxEntity> outboxEntities = outboxJpaRepository.findAllByAggregateId(
-                entity.getAggregateId(),
+                reusableEntity.getAggregateId(),
                 Sort.unsorted(),
                 Limit.unlimited());
+        // Assert
         assertThat(outboxEntities)
                 .hasSize(1);
         assertThat(outboxEntities.getFirst())
