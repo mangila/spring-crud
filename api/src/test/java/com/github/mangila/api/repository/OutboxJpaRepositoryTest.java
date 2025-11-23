@@ -65,7 +65,6 @@ class OutboxJpaRepositoryTest {
     @AfterEach
     void cleanup() {
         repository.delete(reusableEntity);
-        repository.flush();
     }
 
     @Test
@@ -131,7 +130,7 @@ class OutboxJpaRepositoryTest {
         );
         reusableEntity.setAuditMetadata(auditMetadata);
         // Advance in time two days
-        clock.advanceTime(Duration.ofDays(2));
+        clock.advanceTime(Duration.ofHours(3));
         reusableEntity = repository.merge(reusableEntity);
         // we need to flush here to get the new Audit values (JPA lifecycle stuffs), we need to take a trip to the DB
         repository.flush();
@@ -143,10 +142,10 @@ class OutboxJpaRepositoryTest {
                         within(Duration.ofSeconds(3)));
         // Check that modified should be updated with the new Clock time
         assertThat(auditMetadata.modified())
-                .isCloseTo(Instant.now().plus(Duration.ofDays(2)),
+                .isCloseTo(Instant.now().plus(Duration.ofHours(3)),
                         within(Duration.ofSeconds(1)));
         assertThat(auditMetadata.deleted())
                 .isTrue();
-        clock.goBackTime(Duration.ofDays(2));
+        clock.resetTime();
     }
 }

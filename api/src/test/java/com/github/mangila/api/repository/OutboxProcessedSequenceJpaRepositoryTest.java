@@ -9,6 +9,7 @@ import com.github.mangila.api.model.AuditMetadata;
 import com.github.mangila.api.model.outbox.OutboxProcessedSequenceEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
@@ -53,6 +54,7 @@ class OutboxProcessedSequenceJpaRepositoryTest {
     }
 
     @Test
+    @DisplayName("Should audit")
     void shouldAudit() {
         // Act & Assert
         AuditMetadata auditMetadata = reusableEntity.getAuditMetadata();
@@ -68,7 +70,6 @@ class OutboxProcessedSequenceJpaRepositoryTest {
                 .isCloseTo(Instant.now(), within(Duration.ofSeconds(3)));
         assertThat(auditMetadata.modified())
                 .isCloseTo(Instant.now(), within(Duration.ofSeconds(3)));
-        // Set soft delete to true
         auditMetadata = new AuditMetadata(
                 auditMetadata.created(),
                 auditMetadata.modified(),
@@ -76,7 +77,7 @@ class OutboxProcessedSequenceJpaRepositoryTest {
         );
         reusableEntity.setAuditMetadata(auditMetadata);
         // Advance in time two days
-        clock.advanceTime(Duration.ofDays(2));
+        clock.advanceTime(Duration.ofHours(3));
         reusableEntity = repository.merge(reusableEntity);
         // we need to flush here to get the new Audit values (JPA lifecycle stuffs), we need to take a trip to the DB
         repository.flush();
@@ -88,10 +89,10 @@ class OutboxProcessedSequenceJpaRepositoryTest {
                         within(Duration.ofSeconds(3)));
         // Check that modified should be updated with the new Clock time
         assertThat(auditMetadata.modified())
-                .isCloseTo(Instant.now().plus(Duration.ofDays(2)),
-                        within(Duration.ofSeconds(3)));
+                .isCloseTo(Instant.now().plus(Duration.ofHours(3)),
+                        within(Duration.ofSeconds(1)));
         assertThat(auditMetadata.deleted())
                 .isTrue();
-        clock.goBackTime(Duration.ofDays(2));
+        clock.resetTime();
     }
 }

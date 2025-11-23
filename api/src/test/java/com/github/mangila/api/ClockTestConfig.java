@@ -49,6 +49,10 @@ public class ClockTestConfig {
             this.clock = Clock.fixed(newTime, ZoneOffset.UTC);
         }
 
+        public void resetTime() {
+            this.clock = Clock.systemUTC();
+        }
+
         @Override
         public ZoneId getZone() {
             return clock.getZone();
