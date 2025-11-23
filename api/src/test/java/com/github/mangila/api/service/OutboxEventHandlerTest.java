@@ -2,7 +2,6 @@ package com.github.mangila.api.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.api.OutboxTestFactory;
-import com.github.mangila.api.PostgresTestContainerConfiguration;
 import com.github.mangila.api.ReusablePostgresTestContainerConfiguration;
 import com.github.mangila.api.model.employee.event.CreateNewEmployeeEvent;
 import com.github.mangila.api.model.outbox.OutboxEntity;
@@ -17,11 +16,9 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Limit;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -76,14 +73,12 @@ class OutboxEventHandlerTest {
         // Act
         assertThatCode(() -> handler.handle(event))
                 .doesNotThrowAnyException();
-        List<OutboxEntity> outboxEntities = outboxJpaRepository.findAllByAggregateId(
-                event.aggregateId(),
-                Sort.unsorted(),
-                Limit.unlimited());
+        Page<OutboxEntity> outboxEntities = outboxJpaRepository.findAllByAggregateId(
+                event.aggregateId(), Pageable.unpaged());
         // Assert
-        assertThat(outboxEntities)
+        assertThat(outboxEntities.getContent())
                 .hasSize(1);
-        assertThat(outboxEntities.getFirst())
+        assertThat(outboxEntities.getContent().getFirst())
                 .hasFieldOrPropertyWithValue("status", OutboxEventStatus.PUBLISHED);
         var inOrder = inOrder(outboxJpaRepository);
         inOrder.verify(outboxJpaRepository, times(1))
@@ -99,14 +94,12 @@ class OutboxEventHandlerTest {
         // Act
         assertThatCode(() -> handler.handle(event))
                 .doesNotThrowAnyException();
-        List<OutboxEntity> outboxEntities = outboxJpaRepository.findAllByAggregateId(
-                event.aggregateId(),
-                Sort.unsorted(),
-                Limit.unlimited());
+        Page<OutboxEntity> outboxEntities = outboxJpaRepository.findAllByAggregateId(
+                event.aggregateId(), Pageable.unpaged());
         // Assert
-        assertThat(outboxEntities)
+        assertThat(outboxEntities.getContent())
                 .hasSize(1);
-        assertThat(outboxEntities.getFirst())
+        assertThat(outboxEntities.getContent().getFirst())
                 .hasFieldOrPropertyWithValue("status", OutboxEventStatus.UNPROCESSABLE_EVENT);
         var inOrder = inOrder(outboxJpaRepository);
         inOrder.verify(outboxJpaRepository, times(1))
@@ -124,14 +117,12 @@ class OutboxEventHandlerTest {
         // Act
         assertThatCode(() -> handler.handle(event))
                 .doesNotThrowAnyException();
-        List<OutboxEntity> outboxEntities = outboxJpaRepository.findAllByAggregateId(
-                reusableEntity.getAggregateId(),
-                Sort.unsorted(),
-                Limit.unlimited());
+        Page<OutboxEntity> outboxEntities = outboxJpaRepository.findAllByAggregateId(
+                reusableEntity.getAggregateId(), Pageable.unpaged());
         // Assert
         assertThat(outboxEntities)
                 .hasSize(1);
-        assertThat(outboxEntities.getFirst())
+        assertThat(outboxEntities.getContent().getFirst())
                 .hasFieldOrPropertyWithValue("status", OutboxEventStatus.FAILURE);
         var inOrder = inOrder(outboxJpaRepository);
         inOrder.verify(outboxJpaRepository, times(1))

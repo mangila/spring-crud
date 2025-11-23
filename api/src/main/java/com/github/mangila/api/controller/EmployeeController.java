@@ -8,8 +8,8 @@ import com.github.mangila.api.shared.annotation.ValidEmployeeId;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,18 +21,18 @@ import java.util.List;
 
 /**
  * <p>
- *     Use a noun or no noun for the resource is the question.
- *     The noun fit well in this domain, if you think about it, we are basically querying a collection of employees as a REST endpoint.
- *     The endpoints are created how we want to use the employee collection.
+ * Use a noun or no noun for the resource is the question.
+ * The noun fit well in this domain, if you think about it, we are basically querying a collection of employees as a REST endpoint.
+ * The endpoints are created how we want to use the employee collection.
  * </p>
  * <p>
- *    The api versioning is very convenient, if huge breaking changes occur, a new controller v2 can be created.
- *    <br>
- *    e.g., /api/v1/employees, /api/v2/employees
- *    <br>
- *    e.g., A brand new DTO is introduced, and we still have consumers of the old DTO.
- *    <br>
- *    Can be anything really that breaks the current REST contract
+ * The api versioning is very convenient, if huge breaking changes occur, a new controller v2 can be created.
+ * <br>
+ * e.g., /api/v1/employees, /api/v2/employees
+ * <br>
+ * e.g., A brand new DTO is introduced, and we still have consumers of the old DTO.
+ * <br>
+ * Can be anything really that breaks the current REST contract
  * </p>
  */
 @RestController
@@ -61,17 +61,18 @@ public class EmployeeController {
     @GetMapping(value = "replay/{employeeId}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<List<EmployeeDto>> replayEmployee(
+    public PagedModel<EmployeeDto> replayEmployee(
             @PathVariable
             @NotBlank
             @ValidEmployeeId
-            String employeeId) {
-        return ResponseEntity.ok().body(restFacade.replayEmployee(employeeId));
+            String employeeId,
+            @NotNull Pageable pageable) {
+        return new PagedModel<>(restFacade.replayEmployee(employeeId, pageable));
     }
 
     @GetMapping
-    public ResponseEntity<Page<EmployeeDto>> findAllEmployeesByPage(Pageable pageable) {
-        return ResponseEntity.ok(restFacade.findAllEmployeesByPage(pageable));
+    public PagedModel<EmployeeDto> findAllEmployeesByPage(Pageable pageable) {
+        return new PagedModel<>(restFacade.findAllEmployeesByPage(pageable));
     }
 
     @PostMapping

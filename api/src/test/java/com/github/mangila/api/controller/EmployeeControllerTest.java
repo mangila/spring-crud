@@ -1,6 +1,7 @@
 package com.github.mangila.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.api.ClockTestConfig;
 import com.github.mangila.api.EmployeeTestFactory;
 import com.github.mangila.api.PostgresTestContainerConfiguration;
@@ -57,6 +58,7 @@ class EmployeeControllerTest {
         delete(dto.employeeId());
         dto = read(location.toString());
         assertThat(dto.deleted()).isTrue();
+        clock.resetTime();
     }
 
     private URI create() throws IOException {
@@ -188,12 +190,77 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void findAllEmployeesByPage() {
-        assertThat(1 + 1).isEqualTo(3);
+    void findAllEmployeesByPage() throws IOException {
+        // Setup
+        for (int i = 0; i < 20; i++) {
+            create();
+        }
+        // Act & Assert
+        ObjectNode page = webTestClient.get()
+                .uri("/api/v1/employees?size=10")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(ObjectNode.class)
+                .returnResult()
+                .getResponseBody();
+        assertThat(page).isNotNull();
+        assertThatJson(page.toString())
+                .isObject()
+                .containsOnlyKeys("content", "page")
+                .node("")
+                .and(jsonAssert -> jsonAssert.node("page")
+                        .isObject()
+                        .containsEntry("number", 0)
+                        .containsEntry("size", 10)
+                        .containsEntry("totalElements", 20)
+                        .containsEntry("totalPages", 2)
+                )
+                .and(jsonAssert -> jsonAssert.node("content")
+                        .isArray()
+                        .hasSize(10));
     }
 
     @Test
-    void replay() {
-        assertThat(1 + 1).isEqualTo(3);
+    void replay() throws IOException {
+        // Setup
+        crudEmployee();
+        ObjectNode page = webTestClient.get()
+                .uri("/api/v1/employees?size=1")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(ObjectNode.class)
+                .returnResult()
+                .getResponseBody();
+        assertThat(page).isNotNull();
+        String employeeId = page.get("content")
+                .get(0)
+                .get("employeeId")
+                .asText();
+        // Act & Assert
+        page = webTestClient.get()
+                .uri("/api/v1/employees/replay/{employeeId}", employeeId)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(ObjectNode.class)
+                .returnResult()
+                .getResponseBody();
+        assertThat(page).isNotNull();
+        assertThatJson(page.toString())
+                .isObject()
+                .containsOnlyKeys("content", "page")
+                .node("")
+                .and(jsonAssert -> jsonAssert.node("page")
+                        .isObject()
+                        .containsEntry("number", 0)
+                        .containsEntry("size", 20)
+                        .containsEntry("totalElements", 3)
+                        .containsEntry("totalPages", 1)
+                )
+                .and(jsonAssert -> jsonAssert.node("content")
+                        .isArray()
+                        .hasSize(3));
     }
 }

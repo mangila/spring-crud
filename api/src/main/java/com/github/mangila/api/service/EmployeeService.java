@@ -10,7 +10,10 @@ import com.github.mangila.api.repository.OutboxJpaRepository;
 import com.github.mangila.api.shared.exception.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NullMarked;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,9 +53,8 @@ public class EmployeeService {
     }
 
     public Page<Employee> findAllEmployeesByPage(final Pageable pageable) {
-        // TODO: create a Probe for querying
-        var probe = Example.of(new EmployeeEntity());
-        return employeeRepository.findAll(probe, pageable)
+        var example = Example.of(new EmployeeEntity(), ExampleMatcher.matchingAny());
+        return employeeRepository.findAll(example, pageable)
                 .map(domainMapper::map);
     }
 
@@ -106,11 +108,7 @@ public class EmployeeService {
         eventService.publishSoftDeleteEvent(employee);
     }
 
-    public List<OutboxEntity> replayEmployee(EmployeeId id) {
-        return outboxJpaRepository.findAllByAggregateId(
-                id.value(),
-                Sort.by("sequence").descending(),
-                Limit.unlimited()
-        );
+    public Page<OutboxEntity> replayEmployee(final EmployeeId id, final Pageable pageable) {
+        return outboxJpaRepository.findAllByAggregateId(id.value(), pageable);
     }
 }

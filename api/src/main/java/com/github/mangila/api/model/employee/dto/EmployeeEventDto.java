@@ -14,8 +14,8 @@ import java.time.Instant;
 
 /**
  * <p>
- *     DTO for employee domain events.
- *     This is a representation of the event payload as it is sent to the event bus.
+ * DTO for employee domain events.
+ * This is a representation of the event payload as it is sent to the event bus.
  * </p>
  */
 public record EmployeeEventDto(

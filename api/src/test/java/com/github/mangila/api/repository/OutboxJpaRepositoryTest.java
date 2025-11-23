@@ -19,6 +19,8 @@ import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.time.Duration;
@@ -84,12 +86,11 @@ class OutboxJpaRepositoryTest {
     @DisplayName("Should find all by Aggregate ID")
     void findAllByAggregateId() {
         // Act
-        List<OutboxEntity> entities = repository.findAllByAggregateId(
+        Page<OutboxEntity> entities = repository.findAllByAggregateId(
                 "test",
-                Sort.unsorted(),
-                Limit.unlimited());
+                Pageable.unpaged());
         // Assert
-        assertThat(entities)
+        assertThat(entities.getContent())
                 .hasSize(1);
     }
 
