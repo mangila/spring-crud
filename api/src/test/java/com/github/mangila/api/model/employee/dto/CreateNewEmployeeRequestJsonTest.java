@@ -93,35 +93,35 @@ class CreateNewEmployeeRequestJsonTest {
 
     private static void assertAttributesRoot(JsonAssert jsonAssert) {
         jsonAssert.isObject()
-                .hasSize(4)
+                .hasSize(5)
                 .containsOnlyKeys(
                         "vegan",
                         "pronouns",
+                        "lizard_people",
                         "evaluation",
                         "licenses"
                 )
                 .containsEntry("vegan", true)
+                .containsEntry("lizard_people", null)
                 .containsEntry("pronouns", "he/him");
     }
 
     private static void assertLicenses(JsonAssert jsonAssert) {
         jsonAssert.isArray()
-                .hasSize(3)
+                .hasSize(2)
                 .containsExactly(
                         "PP7",
-                        "Klobb",
-                        "DD44 Dostovei"
+                        "Klobb"
                 );
     }
 
     private static void assertEvaluation(JsonAssert jsonAssert) {
         jsonAssert
                 .isObject()
-                .hasSize(3)
+                .hasSize(2)
                 .containsExactly(
                         Map.entry("medical", "FAIL"),
-                        Map.entry("physical", "FAIL"),
-                        Map.entry("psychological", "FAIL")
+                        Map.entry("physical", "FAIL")
                 );
     }
 }
