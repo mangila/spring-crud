@@ -22,9 +22,4 @@ public record AuditMetadata(
         boolean deleted
 ) {
     public static final AuditMetadata EMPTY = new AuditMetadata(null, null, false);
-
-    // Default constructor needed for JPA
-    public AuditMetadata() {
-        this(null, null, false);
-    }
 }

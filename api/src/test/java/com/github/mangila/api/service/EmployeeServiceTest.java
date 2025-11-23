@@ -29,7 +29,8 @@ import java.util.Map;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.inOrder;
 
 /**
  * Full-scale service test with integration towards a database.
@@ -123,17 +124,19 @@ class EmployeeServiceTest {
         Employee employee = factory.from(request);
         service.createNewEmployee(employee);
         var inOrder = inOrder(entityMapper, repository, eventService);
-        inOrder.verify(entityMapper, times(1)).map(any(Employee.class));
-        inOrder.verify(repository, times(1)).persist(any(EmployeeEntity.class));
-        inOrder.verify(eventService, times(1)).publishCreateNewEvent(any(Employee.class));
+        inOrder.verify(entityMapper).map(any(Employee.class));
+        inOrder.verify(repository).persist(any(EmployeeEntity.class));
+        inOrder.verify(eventService).publishCreateNewEvent(any(Employee.class));
+        clearInvocations(entityMapper, repository, eventService);
         return employee.id();
     }
 
     private Employee read(EmployeeId employeeId) {
         Employee employee = service.findEmployeeById(employeeId);
         var inOrder = inOrder(repository, domainMapper);
-        inOrder.verify(repository, times(1)).findById(any(String.class));
-        inOrder.verify(domainMapper, times(1)).map(any(EmployeeEntity.class));
+        inOrder.verify(repository).findById(any(String.class));
+        inOrder.verify(domainMapper).map(any(EmployeeEntity.class));
+        clearInvocations(repository, domainMapper);
         return employee;
     }
 
@@ -167,36 +170,30 @@ class EmployeeServiceTest {
                 .containsOnlyKeys(
                         "vegan",
                         "pronouns",
+                        "lizard_people",
                         "licenses",
-                        "evaluation",
-                        "substance_addiction",
-                        "secret_number",
-                        "notes"
+                        "evaluation"
                 )
-                .hasSize(7)
+                .hasSize(5)
                 .containsEntry("vegan", true)
                 .containsEntry("pronouns", "he/him")
-                .containsEntry("substance_addiction", true)
-                .containsEntry("secret_number", "123")
-                .containsEntry("notes", "subject is not approved for field duty, immediate suspension advised")
+                .containsEntry("lizard_people", null)
                 .hasEntrySatisfying("licenses", json -> {
                     assertThatJson(json)
                             .isArray()
-                            .hasSize(3)
+                            .hasSize(2)
                             .containsExactly(
                                     "PP7",
-                                    "Klobb",
-                                    "DD44 Dostovei"
+                                    "Klobb"
                             );
                 })
                 .hasEntrySatisfying("evaluation", json -> {
                     assertThatJson(json)
                             .isObject()
-                            .hasSize(3)
+                            .hasSize(2)
                             .containsExactly(
                                     Map.entry("medical", "FAIL"),
-                                    Map.entry("physical", "FAIL"),
-                                    Map.entry("psychological", "FAIL")
+                                    Map.entry("physical", "FAIL")
                             );
                 });
         // Assert Employee Audit
@@ -230,11 +227,12 @@ class EmployeeServiceTest {
         clearInvocations(domainMapper); // clear here because it is a preparation for the test
         service.updateEmployee(employee);
         var inOrder = inOrder(repository, entityMapper, domainMapper, eventService);
-        inOrder.verify(repository, times(1)).existsById(any(String.class));
-        inOrder.verify(entityMapper, times(1)).map(any(Employee.class));
-        inOrder.verify(repository, times(1)).merge(any(EmployeeEntity.class));
-        inOrder.verify(domainMapper, times(1)).map(any(EmployeeEntity.class));
-        inOrder.verify(eventService, times(1)).publishUpdateEvent(any(Employee.class));
+        inOrder.verify(repository).findById(any(String.class));
+        inOrder.verify(entityMapper).map(any(Employee.class));
+        inOrder.verify(repository).merge(any(EmployeeEntity.class));
+        inOrder.verify(domainMapper).map(any(EmployeeEntity.class));
+        inOrder.verify(eventService).publishUpdateEvent(any(Employee.class));
+        clearInvocations(repository, entityMapper, domainMapper, eventService);
     }
 
     private void assertUpdatedEmployee(Employee employee) {
@@ -249,13 +247,11 @@ class EmployeeServiceTest {
                 .containsOnlyKeys(
                         "vegan",
                         "pronouns",
+                        "lizard_people",
                         "licenses",
-                        "evaluation",
-                        "substance_addiction",
-                        "secret_number",
-                        "notes"
+                        "evaluation"
                 )
-                .hasSize(7)
+                .hasSize(5)
                 .containsEntry("vegan", false);
         // Verify created and modified dates are somewhere in the last 5 seconds
         assertThat(employee.audit().created())
@@ -271,10 +267,11 @@ class EmployeeServiceTest {
     private void delete(EmployeeId employeeId) {
         service.softDeleteEmployeeById(employeeId);
         var inOrder = inOrder(repository, domainMapper, eventService);
-        inOrder.verify(repository, times(1)).findById(any(String.class));
-        inOrder.verify(repository, times(1)).merge(any(EmployeeEntity.class));
-        inOrder.verify(domainMapper, times(1)).map(any(EmployeeEntity.class));
-        inOrder.verify(eventService, times(1)).publishSoftDeleteEvent(any(Employee.class));
+        inOrder.verify(repository).findById(any(String.class));
+        inOrder.verify(repository).merge(any(EmployeeEntity.class));
+        inOrder.verify(domainMapper).map(any(EmployeeEntity.class));
+        inOrder.verify(eventService).publishSoftDeleteEvent(any(Employee.class));
+        clearInvocations(repository, domainMapper, eventService);
     }
 
     @Test
