@@ -2,7 +2,7 @@ package com.github.mangila.api.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.api.EmployeeTestFactory;
-import com.github.mangila.api.TestcontainersConfiguration;
+import com.github.mangila.api.PostgresTestContainerConfiguration;
 import com.github.mangila.api.model.employee.domain.Employee;
 import com.github.mangila.api.model.employee.domain.EmployeeId;
 import com.github.mangila.api.model.employee.domain.EmployeeName;
@@ -46,14 +46,14 @@ import static org.mockito.Mockito.*;
  * <br>
  * Repository, Mapper and Event publisher is wired as SpyBeans just to make sure they invoke its expected method.
  */
-@Import(TestcontainersConfiguration.class)
+@Import(PostgresTestContainerConfiguration.class)
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
                 "application.scheduler.enabled=false"
         }
 )
-class  EmployeeServiceTest {
+class EmployeeServiceTest {
 
     @Autowired
     private EmployeeService service;

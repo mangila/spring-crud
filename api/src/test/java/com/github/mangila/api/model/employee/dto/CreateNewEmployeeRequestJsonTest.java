@@ -34,8 +34,11 @@ class CreateNewEmployeeRequestJsonTest {
 
     @Test
     void serialize() throws IOException {
+        // Setup
         String jsonString = FilePathUtil.readJsonFileToString("json/create-new-employee-request.json");
+        // Act
         ObjectContent<CreateNewEmployeeRequest> objectContent = jsonTester.parse(jsonString);
+        // Assert
         objectContent.assertThat()
                 .hasOnlyFields(
                         "firstName",
@@ -61,9 +64,11 @@ class CreateNewEmployeeRequestJsonTest {
 
     @Test
     void deserialize() throws IOException {
+        // Setup
         CreateNewEmployeeRequest request = EmployeeTestFactory.createNewEmployeeRequest(objectMapper);
+        // Act
         JsonContent<CreateNewEmployeeRequest> jsonContent = jsonTester.write(request);
-        // Assert JSON root keys
+        // Assert
         assertThatJson(jsonContent.getJson())
                 .isObject()
                 .containsOnlyKeys(

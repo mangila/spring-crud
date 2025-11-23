@@ -1,5 +1,6 @@
 package com.github.mangila.api.service;
 
+import com.github.mangila.api.model.AuditMetadata;
 import com.github.mangila.api.model.employee.domain.Employee;
 import com.github.mangila.api.model.employee.domain.EmployeeId;
 import com.github.mangila.api.model.employee.entity.EmployeeEntity;
@@ -95,7 +96,10 @@ public class EmployeeService {
     public void softDeleteEmployeeById(final EmployeeId id) {
         final EmployeeEntity foundEntity = employeeRepository.findById(id.value())
                 .orElseThrow(() -> new EntityNotFoundException(id.value()));
-        foundEntity.getAuditMetadata().setDeleted(true);
+        foundEntity.setAuditMetadata(new AuditMetadata(
+                foundEntity.getAuditMetadata().created(),
+                foundEntity.getAuditMetadata().modified(),
+                true));
         final EmployeeEntity softDeletedEntity = employeeRepository.merge(foundEntity);
         // Map back to domain to prepare for event publishing
         final Employee employee = domainMapper.map(softDeletedEntity);

@@ -31,9 +31,9 @@ public class EmployeeDomainMapper {
                 entity.getEmploymentStatus(),
                 new EmployeeAttributes(entity.getAttributes()),
                 new EmployeeAudit(
-                        entity.getAuditMetadata().getCreated(),
-                        entity.getAuditMetadata().getModified(),
-                        entity.getAuditMetadata().isDeleted()
+                        entity.getAuditMetadata().created(),
+                        entity.getAuditMetadata().modified(),
+                        entity.getAuditMetadata().deleted()
                 )
         );
     }

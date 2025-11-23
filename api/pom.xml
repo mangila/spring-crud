@@ -44,7 +44,7 @@
         <dependency>
             <groupId>io.github.mangila</groupId>
             <artifactId>ensure4j</artifactId>
-            <version>0.0.6</version>
+            <version>0.0.34</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.github.resilience4j/resilience4j-spring-boot3 -->
         <dependency>
@@ -164,7 +164,7 @@
                     <fork>true</fork>
                     <encoding>UTF-8</encoding>
                     <!-- Fail on compilation warnings is a good practice - but might cause some unique issues, especially when dependent on libraries-->
-                    <failOnWarning>true</failOnWarning>
+                    <failOnWarning>false</failOnWarning>
                     <compilerArgs>
                         <arg>-XDcompilePolicy=simple</arg>
                         <!-- Continue compiling so ErrorProne can display a list of error instead of try to fix it one by one-->

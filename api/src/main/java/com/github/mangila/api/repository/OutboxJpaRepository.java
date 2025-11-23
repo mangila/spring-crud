@@ -25,5 +25,5 @@ public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, UUI
             SET o.status = :status
             WHERE o.aggregateId = :aggregateId
             """)
-    void changeStatus(OutboxEventStatus status, String aggregateId);
+    int changeStatus(OutboxEventStatus status, String aggregateId);
 }

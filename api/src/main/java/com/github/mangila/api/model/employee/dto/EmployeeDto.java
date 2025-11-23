@@ -32,6 +32,6 @@ public record EmployeeDto(
         @NotNull ZonedDateTime created,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss z")
         @NotNull ZonedDateTime modified,
-        @NotNull boolean deleted
+        boolean deleted
 ) {
 }

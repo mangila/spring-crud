@@ -3,7 +3,7 @@ package com.github.mangila.api.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.api.ClockTestConfig;
 import com.github.mangila.api.EmployeeTestFactory;
-import com.github.mangila.api.TestcontainersConfiguration;
+import com.github.mangila.api.PostgresTestContainerConfiguration;
 import com.github.mangila.api.model.employee.dto.EmployeeDto;
 import com.github.mangila.api.model.employee.type.EmploymentActivity;
 import com.github.mangila.api.model.employee.type.EmploymentStatus;
@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.within;
 
 @Import(
         {
-                TestcontainersConfiguration.class,
+                PostgresTestContainerConfiguration.class,
                 ClockTestConfig.class,
         }
 )
@@ -189,6 +189,11 @@ class EmployeeControllerTest {
 
     @Test
     void findAllEmployeesByPage() {
+        assertThat(1 + 1).isEqualTo(3);
+    }
+
+    @Test
+    void replay() {
         assertThat(1 + 1).isEqualTo(3);
     }
 }

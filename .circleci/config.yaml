@@ -7,3 +7,4 @@ version: 2.1
 
 # The live testing will be done from our local machine,
 # since we need public DNS names from the EC2 instances outputted by Terraform
+# I don't use an elastic ip for the EC2 instances.

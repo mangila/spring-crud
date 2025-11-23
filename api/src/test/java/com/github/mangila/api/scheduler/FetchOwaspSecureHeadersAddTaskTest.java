@@ -1,6 +1,6 @@
 package com.github.mangila.api.scheduler;
 
-import com.github.mangila.api.TestcontainersConfiguration;
+import com.github.mangila.api.PostgresTestContainerConfiguration;
 import com.github.mangila.api.shared.OwaspRestClient;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * </p>
  * In an Enterprise setting a CI/CD server might be running in its own network and Mock everywhere would be required.
  */
-@Import(TestcontainersConfiguration.class)
+@Import(PostgresTestContainerConfiguration.class)
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {

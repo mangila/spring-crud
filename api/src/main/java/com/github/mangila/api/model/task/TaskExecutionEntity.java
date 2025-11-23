@@ -5,7 +5,6 @@ import com.github.mangila.api.model.AuditMetadata;
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Type;
-import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
@@ -25,13 +24,11 @@ public class TaskExecutionEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "task_name",
-            nullable = false)
+    @Column(name = "task_name")
     private String taskName;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status",
-            nullable = false)
+    @Column(name = "status")
     private TaskExecutionStatus status;
 
     @Type(JsonBinaryType.class)
@@ -42,11 +39,11 @@ public class TaskExecutionEntity {
     @Embedded
     private AuditMetadata auditMetadata;
 
-    public static TaskExecutionEntity from(String taskName, @Nullable ObjectNode attributes) {
+    public static TaskExecutionEntity from(String taskName, ObjectNode attributes) {
         return new TaskExecutionEntity(taskName, TaskExecutionStatus.RUNNING, attributes);
     }
 
-    public TaskExecutionEntity(String taskName, TaskExecutionStatus status, @Nullable ObjectNode attributes) {
+    public TaskExecutionEntity(String taskName, TaskExecutionStatus status, ObjectNode attributes) {
         this.taskName = taskName;
         this.status = status;
         this.attributes = attributes;

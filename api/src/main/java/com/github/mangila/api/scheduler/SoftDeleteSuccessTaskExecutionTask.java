@@ -2,6 +2,7 @@ package com.github.mangila.api.scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.mangila.api.model.AuditMetadata;
 import com.github.mangila.api.model.task.TaskExecutionEntity;
 import com.github.mangila.api.model.task.TaskExecutionStatus;
 import com.github.mangila.api.repository.TaskExecutionJpaRepository;
@@ -46,7 +47,7 @@ public class SoftDeleteSuccessTaskExecutionTask implements Task {
         node.put("message", "Soft deleting %d success task executions".formatted(entities.size()));
         var arrayNode = node.putArray("ids");
         for (TaskExecutionEntity entity : entities) {
-            var audit = entity.getAuditMetadata();
+            AuditMetadata audit = entity.getAuditMetadata();
             // Could happen if change in jpql query to include NULL
             if (audit == null) {
                 log.warn("Task execution {} has no audit metadata", entity.getId());
@@ -54,7 +55,11 @@ public class SoftDeleteSuccessTaskExecutionTask implements Task {
                 continue;
             }
             arrayNode.add(entity.getId().toString());
-            audit.setDeleted(true);
+            AuditMetadata newAuditMetadata = new AuditMetadata(
+                    audit.created(),
+                    audit.modified(),
+                    true);
+            entity.setAuditMetadata(newAuditMetadata);
         }
         taskExecutionRepository.mergeAll(entities);
         taskExecutionRepository.flush();
