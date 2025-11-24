@@ -27,7 +27,6 @@ public class OutboxPgNotificationListener extends PgNotificationListener {
         return "outbox_event_channel";
     }
 
-
     /**
      * Consumes pg notifications while blocking for 5 seconds and then publish them via Spring Event Bus.
      */
