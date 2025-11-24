@@ -54,29 +54,6 @@ public class EmployeeNotificationService {
         );
     }
 
-    public void start() {
-        log.info("Starting OutboxPgNotificationListener");
-        // CAS swap
-        boolean isSwapped = started.compareAndSet(false, true);
-        Ensure.isTrue(isSwapped, "Listener already started");
-        ObjectNode node = objectMapper.createObjectNode();
-        node.put("executedBy", "EmployeeNotificationService");
-        node.put("channel", "outbox_event");
-        applicationTaskExecutor.execute(pgListener, node)
-                .whenComplete((unused, throwable) -> {
-                    if (throwable != null) {
-                        log.error("Failed to start listener", throwable);
-                        started.compareAndSet(true, false);
-                    }
-                });
-    }
-
-    @EventListener
-    @Async
-    public void listen(PGNotification[] notifications) {
-        log.info("Received notification: {}", Arrays.toString(notifications));
-    }
-
     @Scheduled(
             fixedDelay = 10,
             timeUnit = TimeUnit.SECONDS,
@@ -86,5 +63,31 @@ public class EmployeeNotificationService {
         if (!started.get()) {
             start();
         }
+    }
+
+    /**
+     * CAS swapping the started atomic boolean and starting the listener.
+     * Scheduled health-probe is checking in on the variable if the connection was lost.
+     */
+    public void start() {
+        log.info("Starting OutboxPgNotificationListener");
+        boolean isSwapped = started.compareAndSet(false, true);
+        Ensure.isTrue(isSwapped, "Listener already started");
+        ObjectNode node = objectMapper.createObjectNode();
+        node.put("executedBy", "EmployeeNotificationService");
+        node.put("channel", pgListener.channel());
+        applicationTaskExecutor.execute(pgListener, node)
+                .whenComplete((unused, throwable) -> {
+                    if (throwable != null) {
+                        log.error("Listener failed", throwable);
+                    }
+                    started.set(false);
+                });
+    }
+
+    @EventListener
+    @Async
+    public void listen(PGNotification[] notifications) {
+        log.info("Received notification: {}", Arrays.toString(notifications));
     }
 }

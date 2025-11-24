@@ -34,28 +34,27 @@ public class OutboxPgNotificationListener implements PgNotificationListener {
         return "outbox_event_channel";
     }
 
+    /**
+     * Consumes pg notifications while blocking for 5 seconds and then publish them via Spring Event Bus.
+     * No exception handling here, just to rely on the executors CompletableFuture.whenComplete() mechanism.
+     */
     @Override
     public void run() {
-        try {
-            int timeoutMillis = (int) Duration.ofSeconds(5).toMillis();
-            //language=PostgreSQL
-            final String sql = """
-                    LISTEN '%s'
-                    """.formatted(channel());
-            jdbc.execute(sql);
-            jdbc.execute((Connection c) -> {
-                PgConnection pgConnection = c.unwrap(PgConnection.class);
-                while (true) {
-                    PGNotification[] pgNotifications = pgConnection.getNotifications(timeoutMillis);
-                    if (pgNotifications == null || ArrayUtils.isEmpty(pgNotifications)) {
-                        continue;
-                    }
-                    publisher.publish(pgNotifications);
+        int timeoutMillis = (int) Duration.ofSeconds(5).toMillis();
+        //language=PostgreSQL
+        final String sql = """
+                LISTEN '%s'
+                """.formatted(channel());
+        // jdbc.execute(sql);
+        jdbc.execute((Connection c) -> {
+            PgConnection pgConnection = c.unwrap(PgConnection.class);
+            while (true) {
+                PGNotification[] pgNotifications = pgConnection.getNotifications(timeoutMillis);
+                if (pgNotifications == null || ArrayUtils.isEmpty(pgNotifications)) {
+                    continue;
                 }
-            });
-        } catch (Exception e) {
-            log.error("Error listening to notifications", e);
-            Thread.currentThread().interrupt();
-        }
+                publisher.publish(pgNotifications);
+            }
+        });
     }
 }
