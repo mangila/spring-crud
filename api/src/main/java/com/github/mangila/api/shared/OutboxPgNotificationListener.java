@@ -51,9 +51,9 @@ public class OutboxPgNotificationListener extends PgNotificationListener {
     }
 
     /**
-     * This is the internal stuffs that need to be set up for the LISTEN/NOTIFY
+     * This is the database server internal stuffs that need to be set up for the LISTEN/NOTIFY
      * <br>
-     * 1. Create a Function
+     * 1. Create a Function that uses pg_notify(channel, payload)
      * 2. Create a Trigger when the Function is called
      */
     private void setUpTrigger() {
