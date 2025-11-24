@@ -9,6 +9,9 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Threads that are started by the programmer can be submitted from here.
+ */
 public class ApplicationTaskExecutor {
 
     private final SimpleAsyncTaskExecutor taskExecutor;
