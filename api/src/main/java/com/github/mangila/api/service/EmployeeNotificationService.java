@@ -8,6 +8,7 @@ import com.github.mangila.api.shared.PgNotificationListener;
 import com.github.mangila.api.shared.SpringEventPublisher;
 import com.zaxxer.hikari.HikariConfig;
 import io.github.mangila.ensure4j.Ensure;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.postgresql.PGNotification;
 import org.springframework.boot.autoconfigure.flyway.FlywayProperties;
@@ -89,5 +90,10 @@ public class EmployeeNotificationService {
     @Async
     public void listen(PGNotification[] notifications) {
         log.info("Received notification: {}", Arrays.toString(notifications));
+    }
+
+    @PreDestroy
+    void preDestroy() {
+        pgListener.getDataSource().destroy();
     }
 }
