@@ -2,7 +2,7 @@ package com.github.mangila.api.shared;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.api.TestTaskConfig;
-import com.github.mangila.api.TestcontainersConfiguration;
+import com.github.mangila.api.PostgresTestContainerConfiguration;
 import com.github.mangila.api.repository.TaskExecutionJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@Import({TestcontainersConfiguration.class, TestTaskConfig.class})
+@Import({PostgresTestContainerConfiguration.class, TestTaskConfig.class})
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
@@ -48,6 +48,6 @@ class ApplicationTaskExecutorTest {
         verify(simpleAsyncTaskExecutor, times(1)).submitCompletable(any(Callable.class));
         verify(taskExecutionRepository, times(1)).persist(any());
         verify(taskExecutionRepository, times(1)).merge(any());
-        future.thenAccept(objectNode -> assertThat(objectNode.has("test")));
+        var unused = future.thenAccept(objectNode -> assertThat(objectNode.has("test")).isTrue());
     }
 }

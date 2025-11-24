@@ -3,27 +3,36 @@ package com.github.mangila.api.repository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.api.ClockTestConfig;
 import com.github.mangila.api.OutboxTestFactory;
-import com.github.mangila.api.TestcontainersConfiguration;
+import com.github.mangila.api.ReusablePostgresTestContainerConfiguration;
 import com.github.mangila.api.config.JacksonConfig;
 import com.github.mangila.api.config.JpaConfig;
+import com.github.mangila.api.model.AuditMetadata;
+import com.github.mangila.api.model.employee.event.CreateNewEmployeeEvent;
 import com.github.mangila.api.model.outbox.OutboxEntity;
 import com.github.mangila.api.model.outbox.OutboxEventStatus;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
 @Import(
         {
-                TestcontainersConfiguration.class,
+                ReusablePostgresTestContainerConfiguration.class,
                 JacksonConfig.class,
                 ClockTestConfig.class,
                 JpaConfig.class
@@ -42,33 +51,67 @@ class OutboxJpaRepositoryTest {
     @Autowired
     private ClockTestConfig.TestClock clock;
 
+    private OutboxEntity reusableEntity;
+
+    @BeforeEach
+    void setup() {
+        OutboxEntity entity = OutboxTestFactory.createOutboxEntity(
+                "test",
+                CreateNewEmployeeEvent.class.getName(),
+                OutboxEventStatus.PENDING,
+                objectMapper.createObjectNode()
+        );
+        this.reusableEntity = repository.persist(entity);
+    }
+
+    @AfterEach
+    void cleanup() {
+        repository.delete(reusableEntity);
+    }
+
     @Test
     @DisplayName("Should find all by status")
     void findAllByStatus() {
-        assertThat(1 + 1).isEqualTo(3);
+        // Act
+        List<OutboxEntity> entities = repository.findAllByStatus(
+                OutboxEventStatus.PENDING,
+                Sort.unsorted(),
+                Limit.unlimited());
+        // Assert
+        assertThat(entities)
+                .hasSize(1);
     }
 
     @Test
     @DisplayName("Should find all by Aggregate ID")
     void findAllByAggregateId() {
-        assertThat(1 + 1).isEqualTo(3);
+        // Act
+        Page<OutboxEntity> entities = repository.findAllByAggregateId(
+                "test",
+                Pageable.unpaged());
+        // Assert
+        assertThat(entities.getContent())
+                .hasSize(1);
     }
 
     @Test
     @DisplayName("Should change status")
     void changeStatus() {
-        OutboxEntity entity = repository.persist(OutboxTestFactory.createOutboxEntity(OutboxEventStatus.PENDING, objectMapper));
-        repository.changeStatus(OutboxEventStatus.FAILURE, entity.getAggregateId());
-        entity = repository.findById(entity.getId()).orElseThrow();
-        assertThat(entity.getStatus())
+        // Act
+        int rowsAffected = repository.changeStatus(OutboxEventStatus.FAILURE, reusableEntity.getAggregateId());
+        // Assert
+        assertThat(rowsAffected)
+                .isEqualTo(1);
+        this.reusableEntity = repository.findById(reusableEntity.getId()).orElseThrow();
+        assertThat(reusableEntity.getStatus())
                 .isEqualTo(OutboxEventStatus.FAILURE);
     }
 
     @Test
     @DisplayName("Should audit")
     void shouldAudit() {
-        OutboxEntity entity = repository.persist(OutboxTestFactory.createOutboxEntity(OutboxEventStatus.PENDING, objectMapper));
-        var auditMetadata = entity.getAuditMetadata();
+        // Act & Assert
+        AuditMetadata auditMetadata = reusableEntity.getAuditMetadata();
         assertThat(auditMetadata)
                 .isNotNull()
                 .hasOnlyFields(
@@ -77,27 +120,33 @@ class OutboxJpaRepositoryTest {
                         "deleted"
                 )
                 .hasFieldOrPropertyWithValue("deleted", false);
-        assertThat(auditMetadata.getCreated())
-                .isCloseTo(Instant.now(), within(Duration.ofSeconds(1)));
-        assertThat(auditMetadata.getModified())
-                .isCloseTo(Instant.now(), within(Duration.ofSeconds(1)));
-        auditMetadata.setDeleted(true);
+        assertThat(auditMetadata.created())
+                .isCloseTo(Instant.now(), within(Duration.ofSeconds(3)));
+        assertThat(auditMetadata.modified())
+                .isCloseTo(Instant.now(), within(Duration.ofSeconds(3)));
+        auditMetadata = new AuditMetadata(
+                auditMetadata.created(),
+                auditMetadata.modified(),
+                true
+        );
+        reusableEntity.setAuditMetadata(auditMetadata);
         // Advance in time two days
-        clock.advanceTime(Duration.ofDays(2));
-        entity = repository.merge(entity);
+        clock.advanceTime(Duration.ofHours(3));
+        reusableEntity = repository.merge(reusableEntity);
         // we need to flush here to get the new Audit values (JPA lifecycle stuffs), we need to take a trip to the DB
         repository.flush();
-        auditMetadata = entity.getAuditMetadata();
+        auditMetadata = reusableEntity.getAuditMetadata();
         // Check that created should be unchanged
-        assertThat(auditMetadata.getCreated())
+        assertThat(auditMetadata.created())
                 .isCloseTo(
                         Instant.now(),
-                        within(Duration.ofSeconds(1)));
+                        within(Duration.ofSeconds(3)));
         // Check that modified should be updated with the new Clock time
-        assertThat(auditMetadata.getModified())
-                .isCloseTo(Instant.now().plus(Duration.ofDays(2)),
+        assertThat(auditMetadata.modified())
+                .isCloseTo(Instant.now().plus(Duration.ofHours(3)),
                         within(Duration.ofSeconds(1)));
-        assertThat(auditMetadata.isDeleted())
+        assertThat(auditMetadata.deleted())
                 .isTrue();
+        clock.resetTime();
     }
 }

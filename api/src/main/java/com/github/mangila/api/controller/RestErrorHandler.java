@@ -1,6 +1,7 @@
 package com.github.mangila.api.controller;
 
 import com.github.mangila.api.shared.exception.EntityNotFoundException;
+import com.github.mangila.api.shared.exception.TaskNotFoundException;
 import io.github.mangila.ensure4j.EnsureException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,19 @@ public class RestErrorHandler {
      */
     @ExceptionHandler(NoHandlerFoundException.class)
     public ProblemDetail handleNoHandlerFoundException(NoHandlerFoundException e) {
+        log.error("ERR", e);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND,
+                e.getMessage()
+        );
+        return problemDetail;
+    }
+
+    /**
+     * Display a friendly error message to the client when requesting a task that doesn't exist.
+     */
+    @ExceptionHandler(TaskNotFoundException.class)
+    public ProblemDetail handleTaskNotFoundException(TaskNotFoundException e) {
         log.error("ERR", e);
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.NOT_FOUND,

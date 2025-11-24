@@ -2,7 +2,7 @@ package com.github.mangila.api.scheduler;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.api.TaskExecutionTestFactory;
-import com.github.mangila.api.TestcontainersConfiguration;
+import com.github.mangila.api.PostgresTestContainerConfiguration;
 import com.github.mangila.api.model.task.TaskExecutionEntity;
 import com.github.mangila.api.model.task.TaskExecutionStatus;
 import com.github.mangila.api.repository.TaskExecutionJpaRepository;
@@ -20,7 +20,7 @@ import java.util.List;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Import(TestcontainersConfiguration.class)
+@Import(PostgresTestContainerConfiguration.class)
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
@@ -67,7 +67,7 @@ class SoftDeleteSuccessTaskExecutionTaskTest {
         assertThat(entities)
                 .hasSize(55);
         entities.forEach(entity -> {
-            assertThat(entity.getAuditMetadata().isDeleted())
+            assertThat(entity.getAuditMetadata().deleted())
                     .isTrue();
         });
     }

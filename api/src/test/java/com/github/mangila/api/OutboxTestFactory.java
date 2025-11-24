@@ -1,6 +1,6 @@
 package com.github.mangila.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.api.model.AuditMetadata;
 import com.github.mangila.api.model.outbox.OutboxEntity;
 import com.github.mangila.api.model.outbox.OutboxEventStatus;
@@ -9,22 +9,26 @@ import com.github.mangila.api.model.outbox.OutboxProcessedSequenceEntity;
 
 public class OutboxTestFactory {
 
-    public static OutboxEntity createOutboxEntity(OutboxEventStatus status, ObjectMapper objectMapper) {
+    public static OutboxEntity createOutboxEntity(String aggregateId,
+                                                  String eventName,
+                                                  OutboxEventStatus status,
+                                                  ObjectNode payload) {
         var entity = new OutboxEntity();
-        entity.setAggregateId("test");
-        entity.setEventName("test");
+        entity.setAggregateId(aggregateId);
+        entity.setEventName(eventName);
         entity.setStatus(status);
-        entity.setPayload(objectMapper.createObjectNode());
+        entity.setSequence(1);
+        entity.setPayload(payload);
         entity.setAuditMetadata(AuditMetadata.EMPTY);
         return entity;
     }
 
-    public static OutboxProcessedSequenceEntity createOutboxProcessedSequenceEntity() {
-        return OutboxProcessedSequenceEntity.from("test");
+    public static OutboxProcessedSequenceEntity createOutboxProcessedSequenceEntity(String aggregateId) {
+        return OutboxProcessedSequenceEntity.from(aggregateId);
     }
 
-    public static OutboxNextSequenceEntity createOutboxNextSequenceEntity() {
-        return OutboxNextSequenceEntity.from("test");
+    public static OutboxNextSequenceEntity createOutboxNextSequenceEntity(String aggregateId) {
+        return OutboxNextSequenceEntity.from(aggregateId);
     }
 
 }

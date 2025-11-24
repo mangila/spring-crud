@@ -4,6 +4,8 @@ import com.github.mangila.api.model.outbox.OutboxEntity;
 import com.github.mangila.api.model.outbox.OutboxEventStatus;
 import io.hypersistence.utils.spring.repository.BaseJpaRepository;
 import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,8 +16,10 @@ import java.util.UUID;
 
 @Repository
 public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, UUID> {
-    List<OutboxEntity> findAllByAggregateId(String aggregateId, Sort sort, Limit limit);
+    Page<OutboxEntity> findAllByAggregateId(String aggregateId, Pageable pageable);
+
     List<OutboxEntity> findAllByStatus(OutboxEventStatus status, Sort sort, Limit limit);
+
     @Modifying(
             clearAutomatically = true,
             flushAutomatically = true
@@ -25,5 +29,5 @@ public interface OutboxJpaRepository extends BaseJpaRepository<OutboxEntity, UUI
             SET o.status = :status
             WHERE o.aggregateId = :aggregateId
             """)
-    void changeStatus(OutboxEventStatus status, String aggregateId);
+    int changeStatus(OutboxEventStatus status, String aggregateId);
 }

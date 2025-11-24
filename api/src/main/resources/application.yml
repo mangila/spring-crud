@@ -2,12 +2,12 @@
 application:
   outbox-relay:
     initial-delay: 30s
-    fixed-delay: 10s
+    fixed-delay: 15s
   scheduler:
     enabled: true
     initial-delay: 30s
-    fixed-rate: 5s
-    fixed-delay: 10
+    fixed-rate: 15s
+    fixed-delay: 15s
     cron: "@weekly"
 # Tomcat Server Properties
 # https://docs.spring.io/spring-boot/how-to/webserver.html
@@ -29,6 +29,13 @@ spring:
     resources:
       # No need to serve static resources as a REST API
       add-mappings: false
+  data:
+    web:
+      pageable:
+        default-page-size: 20
+        max-page-size: 100
+        one-indexed-parameters: true
+        serialization-mode: via_dto
   threads:
     virtual:
       enabled: true
@@ -57,7 +64,7 @@ spring:
       # batch when doing updates
       hibernate.order_updates: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
     show-sql: true
     # Detach JPA from the Spring HTTP request lifecycle
     open-in-view: false

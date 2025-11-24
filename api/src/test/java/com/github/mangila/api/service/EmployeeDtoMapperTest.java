@@ -1,7 +1,9 @@
 package com.github.mangila.api.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.api.ClockTestConfig;
 import com.github.mangila.api.EmployeeTestFactory;
+import com.github.mangila.api.config.WebConfig;
 import com.github.mangila.api.model.employee.domain.Employee;
 import com.github.mangila.api.model.employee.dto.EmployeeDto;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
+import java.time.Clock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,6 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(
         classes = {
                 EmployeeDtoMapper.class,
+                WebConfig.class,
+                ClockTestConfig.TestClock.class,
         }
 )
 @AutoConfigureJson

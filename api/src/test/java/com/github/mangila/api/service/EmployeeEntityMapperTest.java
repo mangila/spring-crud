@@ -40,6 +40,30 @@ class EmployeeEntityMapperTest {
     void map() throws IOException {
         Employee employee = EmployeeTestFactory.createEmployee(objectMapper);
         EmployeeEntity entity = mapper.map(employee);
-        assertThat(1 + 1).isEqualTo(3);
+        assertThat(entity)
+                .isNotNull()
+                .hasNoNullFieldsOrProperties()
+                .hasOnlyFields(
+                        "id",
+                        "firstName",
+                        "lastName",
+                        "salary",
+                        "employmentActivity",
+                        "employmentStatus",
+                        "attributes",
+                        "auditMetadata"
+                )
+                .hasFieldOrPropertyWithValue("id", employee.id().value())
+                .hasFieldOrPropertyWithValue("firstName", employee.firstName().value())
+                .hasFieldOrPropertyWithValue("lastName", employee.lastName().value())
+                .hasFieldOrPropertyWithValue("salary", employee.salary().value())
+                .hasFieldOrPropertyWithValue("employmentActivity", employee.employmentActivity())
+                .hasFieldOrPropertyWithValue("employmentStatus", employee.employmentStatus())
+                .hasFieldOrPropertyWithValue("attributes", employee.attributes().value())
+                .hasFieldOrProperty("auditMetadata");
+        assertThat(entity.getAuditMetadata())
+                .hasFieldOrPropertyWithValue("created", employee.audit().created())
+                .hasFieldOrPropertyWithValue("modified", employee.audit().modified())
+                .hasFieldOrPropertyWithValue("deleted", employee.audit().deleted());
     }
 }

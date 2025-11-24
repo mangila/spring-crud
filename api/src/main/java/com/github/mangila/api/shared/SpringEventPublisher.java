@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.jspecify.annotations.NullMarked;
+import org.postgresql.PGNotification;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -67,5 +68,9 @@ public class SpringEventPublisher {
     @Transactional(propagation = Propagation.MANDATORY)
     public void publish(@Valid @NotNull OutboxEvent event) {
         publisher.publishEvent(event);
+    }
+
+    public void publish(@NotNull PGNotification[] notification) {
+        publisher.publishEvent(notification);
     }
 }

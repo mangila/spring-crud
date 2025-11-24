@@ -2,7 +2,7 @@ package com.github.mangila.api.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.api.EmployeeTestFactory;
-import com.github.mangila.api.TestcontainersConfiguration;
+import com.github.mangila.api.PostgresTestContainerConfiguration;
 import com.github.mangila.api.model.employee.dto.EmployeeEventDto;
 import com.github.mangila.api.model.employee.event.CreateNewEmployeeEvent;
 import com.github.mangila.api.model.outbox.OutboxEvent;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.times;
  * <br>
  * "@ExtendWith(OutputCaptureExtension.class)" is for capturing the output of the test method.
  */
-@Import(TestcontainersConfiguration.class)
+@Import(PostgresTestContainerConfiguration.class)
 @ExtendWith(OutputCaptureExtension.class)
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,

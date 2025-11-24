@@ -11,6 +11,8 @@ Postgres database is used as the persistence layer.
 
 Transactional Outbox pattern is used to send events, the outbox table can be used for event sourcing replays.
 
+Postgres LISTEN/NOTIFY is used for Fire and Forget (FaF) Notifications.
+
 [JobRunr](https://www.jobrunr.io) is being used for background tasks scheduling in the background module.
 
 Deployed to AWS and automated with IaC (Infrastructure as Code) and CM (Configuration Management) using Terraform and
@@ -33,6 +35,7 @@ purposes)
 - Spring JPA (with hypersistence-utils)
 - Spring AOP
 - Postgres w Flyway
+- Postgres LISTEN/NOTIFY
 - Resilience4j
 - JSpecify
 - Ensure4j

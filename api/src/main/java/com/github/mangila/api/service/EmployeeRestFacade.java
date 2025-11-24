@@ -13,8 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 /**
  * Facade for REST endpoints.
  * <p>
@@ -79,24 +77,21 @@ public class EmployeeRestFacade {
         service.softDeleteEmployeeById(id);
     }
 
-    public List<@Nullable EmployeeDto> replayEmployee(String employeeId) {
+    public Page<@Nullable EmployeeDto> replayEmployee(String employeeId, Pageable pageable) {
         EmployeeId id = new EmployeeId(employeeId);
-        return service.replayEmployee(id)
-                .stream()
+        return service.replayEmployee(id, pageable)
                 .map(entity -> {
                     log.info("Outbox event: {}", entity);
-                    ObjectNode payload = entity.getPayload();
-                    // the event payloads JSON root key "dto" is what we are looking for
-                    String key = "dto";
-                    if (payload.has(key) && payload.get(key).isObject()) {
-                        payload = (ObjectNode) payload.get(key);
-                        EmployeeEventDto eventDto = eventMapper.map(payload);
+                    // the event payload JSON must have a "dto" key
+                    ObjectNode dto = (ObjectNode) entity
+                            .getPayload()
+                            .get("dto");
+                    if (dto != null && dto.isObject()) {
+                        EmployeeEventDto eventDto = eventMapper.map(dto);
                         return dtoMapper.map(eventDto);
                     }
-                    // here if we get null values, the event is missing the "dto" key
                     log.warn("Event missing 'dto' key: {} - {}", entity.getEventName(), entity.getId());
                     return null;
-                })
-                .toList();
+                });
     }
 }

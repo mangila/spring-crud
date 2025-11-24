@@ -1,11 +1,12 @@
 package com.github.mangila.api.scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.api.shared.ApplicationTaskExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Run some tasks, running with the Spring integrated scheduler.
@@ -25,13 +26,11 @@ public class Scheduler {
 
     private final ApplicationTaskExecutor applicationTaskExecutor;
     private final ObjectMapper objectMapper;
-
-    // Spring magic, wires a map of tasks with their bean names.
-    private final Map<String, Task> taskMap;
+    private final TaskMap taskMap;
 
     public Scheduler(ApplicationTaskExecutor applicationTaskExecutor,
                      ObjectMapper objectMapper,
-                     Map<String, Task> taskMap) {
+                     TaskMap taskMap) {
         this.applicationTaskExecutor = applicationTaskExecutor;
         this.objectMapper = objectMapper;
         this.taskMap = taskMap;
@@ -50,10 +49,14 @@ public class Scheduler {
             fixedDelayString = "${application.outbox-relay.fixed-delay}"
     )
     public void outboxMessageRelayTask() {
-        Task task = taskMap.get("outboxMessageRelayTask");
-        var node = objectMapper.createObjectNode();
-        node.put("executedBy", "Scheduler");
-        applicationTaskExecutor.submit(task, node);
+        Task task = taskMap.getTaskOrThrow("outboxMessageRelayTask");
+        CompletableFuture<ObjectNode> result = applicationTaskExecutor.submit(task, createInitNode(objectMapper));
+        result.whenComplete((objectNode, throwable) -> {
+            if (throwable != null) {
+                log.error("Outbox message relay task failed: {}", throwable.getMessage());
+            }
+            log.debug("Outbox message relay task result: {}", objectNode);
+        });
     }
 
     /**
@@ -68,10 +71,14 @@ public class Scheduler {
     )
     void softDeleteSuccessTaskExecutionTask() {
         log.info("Running softDeleteSuccessTaskExecutionTask");
-        Task task = taskMap.get("softDeleteSuccessTaskExecutionTask");
-        var node = objectMapper.createObjectNode();
-        node.put("executedBy", "Scheduler");
-        applicationTaskExecutor.submit(task, node);
+        Task task = taskMap.getTaskOrThrow("softDeleteSuccessTaskExecutionTask");
+        CompletableFuture<ObjectNode> result = applicationTaskExecutor.submit(task, createInitNode(objectMapper));
+        result.whenComplete((objectNode, throwable) -> {
+            if (throwable != null) {
+                log.error("Soft delete success task failed: {}", throwable.getMessage());
+            }
+            log.debug("Soft delete success task result: {}", objectNode);
+        });
     }
 
     /**
@@ -81,10 +88,14 @@ public class Scheduler {
             cron = "${application.scheduler.cron}"
     )
     public void fetchOwaspSecureHeadersAddTask() {
-        Task task = taskMap.get("fetchOwaspSecureHeadersAddTask");
-        var node = objectMapper.createObjectNode();
-        node.put("executedBy", "Scheduler");
-        applicationTaskExecutor.submit(task, node);
+        Task task = taskMap.getTaskOrThrow("fetchOwaspSecureHeadersAddTask");
+        CompletableFuture<ObjectNode> result = applicationTaskExecutor.submit(task, createInitNode(objectMapper));
+        result.whenComplete((objectNode, throwable) -> {
+            if (throwable != null) {
+                log.error("Fetch OWASP secure headers to add task failed: {}", throwable.getMessage());
+            }
+            log.debug("Fetch OWASP secure headers to add task result: {}", objectNode);
+        });
     }
 
     /**
@@ -94,9 +105,19 @@ public class Scheduler {
             cron = "${application.scheduler.cron}"
     )
     public void fetchOwaspSecureHeadersRemoveTask() {
-        Task task = taskMap.get("fetchOwaspSecureHeadersRemoveTask");
-        var node = objectMapper.createObjectNode();
+        Task task = taskMap.getTaskOrThrow("fetchOwaspSecureHeadersRemoveTask");
+        CompletableFuture<ObjectNode> result = applicationTaskExecutor.submit(task, createInitNode(objectMapper));
+        result.whenComplete((objectNode, throwable) -> {
+            if (throwable != null) {
+                log.error("Fetch OWASP secure headers to remove task failed: {}", throwable.getMessage());
+            }
+            log.debug("Fetch OWASP secure headers to add remove result: {}", objectNode);
+        });
+    }
+
+    private ObjectNode createInitNode(ObjectMapper objectMapper) {
+        ObjectNode node = objectMapper.createObjectNode();
         node.put("executedBy", "Scheduler");
-        applicationTaskExecutor.submit(task, node);
+        return node;
     }
 }

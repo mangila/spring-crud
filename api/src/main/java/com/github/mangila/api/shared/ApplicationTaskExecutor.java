@@ -5,7 +5,6 @@ import com.github.mangila.api.model.task.TaskExecutionEntity;
 import com.github.mangila.api.model.task.TaskExecutionStatus;
 import com.github.mangila.api.repository.TaskExecutionJpaRepository;
 import com.github.mangila.api.scheduler.Task;
-import org.jspecify.annotations.NonNull;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import java.util.concurrent.CompletableFuture;
@@ -21,12 +20,29 @@ public class ApplicationTaskExecutor {
         this.taskExecutionRepository = taskExecutionRepository;
     }
 
+    public CompletableFuture<Void> execute(PgNotificationListener listener, ObjectNode attributes) {
+        var taskExecution = taskExecutionRepository.persist(
+                TaskExecutionEntity.from(listener.channel(), attributes)
+        );
+        return taskExecutor.submitCompletable(listener)
+                .whenComplete((unused, throwable) -> {
+                    if (throwable != null) {
+                        taskExecution.setStatus(TaskExecutionStatus.FAILURE);
+                        attributes.put("error", throwable.getMessage());
+                    } else {
+                        taskExecution.setStatus(TaskExecutionStatus.SUCCESS);
+                    }
+                    taskExecution.setAttributes(attributes);
+                    taskExecutionRepository.merge(taskExecution);
+                });
+    }
+
     /**
      * Submit a task to the scheduler executor and return a completable future.
      * <br>
      * Using Jackson ObjectNode to create insight about the task execution.
      */
-    public CompletableFuture<ObjectNode> submit(Task task, @NonNull ObjectNode attributes) {
+    public CompletableFuture<ObjectNode> submit(Task task, ObjectNode attributes) {
         var taskExecution = taskExecutionRepository.persist(
                 TaskExecutionEntity.from(task.name(), attributes)
         );

@@ -5,6 +5,7 @@ import com.github.mangila.api.model.outbox.OutboxProcessedSequenceEntity;
 import com.github.mangila.api.repository.OutboxProcessedSequenceJpaRepository;
 import jakarta.persistence.LockModeType;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
@@ -55,7 +56,7 @@ public class EmployeeEventListener {
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
-    public void listen(OutboxEvent event) {
+    public void listen(@NonNull OutboxEvent event) {
         log.info("Received OutboxEvent: {}", event);
         transactionTemplate.executeWithoutResult(txStatus -> {
             // Exclusive lock for the aggregate and handle the event

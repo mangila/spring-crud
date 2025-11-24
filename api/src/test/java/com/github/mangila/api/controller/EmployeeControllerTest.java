@@ -1,12 +1,14 @@
 package com.github.mangila.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.api.ClockTestConfig;
 import com.github.mangila.api.EmployeeTestFactory;
-import com.github.mangila.api.TestcontainersConfiguration;
+import com.github.mangila.api.PostgresTestContainerConfiguration;
 import com.github.mangila.api.model.employee.dto.EmployeeDto;
 import com.github.mangila.api.model.employee.type.EmploymentActivity;
 import com.github.mangila.api.model.employee.type.EmploymentStatus;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,7 @@ import static org.assertj.core.api.Assertions.within;
 
 @Import(
         {
-                TestcontainersConfiguration.class,
+                PostgresTestContainerConfiguration.class,
                 ClockTestConfig.class,
         }
 )
@@ -43,6 +45,11 @@ class EmployeeControllerTest {
 
     @Autowired
     private ClockTestConfig.TestClock clock;
+
+    @AfterEach
+    void cleanup() {
+        clock.resetTime();
+    }
 
     @Test
     @DisplayName("Should C.R.U.D Employee")
@@ -188,7 +195,71 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void findAllEmployeesByPage() {
-        assertThat(1 + 1).isEqualTo(3);
+    void findAllEmployeesByPage() throws IOException {
+        // Setup
+        for (int i = 0; i < 20; i++) {
+            create();
+        }
+        // Act & Assert
+        ObjectNode page = webTestClient.get()
+                .uri("/api/v1/employees?size=10")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(ObjectNode.class)
+                .returnResult()
+                .getResponseBody();
+        assertThat(page).isNotNull();
+        assertThatJson(page.toString())
+                .isObject()
+                .containsOnlyKeys("content", "page")
+                .node("")
+                .and(jsonAssert -> jsonAssert.node("page")
+                        .isObject()
+                        .containsOnlyKeys("number", "size", "totalElements", "totalPages")
+                )
+                .and(jsonAssert -> jsonAssert.node("content")
+                        .isArray()
+                        .isNotEmpty());
+    }
+
+    @Test
+    void replay() throws IOException {
+        // Setup
+        crudEmployee();
+        ObjectNode page = webTestClient.get()
+                .uri("/api/v1/employees?size=1")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(ObjectNode.class)
+                .returnResult()
+                .getResponseBody();
+        assertThat(page).isNotNull();
+        String employeeId = page.get("content")
+                .get(0)
+                .get("employeeId")
+                .asText();
+        // Act & Assert
+        page = webTestClient.get()
+                .uri("/api/v1/employees/replay/{employeeId}", employeeId)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(ObjectNode.class)
+                .returnResult()
+                .getResponseBody();
+        assertThat(page).isNotNull();
+        assertThatJson(page.toString())
+                .isObject()
+                .containsOnlyKeys("content", "page")
+                .node("")
+                .and(jsonAssert -> jsonAssert.node("page")
+                        .isObject()
+                        .containsOnlyKeys("number", "size", "totalElements", "totalPages")
+                )
+                .and(jsonAssert -> jsonAssert.node("content")
+                        .isArray()
+                        .isNotEmpty());
     }
 }

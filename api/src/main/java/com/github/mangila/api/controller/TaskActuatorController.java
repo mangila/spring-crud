@@ -1,8 +1,11 @@
 package com.github.mangila.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mangila.api.shared.ApplicationTaskExecutor;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.api.scheduler.Task;
+import com.github.mangila.api.scheduler.TaskMap;
+import com.github.mangila.api.shared.ApplicationTaskExecutor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Selector;
 import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Actuator endpoint for executing tasks.
@@ -21,18 +25,19 @@ import java.util.Map;
  */
 @WebEndpoint(id = "task")
 @Component
+@Slf4j
 public class TaskActuatorController {
 
     private final ApplicationTaskExecutor taskExecutor;
     private final ObjectMapper objectMapper;
-    private final Map<String, Task> taskMap;
+    private final TaskMap taskMap;
 
     public TaskActuatorController(ApplicationTaskExecutor taskExecutor,
                                   ObjectMapper objectMapper,
                                   Map<String, Task> taskMap) {
         this.taskExecutor = taskExecutor;
         this.objectMapper = objectMapper;
-        this.taskMap = taskMap;
+        this.taskMap = new TaskMap(taskMap);
     }
 
     @ReadOperation
@@ -49,16 +54,16 @@ public class TaskActuatorController {
 
     @WriteOperation
     public WebEndpointResponse<Map<String, Object>> execute(@Selector String taskName) {
-        Task task = taskMap.get(taskName);
-        if (task == null) {
-            return new WebEndpointResponse<>(
-                    Map.of("error", "Task not found: %s".formatted(taskName)),
-                    HttpStatus.NOT_FOUND.value()
-            );
-        }
+        Task task = taskMap.getTaskOrThrow(taskName);
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Actuator");
-        taskExecutor.submit(task, node);
+        CompletableFuture<ObjectNode> future = taskExecutor.submit(task, node)
+                .whenComplete((result, error) -> {
+                    if (error != null) {
+                        log.error("error executing actuator task: {}", error.getMessage());
+                    }
+                    log.debug("result from actuator task: {}", result.toPrettyString());
+                });
         return new WebEndpointResponse<>(
                 Map.of("task", taskName),
                 HttpStatus.ACCEPTED.value()

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The event service is responsible for publishing the events.
+ * The event service is responsible for publishing the domain events to the outbox event handler
  */
 @Service
 public class EmployeeEventService {
