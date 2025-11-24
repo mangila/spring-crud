@@ -14,10 +14,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 
 /**
  * <p>
@@ -56,6 +56,19 @@ public class EmployeeController {
             String employeeId) {
         return ResponseEntity.ok()
                 .body(restFacade.findEmployeeById(employeeId));
+    }
+
+    @GetMapping(value = "{employeeId}/events",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public SseEmitter subscribeToEmployeeEvents(
+            @PathVariable
+            @NotBlank
+            @ValidEmployeeId
+            String employeeId
+    ) {
+        SseEmitter.event().build();
+        return null;
     }
 
     @GetMapping(value = "replay/{employeeId}",
