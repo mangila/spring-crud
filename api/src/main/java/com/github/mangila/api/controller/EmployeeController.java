@@ -58,7 +58,7 @@ public class EmployeeController {
                 .body(restFacade.findEmployeeById(employeeId));
     }
 
-    @GetMapping(value = "{employeeId}/events",
+    @GetMapping(value = "subscribe/{employeeId}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public SseEmitter subscribeToEmployeeEvents(
