@@ -278,4 +278,9 @@ class EmployeeServiceTest {
     void findAllEmployeesByPage() {
         assertThat(1 + 1).isEqualTo(3);
     }
+
+    @Test
+    void replay() {
+        assertThat(1 + 1).isEqualTo(3);
+    }
 }
