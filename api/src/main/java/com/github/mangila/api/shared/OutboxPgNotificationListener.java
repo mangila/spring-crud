@@ -50,4 +50,14 @@ public class OutboxPgNotificationListener extends PgNotificationListener {
             }
         });
     }
+
+    /**
+     * This is the internal stuffs that need to be set up for the LISTEN/NOTIFY
+     * <br>
+     * 1. Create a Function
+     * 2. Create a Trigger when the Function is called
+     */
+    private void setUpTrigger() {
+
+    }
 }
