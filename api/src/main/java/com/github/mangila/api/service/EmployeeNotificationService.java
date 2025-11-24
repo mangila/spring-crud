@@ -18,6 +18,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -62,18 +63,28 @@ public class EmployeeNotificationService {
     )
     public void healthProbe() {
         if (!started.get()) {
-            start();
+            try {
+                start();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     /**
      * CAS swapping the started atomic boolean and starting the listener.
      * Scheduled health-probe is checking in on the variable if the connection was lost.
+     * <br>
+     * Eager approach in how to start the listener, check if the connection is valid if not reset the connection.
+     * If the connection to the database is lost, it will continue until the application is restarted.
      */
-    public void start() {
+    public void start() throws SQLException {
         log.info("Starting OutboxPgNotificationListener");
         boolean isSwapped = started.compareAndSet(false, true);
         Ensure.isTrue(isSwapped, "Listener already started");
+        if (!pgListener.isValid()) {
+            pgListener.resetConnection();
+        }
         ObjectNode node = objectMapper.createObjectNode();
         node.put("executedBy", "EmployeeNotificationService");
         node.put("channel", pgListener.channel());
@@ -94,6 +105,6 @@ public class EmployeeNotificationService {
 
     @PreDestroy
     void preDestroy() {
-        pgListener.getDataSource().destroy();
+        pgListener.destroy();
     }
 }

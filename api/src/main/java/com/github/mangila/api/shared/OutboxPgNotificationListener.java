@@ -37,7 +37,7 @@ public class OutboxPgNotificationListener extends PgNotificationListener {
         final String sql = """
                 LISTEN '%s'
                 """.formatted(channel());
-        // jdbc.execute(sql);
+        //getJdbc().execute(sql);
         getJdbc().execute((Connection c) -> {
             PgConnection pgConnection = c.unwrap(PgConnection.class);
             while (true) {
