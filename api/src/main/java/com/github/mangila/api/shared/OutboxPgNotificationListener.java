@@ -57,6 +57,7 @@ public class OutboxPgNotificationListener extends PgNotificationListener {
      * <br>
      * 1. Create a Function that uses pg_notify(channel, payload)
      * 2. Create a Trigger for the Function to be called after each INSERT on the table
+     * 3. Listen to the channel
      */
     private void setUpTrigger() {
         createFunction();
