@@ -1,6 +1,7 @@
 package com.github.mangila.api.service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.mangila.api.config.EmployeeSseEmitters;
 import com.github.mangila.api.model.employee.domain.Employee;
 import com.github.mangila.api.model.employee.domain.EmployeeId;
 import com.github.mangila.api.model.employee.dto.CreateNewEmployeeRequest;
@@ -12,6 +13,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 /**
  * Facade for REST endpoints.
@@ -29,17 +31,20 @@ import org.springframework.stereotype.Service;
 public class EmployeeRestFacade {
 
     private final EmployeeService service;
+    private final EmployeeSseEmitters sseEmitters;
     private final EmployeeDtoMapper dtoMapper;
     private final EmployeeEventMapper eventMapper;
     private final EmployeeDomainMapper domainMapper;
     private final EmployeeFactory factory;
 
     public EmployeeRestFacade(EmployeeService service,
+                              EmployeeSseEmitters sseEmitters,
                               EmployeeDtoMapper dtoMapper,
                               EmployeeEventMapper eventMapper,
                               EmployeeDomainMapper domainMapper,
                               EmployeeFactory factory) {
         this.service = service;
+        this.sseEmitters = sseEmitters;
         this.dtoMapper = dtoMapper;
         this.eventMapper = eventMapper;
         this.domainMapper = domainMapper;
@@ -93,5 +98,18 @@ public class EmployeeRestFacade {
                     log.warn("Event missing 'dto' key: {} - {}", entity.getEventName(), entity.getId());
                     return null;
                 });
+    }
+
+    public SseEmitter createNewSseEmitter(String employeeId) {
+        EmployeeId id = new EmployeeId(employeeId);
+        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        sseEmitters.put(id, emitter);
+        emitter.onCompletion(() -> sseEmitters.remove(id, emitter));
+        emitter.onTimeout(() -> sseEmitters.remove(id, emitter));
+        emitter.onError(e -> {
+            log.error("SseEmitter error: {}", e.getMessage());
+            sseEmitters.remove(id, emitter);
+        });
+        return emitter;
     }
 }

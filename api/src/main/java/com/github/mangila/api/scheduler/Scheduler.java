@@ -50,13 +50,13 @@ public class Scheduler {
     )
     public void outboxMessageRelayTask() {
         Task task = taskMap.getTaskOrThrow("outboxMessageRelayTask");
-        CompletableFuture<ObjectNode> result = applicationTaskExecutor.submit(task, createInitNode(objectMapper));
-        result.whenComplete((objectNode, throwable) -> {
-            if (throwable != null) {
-                log.error("Outbox message relay task failed: {}", throwable.getMessage());
-            }
-            log.debug("Outbox message relay task result: {}", objectNode);
-        });
+        CompletableFuture<ObjectNode> result = applicationTaskExecutor.submitCompletable(task, createInitNode(objectMapper));
+        try {
+            ObjectNode node = result.join();
+            log.debug("Outbox message relay task result: {}", node);
+        } catch (Exception e) {
+            log.error("Error relaying messages", e);
+        }
     }
 
     /**
@@ -72,7 +72,7 @@ public class Scheduler {
     void softDeleteSuccessTaskExecutionTask() {
         log.info("Running softDeleteSuccessTaskExecutionTask");
         Task task = taskMap.getTaskOrThrow("softDeleteSuccessTaskExecutionTask");
-        CompletableFuture<ObjectNode> result = applicationTaskExecutor.submit(task, createInitNode(objectMapper));
+        CompletableFuture<ObjectNode> result = applicationTaskExecutor.submitCompletable(task, createInitNode(objectMapper));
         result.whenComplete((objectNode, throwable) -> {
             if (throwable != null) {
                 log.error("Soft delete success task failed: {}", throwable.getMessage());
@@ -89,7 +89,7 @@ public class Scheduler {
     )
     public void fetchOwaspSecureHeadersAddTask() {
         Task task = taskMap.getTaskOrThrow("fetchOwaspSecureHeadersAddTask");
-        CompletableFuture<ObjectNode> result = applicationTaskExecutor.submit(task, createInitNode(objectMapper));
+        CompletableFuture<ObjectNode> result = applicationTaskExecutor.submitCompletable(task, createInitNode(objectMapper));
         result.whenComplete((objectNode, throwable) -> {
             if (throwable != null) {
                 log.error("Fetch OWASP secure headers to add task failed: {}", throwable.getMessage());
@@ -106,7 +106,7 @@ public class Scheduler {
     )
     public void fetchOwaspSecureHeadersRemoveTask() {
         Task task = taskMap.getTaskOrThrow("fetchOwaspSecureHeadersRemoveTask");
-        CompletableFuture<ObjectNode> result = applicationTaskExecutor.submit(task, createInitNode(objectMapper));
+        CompletableFuture<ObjectNode> result = applicationTaskExecutor.submitCompletable(task, createInitNode(objectMapper));
         result.whenComplete((objectNode, throwable) -> {
             if (throwable != null) {
                 log.error("Fetch OWASP secure headers to remove task failed: {}", throwable.getMessage());

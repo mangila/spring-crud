@@ -11,8 +11,6 @@ public record EmployeeId(String value) {
 
     public EmployeeId {
         Ensure.notBlank(value, "EmployeeId must not be blank");
-        if (!VALIDATOR.isValid(value, null)) {
-            throw new IllegalArgumentException("EmployeeId is not valid");
-        }
+        Ensure.isTrue(VALIDATOR.isValid(value, null), "EmployeeId is not valid");
     }
 }
