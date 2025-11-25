@@ -17,6 +17,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.ZoneId;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
 @Slf4j
@@ -32,6 +33,11 @@ public class WebConfig implements WebMvcConfigurer {
         cors.addAllowedMethod(HttpMethod.DELETE);
         registry.addMapping("/**")
                 .combine(cors);
+    }
+
+    @Bean
+    EmployeeSseEmitters employeeSseEmitters() {
+        return new EmployeeSseEmitters(new ConcurrentHashMap<>());
     }
 
     /**

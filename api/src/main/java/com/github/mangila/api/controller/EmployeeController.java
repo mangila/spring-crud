@@ -67,8 +67,7 @@ public class EmployeeController {
             @ValidEmployeeId
             String employeeId
     ) {
-        SseEmitter.event().build();
-        return null;
+        return restFacade.createNewSseEmitter(employeeId);
     }
 
     @GetMapping(value = "replay/{employeeId}",

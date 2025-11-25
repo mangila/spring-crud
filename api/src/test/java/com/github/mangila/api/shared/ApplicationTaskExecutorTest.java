@@ -43,8 +43,8 @@ class ApplicationTaskExecutorTest {
     private TestTaskConfig.TestTask testTask;
 
     @Test
-    void submit() {
-        var future = taskExecutor.submit(testTask, objectMapper.createObjectNode());
+    void submitCompletable() {
+        var future = taskExecutor.submitCompletable(testTask, objectMapper.createObjectNode());
         verify(simpleAsyncTaskExecutor, times(1)).submitCompletable(any(Callable.class));
         verify(taskExecutionRepository, times(1)).persist(any());
         verify(taskExecutionRepository, times(1)).merge(any());

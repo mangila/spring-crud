@@ -5,10 +5,16 @@ import com.github.mangila.api.model.task.TaskExecutionEntity;
 import com.github.mangila.api.model.task.TaskExecutionStatus;
 import com.github.mangila.api.repository.TaskExecutionJpaRepository;
 import com.github.mangila.api.scheduler.Task;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Threads that are started by the programmer can be submitted from here.
+ */
+@Slf4j
 public class ApplicationTaskExecutor {
 
     private final SimpleAsyncTaskExecutor taskExecutor;
@@ -20,21 +26,8 @@ public class ApplicationTaskExecutor {
         this.taskExecutionRepository = taskExecutionRepository;
     }
 
-    public CompletableFuture<Void> execute(PgNotificationListener listener, ObjectNode attributes) {
-        var taskExecution = taskExecutionRepository.persist(
-                TaskExecutionEntity.from(listener.channel(), attributes)
-        );
-        return taskExecutor.submitCompletable(listener)
-                .whenComplete((unused, throwable) -> {
-                    if (throwable != null) {
-                        taskExecution.setStatus(TaskExecutionStatus.FAILURE);
-                        attributes.put("error", throwable.getMessage());
-                    } else {
-                        taskExecution.setStatus(TaskExecutionStatus.SUCCESS);
-                    }
-                    taskExecution.setAttributes(attributes);
-                    taskExecutionRepository.merge(taskExecution);
-                });
+    public CompletableFuture<Void> submitCompletable(Runnable task) {
+        return taskExecutor.submitCompletable(task);
     }
 
     /**
@@ -42,7 +35,7 @@ public class ApplicationTaskExecutor {
      * <br>
      * Using Jackson ObjectNode to create insight about the task execution.
      */
-    public CompletableFuture<ObjectNode> submit(Task task, ObjectNode attributes) {
+    public CompletableFuture<ObjectNode> submitCompletable(Task task, ObjectNode attributes) {
         var taskExecution = taskExecutionRepository.persist(
                 TaskExecutionEntity.from(task.name(), attributes)
         );
@@ -50,8 +43,15 @@ public class ApplicationTaskExecutor {
                 .orTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
                 .whenComplete((objectNode, throwable) -> {
                     if (throwable != null) {
-                        taskExecution.setStatus(TaskExecutionStatus.FAILURE);
-                        attributes.put("error", throwable.getMessage());
+                        if (throwable instanceof CancellationException) {
+                            log.warn("Cancelled task execution");
+                            taskExecution.setStatus(TaskExecutionStatus.CANCELLED);
+                            attributes.put("error", "Cancelled");
+                        } else {
+                            log.error("Error executing task", throwable);
+                            taskExecution.setStatus(TaskExecutionStatus.FAILURE);
+                            attributes.put("error", throwable.getMessage());
+                        }
                     } else {
                         taskExecution.setStatus(TaskExecutionStatus.SUCCESS);
                         attributes.setAll(objectNode);

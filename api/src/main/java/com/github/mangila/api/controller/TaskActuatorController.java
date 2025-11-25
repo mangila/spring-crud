@@ -57,7 +57,7 @@ public class TaskActuatorController {
         Task task = taskMap.getTaskOrThrow(taskName);
         var node = objectMapper.createObjectNode();
         node.put("executedBy", "Actuator");
-        CompletableFuture<ObjectNode> future = taskExecutor.submit(task, node)
+        CompletableFuture<ObjectNode> future = taskExecutor.submitCompletable(task, node)
                 .whenComplete((result, error) -> {
                     if (error != null) {
                         log.error("error executing actuator task: {}", error.getMessage());
