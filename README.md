@@ -36,6 +36,7 @@ purposes)
 - Spring AOP
 - Postgres w Flyway
 - Postgres LISTEN/NOTIFY
+- Spring Server Sent Events
 - Resilience4j
 - JSpecify
 - Ensure4j
