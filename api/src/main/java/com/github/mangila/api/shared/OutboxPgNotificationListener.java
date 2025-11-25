@@ -1,6 +1,5 @@
-package com.github.mangila.api.scheduler;
+package com.github.mangila.api.shared;
 
-import com.github.mangila.api.shared.SpringEventPublisher;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

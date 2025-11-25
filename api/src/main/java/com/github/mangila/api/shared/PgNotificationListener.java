@@ -1,6 +1,5 @@
-package com.github.mangila.api.scheduler;
+package com.github.mangila.api.shared;
 
-import com.github.mangila.api.shared.SpringEventPublisher;
 import lombok.Getter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
