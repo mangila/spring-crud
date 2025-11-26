@@ -11,7 +11,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -29,7 +28,6 @@ import java.util.concurrent.TimeUnit;
  * <br>
  * Scheduled task is doing a health check on the Postgres Thread
  */
-@Service
 @Slf4j
 public class EmployeeNotificationService {
 

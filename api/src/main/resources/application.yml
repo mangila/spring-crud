@@ -3,6 +3,8 @@ application:
   outbox-relay:
     initial-delay: 30s
     fixed-delay: 15s
+  notification:
+    enabled: false
   scheduler:
     enabled: true
     initial-delay: 30s

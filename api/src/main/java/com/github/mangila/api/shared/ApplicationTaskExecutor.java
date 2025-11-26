@@ -34,7 +34,6 @@ public class ApplicationTaskExecutor {
         var future = taskExecutor.submitCompletable(task);
         setStatusWhenComplete(future, taskExecution);
         return future;
-
     }
 
     public CompletableFuture<ObjectNode> submitCompletable(Task task, ObjectNode attributes) {
@@ -46,8 +45,8 @@ public class ApplicationTaskExecutor {
         return future;
     }
 
-    private CompletableFuture<ObjectNode> setStatusWhenComplete(CompletableFuture<ObjectNode> future, TaskExecutionEntity taskExecution) {
-        return future.whenCompleteAsync((objectNode, throwable) -> {
+    private void setStatusWhenComplete(CompletableFuture<ObjectNode> future, TaskExecutionEntity taskExecution) {
+        future.whenCompleteAsync((objectNode, throwable) -> {
             var attributes = taskExecution.getAttributes();
             if (throwable != null) {
                 if (throwable instanceof CancellationException) {

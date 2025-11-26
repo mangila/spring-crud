@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
  * <br>
  * This is to manage the long-running tasks
  */
-@Component
 @Slf4j
 public class OutboxPgNotificationWatcher implements SmartLifecycle {
     private final OutboxPgNotificationListener listener;
@@ -47,16 +46,17 @@ public class OutboxPgNotificationWatcher implements SmartLifecycle {
 
     @Override
     public void stop() {
-        listener.shutdown();
+        log.info("Shutdown OutboxPgNotificationWatcher");
         try {
+            listener.shutdown();
             listenEventLoop.cancel(true);
             // Wait here for a bit to let the side effect run and insert to db
             TimeUnit.SECONDS.sleep(5);
+            listener.unlisten();
+            listener.destroy();
         } catch (Exception e) {
-            log.error("Stopping OutboxPgNotificationWatcher", e);
+            log.error("Failed to shutdown OutboxPgNotificationListener gracefully", e);
         }
-        listener.unlisten();
-        listener.destroy();
     }
 
     @Override
