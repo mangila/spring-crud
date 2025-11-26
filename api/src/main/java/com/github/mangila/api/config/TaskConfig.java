@@ -20,15 +20,14 @@ public class TaskConfig {
         var executor = new SimpleAsyncTaskExecutor();
         executor.setThreadNamePrefix("task-");
         executor.setVirtualThreads(true);
-        executor.setTaskDecorator(runnable -> {
-            ApplicationContextHolder.setEntry("message", "I'm being Context Propagated");
+        executor.setConcurrencyLimit(-1);
+        executor.setTaskDecorator(originalRunnable -> () -> {
             try {
-                // Run the original task
-                runnable.run();
+                ApplicationContextHolder.setEntry("message", "I'm being Context Propagated");
+                originalRunnable.run();
             } finally {
                 ApplicationContextHolder.clear();
             }
-            return runnable;
         });
         return executor;
     }
