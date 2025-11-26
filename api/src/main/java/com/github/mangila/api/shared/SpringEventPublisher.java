@@ -50,7 +50,6 @@ public class SpringEventPublisher {
         this.eventMapper = eventMapper;
     }
 
-
     /**
      * Creates an outbox event from the given event and persists it in the database
      * before publishing it.

@@ -45,8 +45,6 @@ spring:
       file: ${user.dir}/infrastructure/local/compose.yaml
       skip:
         in-tests: true
-      start:
-        skip: if_running
   datasource:
     hikari:
       pool-name: spring-crud-hikari-pool

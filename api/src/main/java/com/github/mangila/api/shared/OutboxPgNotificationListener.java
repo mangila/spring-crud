@@ -1,7 +1,7 @@
 package com.github.mangila.api.shared;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.postgresql.PGNotification;
@@ -10,6 +10,7 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 import java.sql.Connection;
 import java.time.Duration;
+import java.time.Instant;
 
 /**
  * Postgres LISTEN/NOTIFY listener.
@@ -19,14 +20,13 @@ import java.time.Duration;
 @Slf4j
 public class OutboxPgNotificationListener extends PgNotificationListener {
 
-    @Getter
-    @Setter
-    private volatile boolean running = false;
+    private final ObjectMapper objectMapper;
 
     public OutboxPgNotificationListener(SingleConnectionDataSource dataSource,
-                                        SpringEventPublisher publisher) {
+                                        SpringEventPublisher publisher,
+                                        ObjectMapper objectMapper) {
         super(dataSource, publisher);
-        setUpTrigger();
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -35,21 +35,27 @@ public class OutboxPgNotificationListener extends PgNotificationListener {
     }
 
     @Override
-    public void run() {
-        int timeout = (int) Duration.ofSeconds(1).toMillis();
+    public ObjectNode call() throws Exception {
+        log.info("Starting notification listener event loop on channel {}", channel());
+        Instant startTime = Instant.now();
         getJdbc().execute((Connection c) -> {
             PgConnection pgConnection = c.unwrap(PgConnection.class);
-            while (running) {
+            int timeout = (int) Duration.ofSeconds(1).toMillis();
+            while (isRunning()) {
                 PGNotification[] pgNotifications = pgConnection.getNotifications(timeout);
                 if (pgNotifications == null || ArrayUtils.isEmpty(pgNotifications)) {
-                    log.debug("No notifications received");
+                    log.debug("No notifications received event loop on channel {}", channel());
                     continue;
                 }
-                log.debug("Received {} notifications", pgNotifications.length);
+                log.debug("Received {} notifications event loop on channel {}", pgNotifications.length, channel());
                 getPublisher().publish(pgNotifications);
             }
+            log.info("Stopping notification listener event loop on channel {}", channel());
             return 0;
         });
+        Instant endTime = Instant.now();
+        Duration duration = Duration.between(startTime, endTime);
+        return objectMapper.createObjectNode().put("duration-ms", duration.toMillis());
     }
 
     /**
@@ -59,23 +65,14 @@ public class OutboxPgNotificationListener extends PgNotificationListener {
      * 2. Create a Trigger for the Function to be called after each INSERT on the table
      * 3. Listen to the channel
      */
-    private void setUpTrigger() {
+    @Override
+    public void setUpPgNotify() {
         createFunction();
         createTrigger();
-        listen();
-    }
-
-    private void listen() {
-        getJdbc().execute((Connection c) -> {
-            c.setAutoCommit(true);
-            //language=PostgreSQL
-            final String sql = "LISTEN %s".formatted(channel());
-            c.createStatement().execute(sql);
-            return 0;
-        });
     }
 
     private void createTrigger() {
+        log.info("Creating trigger for channel {}", channel());
         //language=PostgreSQL
         String sql = """
                 DROP TRIGGER IF EXISTS notify_new_outbox_event_trigger ON outbox_event;
@@ -92,6 +89,7 @@ public class OutboxPgNotificationListener extends PgNotificationListener {
     }
 
     private void createFunction() {
+        log.info("Creating function for channel {}", channel());
         //language=PostgreSQL
         String sql = """
                 DROP FUNCTION IF EXISTS notify_new_outbox_event_fn();
