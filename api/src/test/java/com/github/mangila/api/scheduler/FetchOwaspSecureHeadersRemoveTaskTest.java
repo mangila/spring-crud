@@ -16,7 +16,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
-                "application.scheduler.enabled=false"
+                "application.scheduler.enabled=false",
+                "application.notification.enabled=false"
         }
 )
 @Slf4j
