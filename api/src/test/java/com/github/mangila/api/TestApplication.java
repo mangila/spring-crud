@@ -6,7 +6,7 @@ import org.springframework.boot.SpringApplication;
  * Testing is good for feedback loops, and when a change is commited it's good to have a well-defined test suite.
  * Have a test for every component, and when a change is coming, the component test will give fast feedback.
  * <br>
- * The more complexity, the more tests, the bigger the project, the more you have to rely on the test suite
+ * The more complexity, the bigger the project, the more you have to rely on the test suite
  * <br>
  * If all expected behavior can be translated into test source code, the better.
  * The test code suite can also tell a story like the source code.

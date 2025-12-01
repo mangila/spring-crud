@@ -27,6 +27,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -105,7 +106,9 @@ class EmployeeEventListenerTest {
             );
         });
 
-        await().untilAsserted(() -> {
+        await()
+                .timeout(Duration.ofSeconds(5))
+                .untilAsserted(() -> {
             verify(listener).listen(any());
             verify(eventHandler).handle(any());
             OutboxEntity entity = outboxJpaRepository.findAllByAggregateId(dto.employeeId(), Pageable.unpaged())
