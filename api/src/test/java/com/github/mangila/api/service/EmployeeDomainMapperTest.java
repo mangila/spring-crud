@@ -7,6 +7,7 @@ import com.github.mangila.api.model.employee.dto.UpdateEmployeeRequest;
 import com.github.mangila.api.model.employee.entity.EmployeeEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
 import org.springframework.test.context.ContextConfiguration;
@@ -34,14 +35,14 @@ class EmployeeDomainMapperTest {
     @Test
     void mapUpdateEmployeeRequest() throws IOException {
         UpdateEmployeeRequest request = EmployeeTestFactory.createUpdateEmployeeRequest(objectMapper);
-        Employee employee = mapper.map(request);
+      //  Employee employee = mapper.map(request);
         assertThat(1 + 1).isEqualTo(3);
     }
 
     @Test
     void mapEmployeeEntity() throws IOException {
         EmployeeEntity entity = EmployeeTestFactory.createEmployeeEntity(objectMapper);
-        Employee employee = mapper.map(entity);
+       // Employee employee = mapper.map(entity);
         assertThat(1 + 1).isEqualTo(3);
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 /**
  * <p>
@@ -40,11 +41,14 @@ class FetchOwaspSecureHeadersAddTaskTest {
     @Test
     void call() {
         assertThat(1 + 1).isEqualTo(3);
+        assertThatCode(() -> {
+           var unused =  task.call();
+        }).doesNotThrowAnyException();
     }
 
     @Test
     @Disabled
     void callRemote() {
-
+        assertThat(1 + 1).isEqualTo(3);
     }
 }

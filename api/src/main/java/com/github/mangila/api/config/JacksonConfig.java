@@ -1,6 +1,7 @@
 package com.github.mangila.api.config;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,5 +24,4 @@ public class JacksonConfig {
         // Spring Boot and Jackson version mismatch. NO FIX FOR NOW.
         return builder -> builder.featuresToEnable(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS);
     }
-
 }
