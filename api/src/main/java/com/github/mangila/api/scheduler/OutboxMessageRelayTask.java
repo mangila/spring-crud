@@ -1,6 +1,7 @@
 package com.github.mangila.api.scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.api.model.outbox.OutboxEntity;
 import com.github.mangila.api.model.outbox.OutboxEventStatus;
@@ -57,7 +58,7 @@ public class OutboxMessageRelayTask implements Task {
                 OutboxEventStatus.UNPROCESSABLE_EVENT,
                 Sort.by("auditMetadata.created").descending(),
                 Limit.of(25));
-        var node = objectMapper.createObjectNode();
+        ObjectNode node = objectMapper.createObjectNode();
         var lists = List.of(pendingEntities, failureEntities, unprocessableEntities);
         lists.stream()
                 .flatMap(Collection::stream)
@@ -66,11 +67,11 @@ public class OutboxMessageRelayTask implements Task {
         node.put("pending-size", pendingEntities.size());
         node.put("failure-size", failureEntities.size());
         node.put("unprocessable-size", unprocessableEntities.size());
-        var pendingArray = node.putArray("pending");
+        ArrayNode pendingArray = node.putArray("pending");
         pendingEntities.forEach(entity -> pendingArray.add(entity.getId().toString()));
-        var failureArray = node.putArray("failure");
+        ArrayNode failureArray = node.putArray("failure");
         failureEntities.forEach(entity -> failureArray.add(entity.getId().toString()));
-        var unprocessableArray = node.putArray("unprocessable");
+        ArrayNode unprocessableArray = node.putArray("unprocessable");
         unprocessableEntities.forEach(entity -> unprocessableArray.add(entity.getId().toString()));
         return node;
     }

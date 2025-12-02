@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 /**
  * <p>
@@ -24,7 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
-                "application.scheduler.enabled=false"
+                "application.scheduler.enabled=false",
+                "application.notification.enabled=false"
         }
 )
 @Slf4j
@@ -39,11 +41,14 @@ class FetchOwaspSecureHeadersAddTaskTest {
     @Test
     void call() {
         assertThat(1 + 1).isEqualTo(3);
+        assertThatCode(() -> {
+           var unused =  task.call();
+        }).doesNotThrowAnyException();
     }
 
     @Test
     @Disabled
     void callRemote() {
-
+        assertThat(1 + 1).isEqualTo(3);
     }
 }

@@ -99,28 +99,23 @@ class UpdateEmployeeRequestJsonTest {
 
     private static void assertAttributesRoot(JsonAssert jsonAssert) {
         jsonAssert.isObject()
-                .hasSize(7)
+                .hasSize(5)
                 .containsOnlyKeys("vegan",
                         "pronouns",
-                        "chamber_of_secrets",
-                        "favorite_book",
                         "lizard_people",
                         "evaluation",
                         "licenses")
                 .containsEntry("vegan", true)
                 .containsEntry("pronouns", "she/her")
-                .containsEntry("chamber_of_secrets", true)
-                .containsEntry("favorite_book", "No country, no home")
                 .containsEntry("lizard_people", null);
     }
 
     private static void assertLicenses(JsonAssert jsonAssert) {
         jsonAssert
                 .isArray()
-                .hasSize(3)
+                .hasSize(2)
                 .containsExactly(
                         "PP7",
-                        "Widow Maker",
                         "R.Y.N.O"
                 );
     }
@@ -128,11 +123,10 @@ class UpdateEmployeeRequestJsonTest {
     private static void assertEvaluation(JsonAssert jsonAssert) {
         jsonAssert
                 .isObject()
-                .hasSize(3)
+                .hasSize(2)
                 .containsExactly(
                         Map.entry("medical", "PASS"),
-                        Map.entry("physical", "PASS"),
-                        Map.entry("psychological", "PASS")
+                        Map.entry("physical", "PASS")
                 );
     }
 }

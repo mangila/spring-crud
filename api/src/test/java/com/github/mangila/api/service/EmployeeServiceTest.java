@@ -3,6 +3,7 @@ package com.github.mangila.api.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.api.EmployeeTestFactory;
 import com.github.mangila.api.PostgresTestContainerConfiguration;
+import com.github.mangila.api.ReusablePostgresTestContainerConfiguration;
 import com.github.mangila.api.model.employee.domain.Employee;
 import com.github.mangila.api.model.employee.domain.EmployeeId;
 import com.github.mangila.api.model.employee.domain.EmployeeName;
@@ -11,13 +12,19 @@ import com.github.mangila.api.model.employee.dto.CreateNewEmployeeRequest;
 import com.github.mangila.api.model.employee.entity.EmployeeEntity;
 import com.github.mangila.api.model.employee.type.EmploymentActivity;
 import com.github.mangila.api.model.employee.type.EmploymentStatus;
+import com.github.mangila.api.model.outbox.OutboxEntity;
 import com.github.mangila.api.repository.EmployeeJpaRepository;
 import com.github.mangila.api.shared.exception.EntityNotFoundException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.io.IOException;
@@ -47,11 +54,12 @@ import static org.mockito.Mockito.inOrder;
  * <br>
  * Repository, Mapper and Event publisher is wired as SpyBeans just to make sure they invoke its expected method.
  */
-@Import(PostgresTestContainerConfiguration.class)
+@Import(ReusablePostgresTestContainerConfiguration.class)
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
-                "application.scheduler.enabled=false"
+                "application.scheduler.enabled=false",
+                "application.notification.enabled=false"
         }
 )
 class EmployeeServiceTest {
@@ -76,6 +84,13 @@ class EmployeeServiceTest {
 
     @MockitoSpyBean
     private EmployeeEntityMapper entityMapper;
+
+    @AfterEach
+    void cleanup() {
+        var example = Example.of(new EmployeeEntity(), ExampleMatcher.matchingAny());
+        repository.findAll(example)
+                .forEach(entity -> repository.delete(entity));
+    }
 
     @Test
     @DisplayName("Find Employee by ID not exists should throw")
@@ -275,13 +290,26 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void findAllEmployeesByPage() {
-
-        assertThat(1 + 1).isEqualTo(3);
+    void findAllEmployeesByPage() throws IOException {
+        create();
+        var page = service.findAllEmployeesByPage(Pageable.unpaged());
+        assertThat(page.getContent())
+                .hasSize(1);
+        create();
+        page = service.findAllEmployeesByPage(Pageable.unpaged());
+        assertThat(page.getContent())
+                .hasSize(2);
     }
 
     @Test
-    void replay() {
-        assertThat(1 + 1).isEqualTo(3);
+    void replay() throws IOException {
+        EmployeeId employeeId = create();
+        Page<OutboxEntity> page = service.replayEmployee(employeeId, Pageable.unpaged());
+        assertThat(page.getContent())
+                .hasSize(1);
+        update(read(employeeId));
+        page = service.replayEmployee(employeeId, Pageable.unpaged());
+        assertThat(page.getContent())
+                .hasSize(2);
     }
 }

@@ -6,6 +6,7 @@ import com.github.mangila.api.model.outbox.OutboxEntity;
 import com.github.mangila.api.model.outbox.OutboxEventStatus;
 import com.github.mangila.api.model.outbox.OutboxNextSequenceEntity;
 import com.github.mangila.api.repository.OutboxNextSequenceJpaRepository;
+import io.github.mangila.ensure4j.Ensure;
 import jakarta.persistence.LockModeType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ public class OutboxFactory {
         OutboxNextSequenceEntity nextSequenceEntity = nextSequenceRepository.lockById(
                 aggregateId,
                 LockModeType.PESSIMISTIC_WRITE);
+        Ensure.notNull(nextSequenceEntity, "No next sequence found for aggregateId: %s".formatted(aggregateId));
         long sequence = nextSequenceEntity.getSequence() + 1;
         nextSequenceEntity.setSequence(sequence);
         outbox.setSequence(sequence);

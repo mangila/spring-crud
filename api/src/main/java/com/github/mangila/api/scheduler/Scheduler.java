@@ -41,13 +41,9 @@ public class Scheduler {
      * We use this task to relay from our Outbox for sad path scenarios.
      * Failed messages etc.
      * <br>
-     * Run a task every n(timeunit), but only if the previous run has finished
-     * Is the purpose of a fixed-delay scheduling.
+     * Run a cron task every minute
      */
-    @Scheduled(
-            initialDelayString = "${application.outbox-relay.initial-delay}",
-            fixedDelayString = "${application.outbox-relay.fixed-delay}"
-    )
+    @Scheduled(cron = "0 * * * * *")
     public void outboxMessageRelayTask() {
         Task task = taskMap.getTaskOrThrow("outboxMessageRelayTask");
         CompletableFuture<ObjectNode> result = applicationTaskExecutor.submitCompletable(task, createInitNode(objectMapper));
