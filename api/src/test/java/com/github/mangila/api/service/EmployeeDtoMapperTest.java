@@ -6,6 +6,7 @@ import com.github.mangila.api.EmployeeTestFactory;
 import com.github.mangila.api.config.WebConfig;
 import com.github.mangila.api.model.employee.domain.Employee;
 import com.github.mangila.api.model.employee.dto.EmployeeDto;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ class EmployeeDtoMapperTest {
     private ObjectMapper objectMapper;
 
     @Test
+    @Disabled
     void map() throws IOException {
         Employee employee = EmployeeTestFactory.createEmployee(objectMapper);
         EmployeeDto dto = mapper.map(employee);

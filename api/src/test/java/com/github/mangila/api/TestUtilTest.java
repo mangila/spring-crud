@@ -1,10 +1,14 @@
 package com.github.mangila.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.api.config.JacksonConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
+import org.springframework.context.annotation.Import;
 
 import java.io.IOException;
 
@@ -14,7 +18,12 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 /**
  * Test the test utility :)
  */
-class TestUtilTest {
+@Import(JacksonConfig.class)
+@JsonTest
+public class TestUtilTest {
+
+    @Autowired
+    private ObjectMapper mapper;
 
     @DisplayName("Should read JSON")
     @ParameterizedTest(name = "{0}")
@@ -33,7 +42,6 @@ class TestUtilTest {
     @Test
     @DisplayName("Should parse JSON")
     void parseJson() {
-        var mapper = new ObjectMapper();
         assertThatCode(() -> {
             EmployeeTestFactory.createNewEmployeeRequest(mapper);
             EmployeeTestFactory.createEmployeeDto(mapper);
@@ -44,7 +52,6 @@ class TestUtilTest {
     @Test
     @DisplayName("Should create Objects")
     void createObjects() {
-        var mapper = new ObjectMapper();
         assertThatCode(() -> {
             EmployeeTestFactory.createNewEmployeeRequestBuilder(mapper)
                     .build();
