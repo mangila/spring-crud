@@ -4,8 +4,8 @@ data "tfe_outputs" "spring" {
 }
 
 locals {
-  has_ssh_key_file       = fileexists("keys/ansible")
-  has_ansible_ini_file   = fileexists("ansible/inventory.init")
+  has_ssh_key_file       = fileexists("ansible")
+  has_ansible_ini_file   = fileexists("inventory.init")
   ec2_instance_public_ip = try(data.tfe_outputs.spring.values.ec2_instance_public_ip, null)
 
   should_generate_ssh_key      = local.has_ssh_key_file == false
@@ -26,7 +26,7 @@ resource "terraform_data" "generate_ssh_key_pair" {
 # Generate ansibles inventory.ini file
 resource "local_file" "ansible_inventory_ini_file" {
   count    = local.should_generate_ini_tpl_file ? 1 : 0
-  filename = "ansible/inventory.ini"
+  filename = "inventory.ini"
   content = templatefile("inventory.ini.tftpl", {
     TPL_EC2_PUBLIC_IP = local.ec2_instance_public_ip
   })
