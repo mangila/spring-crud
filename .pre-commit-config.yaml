@@ -8,7 +8,7 @@ repos:
     hooks:
       - id: api-test
         name: Api test
-        entry: cmd.exe /c mvnw.cmd
+        entry: ./mvnw
         args: [ "-f", "api/pom.xml", "clean", "test" ]
         language: system
         files: ^api/src
@@ -16,7 +16,7 @@ repos:
         pass_filenames: false
       - id: background-test
         name: Background test
-        entry: cmd.exe /c mvnw.cmd
+        entry: ./mvnw
         args: [ "-f", "background/pom.xml", "clean", "test" ]
         language: system
         files: ^background/src
