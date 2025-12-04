@@ -23,7 +23,7 @@ resource "terraform_data" "generate_ssh_key_pair" {
   }
 }
 
-# Generate ansibles inventory.ini file
+# Generate ansibles inventory.ini.tftpl file
 resource "local_file" "ansible_inventory_ini_file" {
   count    = local.should_generate_ini_tpl_file ? 1 : 0
   filename = "inventory.ini"

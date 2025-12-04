@@ -1,7 +1,7 @@
 ---
 - name: Deploy multi-container application with Docker Compose
-  hosts: docker_host
-  become: yes # Use sudo to run Docker commands
+  hosts: web
+  become: yes # Use sudo to run Docker command
 
   tasks:
     - name: Create application directory on remote host
@@ -25,6 +25,6 @@
         build: false            # Set to true if you need to build images
       register: compose_output
 
-    - name: Display Docker Compose results
+    - name: Display Docker Compose result
       ansible.builtin.debug:
         var: compose_output
