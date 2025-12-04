@@ -1,24 +1,23 @@
 data "tfe_outputs" "spring" {
-  organization = "<YOUR ORG>"
+  organization = "mangila"
   workspace    = "spring-crud"
 }
 
 locals {
-  has_ssh_key_file       = fileexists("keys/key")
+  has_ssh_key_file       = fileexists("keys/ansible")
   has_ansible_ini_file   = fileexists("ansible/inventory.init")
   ec2_instance_public_ip = try(data.tfe_outputs.spring.values.ec2_instance_public_ip, null)
 
-  should_generate_ssh_key     = local.has_ssh_key_file == false
+  should_generate_ssh_key      = local.has_ssh_key_file == false
   should_generate_ini_tpl_file = local.has_ansible_ini_file == false && local.ec2_instance_public_ip != null
 }
 
 # Generate the external SSH key pair on disk, only if not exists
 resource "terraform_data" "generate_ssh_key_pair" {
   count = local.should_generate_ssh_key ? 1 : 0
-  input = "python generate_ssh_key_pair.py"
   provisioner "local-exec" {
     working_dir = "keys"
-    command     = "python generate_ssh_key_pair.py"
+    command     = "ssh-keygen -t ed25519 -f ansible -N \"\""
     quiet       = false
     on_failure  = fail
   }
