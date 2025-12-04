@@ -1,30 +1,32 @@
 ---
 - name: Deploy multi-container application with Docker Compose
   hosts: web
-  become: yes # Use sudo to run Docker command
+  become: yes
 
   tasks:
     - name: Create application directory on remote host
+      # https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/file_module.html#ansible-collections-ansible-builtin-file-module
       ansible.builtin.file:
-        path: /opt/my_app
+        path: /opt/docker
         state: directory
         mode: '0755'
 
     - name: Copy docker-compose.yml and application files to remote host
+      # https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/copy_module.html#ansible-collections-ansible-builtin-copy-module
       ansible.builtin.copy:
-        src: my_app/
-        dest: /opt/
-      # The `my_app` directory on the control node contains
-      # the docker-compose.yml and the html directory.
+        src: docker-compose.ec2.yaml
+        dest: /opt/docker
 
     - name: Ensure Docker Compose services are running and up-to-date
+      # https://docs.ansible.com/projects/ansible/latest/collections/community/docker/docker_compose_v2_module.html
       community.docker.docker_compose_v2:
-        project_src: /opt/my_app # Directory containing docker-compose.yml
-        state: present          # Ensures the services are created and running
-        pull: true              # Pulls latest images before starting
-        build: false            # Set to true if you need to build images
+        project_src: /opt/docker/docker-compose.ec2.yaml
+        state: present
+        pull: true
+        build: false
       register: compose_output
 
     - name: Display Docker Compose result
+      # https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/debug_module.html#ansible-collections-ansible-builtin-debug-module
       ansible.builtin.debug:
         var: compose_output
