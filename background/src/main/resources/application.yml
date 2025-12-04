@@ -10,6 +10,6 @@ spring:
   docker:
     compose:
       enabled: true
-      file: ${user.dir}/infrastructure/local/compose.yaml
+      file: ${user.dir}/infrastructure/local/docker/compose.yaml
       skip:
         in-tests: true

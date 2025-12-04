@@ -13,6 +13,7 @@ locals {
 }
 
 # Generate the external SSH key pair on disk, only if not exists
+# For Ansible login
 resource "terraform_data" "generate_ssh_key_pair" {
   count = local.should_generate_ssh_key ? 1 : 0
   provisioner "local-exec" {
@@ -23,11 +24,20 @@ resource "terraform_data" "generate_ssh_key_pair" {
   }
 }
 
-# Generate ansibles inventory.ini.tftpl file
+# Generate ansibles inventory.ini file from template
 resource "local_file" "ansible_inventory_ini_file" {
   count    = local.should_generate_ini_tpl_file ? 1 : 0
-  filename = "inventory.ini"
-  content = templatefile("inventory.ini.tftpl", {
+  filename = "ansible/inventory.ini"
+  content = templatefile("template/inventory.ini", {
+    TPL_EC2_PUBLIC_IP = local.ec2_instance_public_ip
+  })
+}
+
+# Generate nginx config file from template
+resource "local_file" "nginx_conf_file" {
+  count    = local.should_generate_ini_tpl_file ? 1 : 0
+  filename = "ansible/nginx.conf"
+  content = templatefile("template/nginx.conf", {
     TPL_EC2_PUBLIC_IP = local.ec2_instance_public_ip
   })
 }
