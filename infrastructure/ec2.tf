@@ -22,7 +22,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_HTTP_traffic_ipv4" {
 
 resource "aws_key_pair" "ansible_key" {
   key_name   = "ansible-key"
-  public_key = file("local/keys/ansible.pub")
+  public_key = file("local/ansible.pub")
 }
 
 module "ec2_instance" {
