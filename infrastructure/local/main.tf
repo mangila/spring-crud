@@ -4,9 +4,10 @@ data "tfe_outputs" "spring" {
 }
 
 locals {
-  has_ssh_key_file       = fileexists("ansible")
-  has_ansible_ini_file   = fileexists("inventory.init")
-  ec2_instance_public_ip = try(data.tfe_outputs.spring.values.ec2_instance_public_ip, null)
+  has_ssh_key_file        = fileexists("ansible")
+  has_ansible_ini_file    = fileexists("inventory.init")
+  ec2_instance_public_ip  = try(data.tfe_outputs.spring.values.ec2_instance_public_ip, null)
+  ec2_instance_public_dns = try(data.tfe_outputs.spring.values.ec2_instance_public_dns)
 
   should_generate_ssh_key      = local.has_ssh_key_file == false
   should_generate_ini_tpl_file = local.has_ansible_ini_file == false && local.ec2_instance_public_ip != null
@@ -38,7 +39,7 @@ resource "local_file" "nginx_conf_file" {
   count    = local.should_generate_ini_tpl_file ? 1 : 0
   filename = "ansible/nginx.conf"
   content = templatefile("template/nginx.conf", {
-    TPL_EC2_PUBLIC_IP = local.ec2_instance_public_ip
+    TPL_EC2_PUBLIC_DNS = local.ec2_instance_public_dns
   })
 }
 
