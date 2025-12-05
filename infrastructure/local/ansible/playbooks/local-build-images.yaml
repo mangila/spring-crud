@@ -1,0 +1,32 @@
+---
+- name: Build Docker Images and Push to Docker Public Repository
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Build API Docker Image
+      community.docker.docker_image:
+        source: build
+        name: mangila/spring-crud-api
+        tag: latest
+        build:
+          path: ../../../api
+          dockerfile: Dockerfile
+        push: true
+      register: output_api
+    - name: Show results
+      ansible.builtin.debug:
+        var: output_api
+    - name: Build Background Docker Image
+      community.docker.docker_image:
+        source: build
+        name: mangila/spring-crud-background
+        tag: latest
+        build:
+          path: ../../../background
+          dockerfile: Dockerfile
+        push: true
+      register: output_background
+    - name: Show results
+      ansible.builtin.debug:
+        var: output_background

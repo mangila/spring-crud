@@ -4,10 +4,10 @@
   become: yes
   tasks:
     - name: Partition Remote Host
-      import_tasks: partition-host.yaml
+      import_tasks: tasks/partition-host.yaml
     - name: Install Docker
-      import_tasks: install-docker.yaml
+      import_tasks: tasks/install-docker.yaml
     - name: Install & Configure NGINX
-      import_tasks: install-nginx.yaml
+      import_tasks: tasks/install-nginx.yaml
     - name: Start Docker Compose
-      import_tasks: start-docker.yaml
+      import_tasks: tasks/start-docker.yaml
