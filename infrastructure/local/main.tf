@@ -55,7 +55,7 @@ resource "local_file" "nginx_conf_file" {
   })
 }
 
-resource "terraform_data" "ping_ec2" {
+resource "terraform_data" "ansible_ping_ec2" {
   depends_on = [local_file.ansible_inventory_ini_file]
 
   provisioner "local-exec" {

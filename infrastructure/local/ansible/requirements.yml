@@ -1,0 +1,8 @@
+---
+# Install with: ansible-galaxy collection install -r requirements.yml
+
+collections:
+  - name: community.docker
+  # https://github.com/nginxinc/ansible-collection-nginx/tree/main
+  - name: nginxinc.nginx_core
+    version: ">=0.8.0"

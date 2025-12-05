@@ -11,3 +11,5 @@ and also the home of the local development `compose.yaml` to spin up a Postgres 
 `ssh-keygen -t ed25519 -f ansible-ssh -C "olsson.erik1993@gmail.com" -N ""`
 
 ` ansible-config init --disabled > ansible.cfg `
+
+` ansible-galaxy collection install -r requirements.yml`
