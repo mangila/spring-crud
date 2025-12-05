@@ -1,3 +1,5 @@
+# Install and Configure Nginx on bare metal to serve as a Reverse Proxy
+
 - name: Install NGINX
   ansible.builtin.include_role:
     name: nginxinc.nginx_core.nginx

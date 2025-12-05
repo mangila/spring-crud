@@ -1,3 +1,4 @@
+# Terraform USER_TOKEN is needed for this operation
 data "tfe_outputs" "spring" {
   organization = "mangila"
   workspace    = "spring-crud"

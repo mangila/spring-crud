@@ -1,3 +1,5 @@
+# Copy files from locally directory to remote directory
+
 - name: Create application directory on remote host
   # https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/file_module.html#ansible-collections-ansible-builtin-file-module
   ansible.builtin.file:
