@@ -1,37 +1,43 @@
-# Test
+# Test Module
 
-Testing a RESTful API needs Live testing for stable and mature verification that the software behaves as expected.
+Purpose
+- Provide live test suites and guidance for validating the running application beyond unit/integration tests in code.
+- Focus areas: End‑to‑End (E2E), Load/Performance, and basic Security testing.
 
-## E2E
+Scope and philosophy
+- Tests here target a running environment (local, staging, pre‑prod, or prod) to verify real behavior and integrations.
+- Keep suites small, deterministic, and environment‑aware via variables (base URL, credentials, etc.).
 
-End-to-end test for our RESTful API is a live testing suite to an already running instance in a staging, QA, pre-prod or
-even in the prod environment.
+E2E testing
+- Recommended: Venom https://github.com/ovh/venom
+  - YAML‑driven scenarios; easy to version control and parameterize.
+- Alternative: Postman + Newman https://github.com/postmanlabs/newman
+- If a browser UI exists, consider a separate suite using:
+  - Selenium https://www.selenium.dev/
+  - Selenide (Java) https://selenide.org/
+  - Playwright https://playwright.dev/
 
-We will use Venom https://github.com/ovh/venom for this purpose.
+Running examples (conceptual)
+- Venom:
+  - `venom run ./e2e` (where `./e2e` contains YAML test suites and an env file with `API_BASE_URL` etc.)
+- Newman:
+  - `newman run collection.json -e environment.json`
 
-Alternatively, we could use Postman Newman and run collections https://github.com/postmanlabs/newman
+Load & performance testing
+- Gauge system behavior under sustained and peak load.
+- Tools:
+  - Gatling https://gatling.io/
+  - hey https://github.com/rakyll/hey
+  - oha https://github.com/hatoo/oha
+  - k6 https://k6.io/
 
-If there would be a frontend also involved, it would be a good idea to have a separate suite for that.
-With a browser automation tool we can automate the browser and test the full journey of the user.
+Security and basic penetration checks
+- Objectives:
+  - Identify obvious misconfigurations and information disclosures.
+  - Validate headers and TLS where applicable; check rate limiting and auth flows.
+- Tools:
+  - Burp Suite https://portswigger.net/burp
 
-- Selenium https://www.selenium.dev/
-- Selenide(Java) https://selenide.org/
-- Playwright https://playwright.dev/
-
-## Load
-
-Load testing is a way to measure the performance of a system under load. Will it break during a traffic spike?
-
-- Gatling https://gatling.io/
-- Hey - https://github.com/rakyll/hey
-- Oha - https://github.com/hatoo/oha
-- k6 - https://k6.io/
-
-## Penetration
-
-Find weaknesses in the system and how they can be exploited.
-
-- How much damage can a malicious actor do to the system?
-- How much technical information about the system can we get as a client that can be exploited?
-- GDPR?
-- Burp Suite - https://portswigger.net/burp 
+Repository conventions
+- Place E2E scenarios under `test/e2e/`, load scripts under `test/load/`, and security checks under `test/security/`.
+- Use environment files to decouple target hosts and credentials from the test logic.

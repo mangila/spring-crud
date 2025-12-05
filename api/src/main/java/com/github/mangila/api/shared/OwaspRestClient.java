@@ -18,13 +18,13 @@ public class OwaspRestClient {
 
     private final RestClient restClient;
 
-    public OwaspRestClient() {
+    public OwaspRestClient(RestClient.Builder builder) {
         HttpClient httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_2)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(java.time.Duration.ofSeconds(10))
                 .build();
-        this.restClient = RestClient.builder()
+        this.restClient = builder
                 .requestFactory(new JdkClientHttpRequestFactory(httpClient))
                 .baseUrl("https://www.owasp.org/")
                 .defaultHeader("User-Agent", "spring-crud/mangila.github")

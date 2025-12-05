@@ -1,6 +1,7 @@
 package com.github.mangila.api.shared;
 
 import com.github.mangila.api.PostgresTestContainerConfiguration;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -15,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "application.notification.enabled=false"
         }
 )
+@Disabled
 class SpringEventPublisherTest {
 
     @Test

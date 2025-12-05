@@ -1,7 +1,8 @@
 locals {
-  project_name = "spring-crud"
-  aws_region = "eu-north-1"
-  repository = "https://github.com/mangila/spring-crud"
+  project_name     = "spring-crud"
+  aws_region       = "eu-north-1"
+  repository       = "https://github.com/mangila/spring-crud"
+  ansible_key_name = "ansible-ssh"
 }
 
 provider "aws" {
@@ -12,6 +13,7 @@ provider "aws" {
     }
   }
 }
+
 resource "aws_servicecatalogappregistry_application" "spring_application" {
   name        = local.project_name
   description = "Spring Boot is amazing for CRUD apps!"

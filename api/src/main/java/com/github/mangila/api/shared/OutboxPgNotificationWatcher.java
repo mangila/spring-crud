@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +50,7 @@ public class OutboxPgNotificationWatcher implements SmartLifecycle {
             listener.shutdown();
             listenEventLoop.cancel(true);
             // Wait here for a bit to let the side effect run and insert to db
+            // TODO: verify in db instead of sleep
             TimeUnit.SECONDS.sleep(5);
             listener.unlisten();
             listener.destroy();

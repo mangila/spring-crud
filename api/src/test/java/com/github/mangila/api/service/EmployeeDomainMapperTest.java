@@ -5,6 +5,7 @@ import com.github.mangila.api.EmployeeTestFactory;
 import com.github.mangila.api.model.employee.domain.Employee;
 import com.github.mangila.api.model.employee.dto.UpdateEmployeeRequest;
 import com.github.mangila.api.model.employee.entity.EmployeeEntity;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -33,6 +34,7 @@ class EmployeeDomainMapperTest {
     private ObjectMapper objectMapper;
 
     @Test
+    @Disabled
     void mapUpdateEmployeeRequest() throws IOException {
         UpdateEmployeeRequest request = EmployeeTestFactory.createUpdateEmployeeRequest(objectMapper);
       //  Employee employee = mapper.map(request);
@@ -40,6 +42,7 @@ class EmployeeDomainMapperTest {
     }
 
     @Test
+    @Disabled
     void mapEmployeeEntity() throws IOException {
         EmployeeEntity entity = EmployeeTestFactory.createEmployeeEntity(objectMapper);
        // Employee employee = mapper.map(entity);

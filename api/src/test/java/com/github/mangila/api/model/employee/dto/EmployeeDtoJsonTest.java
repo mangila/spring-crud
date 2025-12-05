@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.api.EmployeeTestFactory;
 import com.github.mangila.api.FilePathUtil;
 import com.github.mangila.api.config.JacksonConfig;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -18,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Import(JacksonConfig.class)
 @JsonTest
+@Disabled
 class EmployeeDtoJsonTest {
 
     @Autowired

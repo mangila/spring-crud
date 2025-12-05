@@ -115,8 +115,12 @@ terraform.rc
 # GENERAL
 # =========================================
 
-key
-key.pub
+
+/infrastructure/local/ansible/inventory.ini
+/infrastructure/local/ansible/nginx.conf
+/infrastructure/local/ansible/ansible-ssh
+/infrastructure/local/ansible/ansible-ssh.pub
+/infrastructure/local/ansible/ansible_collections/
 
 # OS files
 .DS_Store

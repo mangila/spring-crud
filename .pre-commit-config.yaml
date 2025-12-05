@@ -1,6 +1,6 @@
 # This is pre-commit git hooks that run before a git commit to ensure test is being runned
-# this automation is running on my local Windows system, so it might not work if you are using linux/macOS,
-# but it can be changed to use the mvnw bash script instead.
+# this automation is running on my local Linux system, so it might not work if you are using Windows,
+# but it can be changed to use the mvnw cmd script instead.
 
 fail_fast: false
 repos:
@@ -8,7 +8,7 @@ repos:
     hooks:
       - id: api-test
         name: Api test
-        entry: cmd.exe /c mvnw.cmd
+        entry: ./mvnw
         args: [ "-f", "api/pom.xml", "clean", "test" ]
         language: system
         files: ^api/src
@@ -16,7 +16,7 @@ repos:
         pass_filenames: false
       - id: background-test
         name: Background test
-        entry: cmd.exe /c mvnw.cmd
+        entry: ./mvnw
         args: [ "-f", "background/pom.xml", "clean", "test" ]
         language: system
         files: ^background/src
