@@ -1,3 +1,3 @@
 #!/bin/bash
 
-curl -I --http2 http://localhost:8080/api/v1/employees
+curl -I http://ec2-13-51-64-136.eu-north-1.compute.amazonaws.com
