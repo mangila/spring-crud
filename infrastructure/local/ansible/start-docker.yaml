@@ -1,0 +1,13 @@
+- name: Ensure Docker Compose services are running and up-to-date
+  # https://docs.ansible.com/projects/ansible/latest/collections/community/docker/docker_compose_v2_module.html
+  community.docker.docker_compose_v2:
+    project_src: /opt/docker/docker-compose.ec2.yaml
+    state: present
+    pull: always
+    build: never
+  register: compose_output
+
+- name: Display Docker Compose result
+  # https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/debug_module.html#ansible-collections-ansible-builtin-debug-module
+  ansible.builtin.debug:
+    var: compose_output
