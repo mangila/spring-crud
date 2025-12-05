@@ -55,14 +55,13 @@ resource "local_file" "nginx_conf_file" {
   })
 }
 
-# Run playbook command
-# resource "terraform_data" "generate_ssh_key_pair" {
-#   count = local.should_generate_ssh_key ? 1 : 0
-#   input = "python generate_ssh_key_pair.py"
-#   provisioner "local-exec" {
-#     working_dir = "keys"
-#     command     = "python generate_ssh_key_pair.py"
-#     quiet       = false
-#     on_failure  = fail
-#   }
-# }
+resource "terraform_data" "ping_ec2" {
+  depends_on = [local_file.ansible_inventory_ini_file]
+
+  provisioner "local-exec" {
+    working_dir = "ansible"
+    command     = "ansible web -m ping"
+    quiet       = false
+    on_failure  = fail
+  }
+}

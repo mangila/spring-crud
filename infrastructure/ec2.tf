@@ -20,8 +20,8 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_HTTP_traffic_ipv4" {
   to_port           = 80
 }
 
-resource "aws_key_pair" "ansible_key" {
-  key_name   = "ansible-key"
+resource "aws_key_pair" "ansible_public_key" {
+  key_name   = local.ansible_key_name
   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGGN4M8jlQO3bIgL4T4rrwwijckA0xG+KlB8pfhHZT3w olsson.erik1993@gmail.com"
 }
 
@@ -32,8 +32,8 @@ module "ec2_instance" {
   name                        = "the-box"
   instance_type               = "t3.micro"
   ami                         = "ami-0a716d3f3b16d290c" # ubuntu machine
-  key_name                    = aws_key_pair.ansible_key.key_name
-  subnet_id                   = module.vpc.public_subnets
+  key_name                    = aws_key_pair.ansible_public_key.key_name
+  subnet_id                   = module.vpc.public_subnets[0]
   vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
   associate_public_ip_address = true
 

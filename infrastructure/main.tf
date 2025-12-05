@@ -1,7 +1,8 @@
 locals {
-  project_name = "spring-crud"
-  aws_region   = "eu-north-1"
-  repository   = "https://github.com/mangila/spring-crud"
+  project_name     = "spring-crud"
+  aws_region       = "eu-north-1"
+  repository       = "https://github.com/mangila/spring-crud"
+  ansible_key_name = "ansible-ssh"
 }
 
 provider "aws" {

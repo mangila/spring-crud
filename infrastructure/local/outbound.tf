@@ -1,3 +1,3 @@
-output "ansible_inventory_ini_file" {
-  value = local_file.ansible_inventory_ini_file
+output "ping_ec2" {
+  value = terraform_data.ping_ec2.output
 }
