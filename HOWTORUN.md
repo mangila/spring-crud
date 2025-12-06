@@ -51,6 +51,8 @@ Run `terraform apply` in the `infrastructure/local` folder to provision for the 
 
 Run `ansible-playbook playbooks/playbook.yaml` to provision the application to the EC2 instance.
 
+The EC2 instance will be accessible via SSH on port 22 and on port 80 via its public IP and DNS name.
+
 ### Build and push the Docker images:
 
 `ansible-playbook playbooks/local-build-images.yaml`
