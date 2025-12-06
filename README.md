@@ -2,7 +2,9 @@
 
 Spring Boot demo showcasing classic CRUD (Create, Read, Update, Delete) on an Employee domain with a clean, layered architecture. The project is split into modules for API, background processing, and infrastructure, plus a test area for live/E2E suites.
 
-Note: This repository is for learning/demonstration. It contains opinionated choices and serves as a personal reference.
+**Note: This repository is for learning/demonstration. It contains opinionated choices and serves as a personal reference.**
+
+See the [HOWTORUN.md](HOWTORUN.md) for more details about how to start and deploy this application.
 
 ## Modules
 
