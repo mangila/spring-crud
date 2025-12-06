@@ -13,6 +13,11 @@ Tech stack
 - Resilience4j
 - Testcontainers, JSON‑Unit, ArchUnit
 
+Prerequisites
+- Java 21
+- Maven wrapper `./mvnw`
+- Docker (for local PostgreSQL via Docker Compose integration)
+
 Local development
 - The module is configured to use Spring Boot’s Docker Compose integration to start a local PostgreSQL automatically.
   - Compose file: `infrastructure/local/compose.yaml`
@@ -43,3 +48,15 @@ Build & test
 Packaging & Docker
 - Standard Spring Boot fat JAR via `spring-boot-maven-plugin`.
 - A `Dockerfile` is present to containerize the API if needed.
+
+Quick smoke test
+- Create an employee (example):
+```
+curl -X POST http://localhost:8080/api/v1/employees \
+  -H 'Content-Type: application/json' \
+  -d '{"firstName":"Ada","lastName":"Lovelace","email":"ada@example.com"}'
+```
+- List employees:
+```
+curl http://localhost:8080/api/v1/employees
+```

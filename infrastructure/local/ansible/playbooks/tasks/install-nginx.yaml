@@ -1,0 +1,26 @@
+# Install and Configure Nginx on bare metal to serve as a Reverse Proxy
+
+- name: Install NGINX
+  ansible.builtin.include_role:
+    name: nginxinc.nginx_core.nginx
+
+- name: Configure NGINX
+  ansible.builtin.include_role:
+    name: nginxinc.nginx_core.nginx_config
+  vars:
+    nginx_config_cleanup: true
+    nginx_config_cleanup_paths:
+      - directory:
+          - /etc/nginx/conf.d
+        recurse: false
+
+- name: Copy nginx.conf to remote host
+  # https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/copy_module.html#ansible-collections-ansible-builtin-copy-module
+  ansible.builtin.copy:
+    src: ../../nginx.conf
+    dest: /etc/nginx/conf.d
+
+- name: Restart Nginx service
+  ansible.builtin.service:
+    name: nginx
+    state: restarted

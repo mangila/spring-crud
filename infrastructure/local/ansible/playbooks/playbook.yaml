@@ -1,0 +1,17 @@
+---
+- name: Deploy multi-container application with Docker Compose
+  hosts: web
+  become: yes
+  tasks:
+    - name: Install & Configure NGINX
+      import_tasks: tasks/install-nginx.yaml
+    - name: Create application directory on remote host
+      # https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/file_module.html#ansible-collections-ansible-builtin-file-module
+      ansible.builtin.file:
+        path: /opt/docker
+        state: directory
+        mode: '0755'
+    - name: Install Docker
+      import_tasks: tasks/install-docker.yaml
+    - name: Start Docker Compose
+      import_tasks: tasks/start-docker.yaml

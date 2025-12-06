@@ -1,101 +1,74 @@
 # spring-crud
 
-Spring Web app demonstrating C.R.U.D (Create, Read, Update, Delete) operations in a Layered Architecture
+Spring Boot demo showcasing classic CRUD (Create, Read, Update, Delete) on an Employee domain with a clean, layered architecture. The project is split into modules for API, background processing, and infrastructure, plus a test area for live/E2E suites.
 
-**NOTE: This project is just for demonstration purposes. Just me setting up a project, nothing fancy.
-I mostly use this kind of repos as my flashcards.**
+Note: This repository is for learning/demonstration. It contains opinionated choices and serves as a personal reference.
 
-## Architecture
+## Modules
 
-Postgres database is used as the persistence layer.
+- api — Spring Boot REST API exposing CRUD operations and related patterns. See `api/README.md`.
+- background — Headless Spring Boot app for background jobs and notifications. See `background/README.md`.
+- infrastructure — Terraform + Ansible for cloud and local developer setup. See `infrastructure/README.md` and `infrastructure/local/README.md`.
+- test — Guidance and structure for E2E/performance/security testing. See `test/README.md`.
 
-Transactional Outbox pattern is used to send events, the outbox table can be used for event sourcing replays.
+## Key architecture and patterns
 
-Postgres LISTEN/NOTIFY is used for Fire and Forget (FaF) Notifications.
+- PostgreSQL as the persistence layer (local DB via Docker Compose).
+- Transactional Outbox pattern for event publishing; outbox table can support replays.
+- PostgreSQL LISTEN/NOTIFY for fire-and-forget notifications.
+- Optional background scheduling with JobRunr in the background module.
+- OpenAPI/Swagger for API exploration.
+- OWASP Secure Headers reference integration.
 
-[JobRunr](https://www.jobrunr.io) is being used for background tasks scheduling in the background module.
+## Prerequisites
 
-Deployed to AWS and automated with IaC (Infrastructure as Code) and CM (Configuration Management) using Terraform and
-Ansible.
+- Java 21
+- Maven 3.9+ (wrapper provided: `./mvnw`)
+- Docker (for local PostgreSQL via Docker Compose)
+- Terraform CLI if provisioning cloud infra (see infra README)
+- Python 3 + pip if using local Ansible automation
 
-Live Integration testing is done with [Venom](https://github.com/ovh/venom).
+## Quickstart (local)
 
-[Pre-commit](https://pre-commit.com/) hooks are used to run tests before a git commit.
+1) Start local PostgreSQL (if not auto-started by Spring Boot):
+- `docker compose -f infrastructure/local/compose.yaml up -d`
 
-### Api
+2) Run the API:
+- `./mvnw -pl api -am spring-boot:run`
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- OpenAPI JSON: http://localhost:8080/v3/api-docs
 
-Spring RESTful API with CRUD operations for the Employee domain. (The famous Employee CRUD, great for demonstration
-purposes)
+3) Run the Background module (optional):
+- `./mvnw -pl background -am spring-boot:run`
 
-- Spring Web
-- Spring Actuator
-- Spring Scheduler
-- Spring ApplicationPublisher
-- Spring Validation
-- Spring JPA (with hypersistence-utils)
-- Spring AOP
-- Postgres w Flyway
-- Postgres LISTEN/NOTIFY
-- Spring Server Sent Events
-- Resilience4j
-- JSpecify
-- Ensure4j
-- Spring Test with Testcontainers and JsonUnit
+## Build and test
 
-##### Swagger
+- Build all: `./mvnw clean package`
+- Run all tests: `./mvnw test`
+- Module-specific builds/tests (examples):
+  - API: `./mvnw -pl api -am clean package`
+  - Background: `./mvnw -pl background -am clean package`
 
-- Swagger UI is available at http://localhost:8080/swagger-ui.html
-- Swagger JSON is available at http://localhost:8080/v3/api-docs
+## Infrastructure
 
-##### Owasp Secure Headers
+Infrastructure as Code is under `infrastructure/` using Terraform (AWS, remote state via Terraform Cloud in the example) and Ansible. A `local/` subfolder contains developer conveniences such as a Docker Compose file for PostgreSQL. See detailed docs in:
 
-Project is configured to fetch the latest [OWASP secure headers project](https://owasp.org/www-project-secure-headers)
-reference collections
+- `infrastructure/README.md` — Cloud and local overview, Terraform usage
+- `infrastructure/local/README.md` — Local Compose, Ansible snippets, SSH key setup
 
-The latest headers are fetched from the following URL:
+## Testing beyond the codebase
 
+Live/E2E, load, and security test conventions are described in `test/README.md`. The project also uses pre-commit hooks to automate checks before commits. See `.pre-commit-config.yaml`.
+
+## Security headers
+
+The API fetches OWASP Secure Headers reference collections:
 - https://owasp.org/www-project-secure-headers/ci/headers_add.json
 - https://owasp.org/www-project-secure-headers/ci/headers_remove.json
 
-### Background
+## License
 
-Spring Boot with JobRunr background tasks scheduler.
-
-### Infrastructure
-
-Terraform and Ansible are used for provisioning the infrastructure.
-
-#### Terraform
-
-In this example we use the Terraform Cloud remote state backend.
-
-##### AWS
-
-Resource created by Terraform is in the scope of the AWS free tier.
-
-- Create a small VPC with Internet Gateway (Terraform AWS VPC module does the magic)
-- Create a public EC2 instance (Terraform AWS EC2 module does the magic)
-    - sg for HTTP access and SSH access
-    - EC2 is a t3.micro instance (Free tier eligible in eu-north-1)
-
-In the local folder is a Terraform local state project that runs some python and .tftpl(Terraform Template File) to
-manage the Ansible Control Node and provision the EC2 instance.
-
-#### Ansible
-
-The Ansible Control Node is managed from our local machine.
-
-### Test
-
-Live testing suites
-
-### Project Automation with Python
-
-Python virtual environment is created in the root of the project, so it can run python automation scripts.
-
-The virtual env is being .gitignore, so it is not pushed to the repository.
-
-Pre-commit hooks are used to run tests before a git commit. [.pre-commit-config.yaml](.pre-commit-config.yaml)
+This project is licensed under the terms of the LICENSE file in the repository root.
 
 
 
