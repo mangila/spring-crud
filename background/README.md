@@ -11,6 +11,11 @@ Tech stack
 - PostgreSQL via Spring Boot Docker Compose integration
 - Job scheduling (prepared for JobRunr library)
 
+Prerequisites
+- Java 21
+- Maven wrapper `./mvnw`
+- Docker (for local PostgreSQL via Docker Compose integration)
+
 Local development
 - The module is configured to auto‑start a local PostgreSQL using Spring Boot’s Docker Compose integration.
   - Compose file: `infrastructure/local/compose.yaml`
@@ -26,3 +31,6 @@ Configuration notes
 Build & test
 - Build: `./mvnw -pl background -am clean package`
 - Run tests: `./mvnw -pl background -am test`
+
+Quick check
+- Verify it boots and connects to the same local PostgreSQL as the API. Logs should indicate non‑web mode and successful datasource initialization.

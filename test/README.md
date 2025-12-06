@@ -4,6 +4,10 @@ Purpose
 - Provide live test suites and guidance for validating the running application beyond unit/integration tests in code.
 - Focus areas: End‑to‑End (E2E), Load/Performance, and basic Security testing.
 
+Prerequisites
+- A running instance of the API (local or remote)
+- Tooling as needed per suite (e.g., Venom, Newman, k6)
+
 Scope and philosophy
 - Tests here target a running environment (local, staging, pre‑prod, or prod) to verify real behavior and integrations.
 - Keep suites small, deterministic, and environment‑aware via variables (base URL, credentials, etc.).
@@ -41,3 +45,4 @@ Security and basic penetration checks
 Repository conventions
 - Place E2E scenarios under `test/e2e/`, load scripts under `test/load/`, and security checks under `test/security/`.
 - Use environment files to decouple target hosts and credentials from the test logic.
+- Keep generated reports under `test/reports/` and avoid committing large artifacts.
