@@ -1,4 +1,4 @@
-package com.github.mangila.api.config;
+package com.github.mangila.api.model.owasp;
 
 import org.springframework.http.HttpHeaders;
 

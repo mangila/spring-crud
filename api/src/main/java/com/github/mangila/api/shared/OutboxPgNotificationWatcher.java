@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class OutboxPgNotificationWatcher implements SmartLifecycle {
+
     private final OutboxPgNotificationListener listener;
     private final ApplicationTaskExecutor applicationTaskExecutor;
     private final ObjectMapper objectMapper;

@@ -1,8 +1,9 @@
 package com.github.mangila.api.service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.mangila.api.config.EmployeeSseEmitters;
-import com.github.mangila.api.config.FileUploadTaskQueue;
+import com.github.mangila.api.model.EmployeeSseEmitters;
+import com.github.mangila.api.model.FileUploadRequest;
+import com.github.mangila.api.model.FileUploadTaskQueue;
 import com.github.mangila.api.model.employee.domain.Employee;
 import com.github.mangila.api.model.employee.domain.EmployeeId;
 import com.github.mangila.api.model.employee.dto.CreateNewEmployeeRequest;
@@ -13,9 +14,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 /**
  * Facade for REST endpoints.
@@ -118,11 +126,29 @@ public class EmployeeRestFacade {
         return emitter;
     }
 
-    public void fileUpload(MultipartFile file) {
-        switch (file.getContentType()) {
-            case "text/csv", "application/xml", "application/json" -> fileUploadTaskQueue.put(file);
+    public String fileUpload(MultipartFile file) {
+        log.info("File upload: {}", file.getOriginalFilename());
+        String contentType = file.getContentType();
+        switch (contentType) {
+            case "text/csv",
+                 MediaType.APPLICATION_XML_VALUE,
+                 MediaType.APPLICATION_JSON_VALUE -> {
+                try {
+                    String uuid = UUID.randomUUID().toString();
+                    Path out = Paths.get(uuid);
+                    boolean created = out.toFile().createNewFile();
+                    if (!created) {
+                        throw new FileAlreadyExistsException(out.toString());
+                    }
+                    file.transferTo(out);
+                    fileUploadTaskQueue.put(new FileUploadRequest(out, file.getOriginalFilename(), contentType));
+                    return uuid;
+                } catch (InterruptedException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             case null -> throw new RuntimeException("null file content type");
-            default -> throw new IllegalStateException("Unexpected value: " + file.getContentType());
+            default -> throw new IllegalStateException("Unexpected value: %s".formatted(contentType));
         }
     }
 }

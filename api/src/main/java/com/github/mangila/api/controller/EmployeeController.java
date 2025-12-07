@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Map;
 
 /**
  * <p>
@@ -129,8 +130,7 @@ public class EmployeeController {
     @PostMapping(value = "/bulk",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> fileUpload(@NotNull @RequestPart("file") MultipartFile file) {
-        restFacade.fileUpload(file);
-        return ResponseEntity.ok()
-                .build();
+        var uuid = restFacade.fileUpload(file);
+        return ResponseEntity.ok(Map.of("uuid", uuid));
     }
 }

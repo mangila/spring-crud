@@ -1,7 +1,7 @@
 package com.github.mangila.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mangila.api.config.OwaspHeaders;
+import com.github.mangila.api.model.owasp.OwaspHeaders;
 import com.github.mangila.api.model.owasp.OwaspAddResponse;
 import com.github.mangila.api.model.owasp.OwaspRemoveResponse;
 import jakarta.annotation.PostConstruct;
@@ -10,10 +10,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import static java.nio.charset.StandardCharsets.*;
 

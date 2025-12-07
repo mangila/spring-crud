@@ -1,4 +1,4 @@
-package com.github.mangila.api.config;
+package com.github.mangila.api.model;
 
 import com.github.mangila.api.model.employee.domain.EmployeeId;
 import jakarta.annotation.PreDestroy;

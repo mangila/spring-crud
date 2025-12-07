@@ -1,6 +1,7 @@
 package com.github.mangila.api.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.api.model.EmployeeSseEmitters;
 import com.github.mangila.api.service.EmployeeNotificationService;
 import com.github.mangila.api.shared.ApplicationTaskExecutor;
 import com.github.mangila.api.shared.OutboxPgNotificationListener;

@@ -4,18 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.api.PostgresTestContainerConfiguration;
 import com.github.mangila.api.TestTaskConfig;
 import com.github.mangila.api.repository.TaskExecutionJpaRepository;
-import com.github.mangila.api.scheduler.Task;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
-import java.time.Duration;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,11 +25,8 @@ import static org.mockito.Mockito.verify;
 )
 class ApplicationTaskExecutorTest {
 
-    @Autowired
-    private ApplicationTaskExecutor taskExecutor;
-
     @MockitoSpyBean
-    private SimpleAsyncTaskExecutor simpleAsyncTaskExecutor;
+    private ApplicationTaskExecutor taskExecutor;
 
     @MockitoSpyBean
     private TaskExecutionJpaRepository taskExecutionRepository;
@@ -47,14 +39,11 @@ class ApplicationTaskExecutorTest {
 
     @Test
     void submitCompletable() {
-        var future = taskExecutor.submitCompletable(testTask, objectMapper.createObjectNode());
-        verify(simpleAsyncTaskExecutor, times(1)).submitCompletable(any(Task.class));
+        Mockito.clearInvocations(taskExecutor, taskExecutionRepository);
+        var unused = taskExecutor.submitCompletable(testTask, objectMapper.createObjectNode())
+                .join();
+        verify(taskExecutor, times(1)).submitCompletable(any(), any());
         verify(taskExecutionRepository, times(1)).persist(any());
-        await()
-                .timeout(Duration.ofSeconds(5))
-                .untilAsserted(() -> {
-                    verify(taskExecutionRepository, times(1)).merge(any());
-                });
-        var unused = future.thenAccept(objectNode -> assertThat(objectNode.has("test")).isTrue());
+        verify(taskExecutionRepository, times(1)).merge(any());
     }
 }
