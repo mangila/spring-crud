@@ -28,6 +28,7 @@ import java.util.List;
 @NullMarked
 @Slf4j
 public class EmployeeService {
+
     private final EmployeeJpaRepository employeeRepository;
     private final OutboxJpaRepository outboxJpaRepository;
     private final EmployeeEventService eventService;

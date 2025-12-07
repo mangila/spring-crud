@@ -17,4 +17,7 @@ public record CreateNewEmployeeRequest(
         @NotNull EmploymentStatus employmentStatus,
         @NotNull ObjectNode attributes
 ) {
+    public static final String[] CSV_HEADERS = new String[]{
+            "firstName", "lastName", "salary", "employmentActivity", "employmentStatus", "attributes"
+    };
 }
