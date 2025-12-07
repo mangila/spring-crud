@@ -72,6 +72,13 @@ spring:
     show-sql: true
     # Detach JPA from the Spring HTTP request lifecycle
     open-in-view: false
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 1MB
+      strict-servlet-compliance: true
+      resolve-lazily: true
+      file-size-threshold: 0B
 # Logging Properties
 logging:
   level:

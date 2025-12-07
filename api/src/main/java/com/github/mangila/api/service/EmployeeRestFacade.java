@@ -2,6 +2,7 @@ package com.github.mangila.api.service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.api.config.EmployeeSseEmitters;
+import com.github.mangila.api.config.FileUploadTaskQueue;
 import com.github.mangila.api.model.employee.domain.Employee;
 import com.github.mangila.api.model.employee.domain.EmployeeId;
 import com.github.mangila.api.model.employee.dto.CreateNewEmployeeRequest;
@@ -13,6 +14,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 /**
@@ -36,19 +38,22 @@ public class EmployeeRestFacade {
     private final EmployeeEventMapper eventMapper;
     private final EmployeeDomainMapper domainMapper;
     private final EmployeeFactory factory;
+    private final FileUploadTaskQueue fileUploadTaskQueue;
 
     public EmployeeRestFacade(EmployeeService service,
                               EmployeeSseEmitters sseEmitters,
                               EmployeeDtoMapper dtoMapper,
                               EmployeeEventMapper eventMapper,
                               EmployeeDomainMapper domainMapper,
-                              EmployeeFactory factory) {
+                              EmployeeFactory factory,
+                              FileUploadTaskQueue fileUploadTaskQueue) {
         this.service = service;
         this.sseEmitters = sseEmitters;
         this.dtoMapper = dtoMapper;
         this.eventMapper = eventMapper;
         this.domainMapper = domainMapper;
         this.factory = factory;
+        this.fileUploadTaskQueue = fileUploadTaskQueue;
     }
 
     public EmployeeDto findEmployeeById(String employeeId) {
@@ -111,5 +116,13 @@ public class EmployeeRestFacade {
             sseEmitters.remove(id, emitter);
         });
         return emitter;
+    }
+
+    public void fileUpload(MultipartFile file) {
+        switch (file.getContentType()) {
+            case "text/csv", "application/xml", "application/json" -> fileUploadTaskQueue.put(file);
+            case null -> throw new RuntimeException("null file content type");
+            default -> throw new IllegalStateException("Unexpected value: " + file.getContentType());
+        }
     }
 }

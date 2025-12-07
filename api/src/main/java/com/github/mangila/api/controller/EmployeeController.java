@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -87,7 +88,7 @@ public class EmployeeController {
         return new PagedModel<>(restFacade.findAllEmployeesByPage(pageable));
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createNewEmployee(
             @RequestBody
             @NotNull
@@ -103,9 +104,7 @@ public class EmployeeController {
                 .build();
     }
 
-    @PutMapping(
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<EmployeeDto> updateEmployee(
             @RequestBody
             @NotNull
@@ -124,6 +123,14 @@ public class EmployeeController {
     ) {
         restFacade.softDeleteEmployeeById(employeeId);
         return ResponseEntity.noContent()
+                .build();
+    }
+
+    @PostMapping(value = "/bulk",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> fileUpload(@NotNull @RequestPart("file") MultipartFile file) {
+        restFacade.fileUpload(file);
+        return ResponseEntity.ok()
                 .build();
     }
 }

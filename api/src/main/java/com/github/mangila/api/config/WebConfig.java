@@ -17,6 +17,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.ZoneId;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
@@ -54,6 +55,11 @@ public class WebConfig implements WebMvcConfigurer {
     @Bean("headersToRemove")
     OwaspHeaders headersToRemove() {
         return new OwaspHeaders(new HttpHeaders());
+    }
+
+    @Bean("fileUploadTaskQueue")
+    FileUploadTaskQueue fileUploadTaskQueue() {
+        return new FileUploadTaskQueue(new ArrayBlockingQueue<>(10));
     }
 
     /**
