@@ -33,7 +33,7 @@ public class JsonFileUploadTask implements Task {
 
     @Override
     public String name() {
-        return this.getClass().getSimpleName();
+        return fileUploadRequest.fileId();
     }
 
     @Transactional

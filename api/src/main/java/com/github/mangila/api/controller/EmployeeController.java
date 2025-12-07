@@ -127,10 +127,16 @@ public class EmployeeController {
                 .build();
     }
 
-    @PostMapping(value = "/bulk",
+    @PostMapping(value = "file/upload",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> fileUpload(@NotNull @RequestPart("file") MultipartFile file) {
-        var uuid = restFacade.fileUpload(file);
-        return ResponseEntity.ok(Map.of("uuid", uuid));
+        String fileId = restFacade.fileUpload(file);
+        return ResponseEntity.ok(Map.of("fileId", fileId));
+    }
+
+    @GetMapping(value = "file/status/{fileId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> fileStatus(@NotNull @PathVariable String fileId) {
+        restFacade.fileStatus(fileId);
+        return ResponseEntity.ok().build();
     }
 }

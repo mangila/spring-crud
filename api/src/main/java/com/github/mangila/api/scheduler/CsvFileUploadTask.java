@@ -36,7 +36,7 @@ public class CsvFileUploadTask implements Task {
 
     @Override
     public String name() {
-        return this.getClass().getSimpleName();
+        return fileUploadRequest.fileId();
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.github.mangila.api.scheduler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mangila.api.model.FileUploadRequest;
-import com.github.mangila.api.repository.EmployeeJpaRepository;
 import com.github.mangila.api.service.EmployeeFactory;
 import com.github.mangila.api.service.EmployeeService;
 
@@ -24,7 +23,7 @@ public class XmlFileUploadTask implements Task {
 
     @Override
     public String name() {
-        return this.getClass().getSimpleName();
+        return fileUploadRequest.fileId();
     }
 
     @Override

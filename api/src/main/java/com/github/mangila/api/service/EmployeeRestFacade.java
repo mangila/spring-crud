@@ -141,7 +141,7 @@ public class EmployeeRestFacade {
                         throw new FileAlreadyExistsException(out.toString());
                     }
                     file.transferTo(out);
-                    fileUploadTaskQueue.put(new FileUploadRequest(out, file.getOriginalFilename(), contentType));
+                    fileUploadTaskQueue.put(new FileUploadRequest(out, uuid, file.getOriginalFilename(), contentType));
                     return uuid;
                 } catch (InterruptedException | IOException e) {
                     throw new RuntimeException(e);
@@ -150,5 +150,9 @@ public class EmployeeRestFacade {
             case null -> throw new RuntimeException("null file content type");
             default -> throw new IllegalStateException("Unexpected value: %s".formatted(contentType));
         }
+    }
+
+    public void fileStatus(String fileId) {
+
     }
 }
