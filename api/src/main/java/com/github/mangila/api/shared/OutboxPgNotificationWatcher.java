@@ -49,11 +49,11 @@ public class OutboxPgNotificationWatcher implements SmartLifecycle {
         log.info("Shutdown OutboxPgNotificationWatcher");
         try {
             listener.shutdown();
+            listener.unlisten();
             listenEventLoop.cancel(true);
             // Wait here for a bit to let the side effect run and insert to db
             // TODO: verify in db instead of sleep
             TimeUnit.SECONDS.sleep(5);
-            listener.unlisten();
             listener.destroy();
         } catch (Exception e) {
             log.error("Failed to shutdown OutboxPgNotificationListener gracefully", e);

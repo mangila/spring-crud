@@ -10,6 +10,10 @@ import com.github.mangila.api.model.employee.dto.CreateNewEmployeeRequest;
 import com.github.mangila.api.model.employee.dto.EmployeeDto;
 import com.github.mangila.api.model.employee.dto.EmployeeEventDto;
 import com.github.mangila.api.model.employee.dto.UpdateEmployeeRequest;
+import com.github.mangila.api.model.task.TaskExecutionEntity;
+import com.github.mangila.api.repository.TaskExecutionJpaRepository;
+import io.github.mangila.ensure4j.Ensure;
+import io.github.mangila.ensure4j.EnsureException;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
@@ -19,10 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -47,6 +50,7 @@ public class EmployeeRestFacade {
     private final EmployeeDomainMapper domainMapper;
     private final EmployeeFactory factory;
     private final FileUploadTaskQueue fileUploadTaskQueue;
+    private final TaskExecutionJpaRepository taskExecutionRepository;
 
     public EmployeeRestFacade(EmployeeService service,
                               EmployeeSseEmitters sseEmitters,
@@ -54,7 +58,8 @@ public class EmployeeRestFacade {
                               EmployeeEventMapper eventMapper,
                               EmployeeDomainMapper domainMapper,
                               EmployeeFactory factory,
-                              FileUploadTaskQueue fileUploadTaskQueue) {
+                              FileUploadTaskQueue fileUploadTaskQueue,
+                              TaskExecutionJpaRepository taskExecutionRepository) {
         this.service = service;
         this.sseEmitters = sseEmitters;
         this.dtoMapper = dtoMapper;
@@ -62,6 +67,7 @@ public class EmployeeRestFacade {
         this.domainMapper = domainMapper;
         this.factory = factory;
         this.fileUploadTaskQueue = fileUploadTaskQueue;
+        this.taskExecutionRepository = taskExecutionRepository;
     }
 
     public EmployeeDto findEmployeeById(String employeeId) {
@@ -134,16 +140,15 @@ public class EmployeeRestFacade {
                  MediaType.APPLICATION_XML_VALUE,
                  MediaType.APPLICATION_JSON_VALUE -> {
                 try {
-                    String uuid = UUID.randomUUID().toString();
-                    Path out = Paths.get(uuid);
-                    boolean created = out.toFile().createNewFile();
-                    if (!created) {
-                        throw new FileAlreadyExistsException(out.toString());
-                    }
+                    String fileId = UUID.randomUUID().toString();
+                    Path out = Paths.get(fileId);
+                    Ensure.isTrue(out.toFile().createNewFile(), "File already exists: %s".formatted(out.toString()));
                     file.transferTo(out);
-                    fileUploadTaskQueue.put(new FileUploadRequest(out, uuid, file.getOriginalFilename(), contentType));
-                    return uuid;
-                } catch (InterruptedException | IOException e) {
+                    fileUploadTaskQueue.put(new FileUploadRequest(out, fileId, file.getOriginalFilename(), contentType));
+                    return fileId;
+                } catch (EnsureException e) {
+                    throw e;
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -152,7 +157,15 @@ public class EmployeeRestFacade {
         }
     }
 
-    public void fileStatus(String fileId) {
-
+    /**
+     * Make sure it's a valid UUID, since that is being used as fileId as taskName
+     */
+    public List<TaskExecutionEntity> fileStatus(String fileId) {
+        try {
+            UUID.fromString(fileId);
+            return taskExecutionRepository.findAllByTaskName(fileId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

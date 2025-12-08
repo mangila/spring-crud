@@ -4,7 +4,7 @@ application:
     initial-delay: 30s
     fixed-delay: 15s
   notification:
-    enabled: false
+    enabled: true
   scheduler:
     enabled: true
     initial-delay: 30s

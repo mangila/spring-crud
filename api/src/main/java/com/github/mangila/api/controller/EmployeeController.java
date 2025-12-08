@@ -136,7 +136,7 @@ public class EmployeeController {
 
     @GetMapping(value = "file/status/{fileId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> fileStatus(@NotNull @PathVariable String fileId) {
-        restFacade.fileStatus(fileId);
-        return ResponseEntity.ok().build();
+        var entities = restFacade.fileStatus(fileId);
+        return ResponseEntity.ok(entities);
     }
 }
