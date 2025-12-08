@@ -12,4 +12,6 @@ import java.util.List;
 @Repository
 public interface TaskExecutionJpaRepository extends BaseJpaRepository<TaskExecutionEntity, Long> {
     List<TaskExecutionEntity> findAllByStatusAndAuditMetadataDeleted(TaskExecutionStatus status, boolean deleted, Sort sort, Limit limit);
+
+    List<TaskExecutionEntity> findAllByTaskName(String taskName);
 }

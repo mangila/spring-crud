@@ -3,7 +3,7 @@ package com.github.mangila.api.scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.mangila.api.config.OwaspHeaders;
+import com.github.mangila.api.model.owasp.OwaspHeaders;
 import com.github.mangila.api.config.WebConfig;
 import com.github.mangila.api.model.owasp.OwaspAddResponse;
 import com.github.mangila.api.shared.OwaspRestClient;

@@ -1,6 +1,7 @@
 package com.github.mangila.api.controller;
 
 import com.github.mangila.api.shared.exception.EntityNotFoundException;
+import com.github.mangila.api.shared.exception.FileUploadQueueFullException;
 import com.github.mangila.api.shared.exception.TaskNotFoundException;
 import io.github.mangila.ensure4j.EnsureException;
 import jakarta.validation.ConstraintViolationException;
@@ -16,6 +17,16 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 @RestControllerAdvice
 @Slf4j
 public class RestErrorHandler {
+
+    @ExceptionHandler(FileUploadQueueFullException.class)
+    public ProblemDetail handleFileUploadQueueFullException(FileUploadQueueFullException e) {
+        log.error("ERR", e);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "file upload task queue is full, please try again later"
+        );
+        return problemDetail;
+    }
 
     /**
      * Display a friendly error message to the client when requesting a resource that doesn't exist.

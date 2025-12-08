@@ -2,7 +2,7 @@ package com.github.mangila.api.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.mangila.api.config.EmployeeSseEmitters;
+import com.github.mangila.api.model.EmployeeSseEmitters;
 import com.github.mangila.api.model.employee.domain.EmployeeId;
 import com.github.mangila.api.shared.OutboxPgNotificationWatcher;
 import lombok.extern.slf4j.Slf4j;

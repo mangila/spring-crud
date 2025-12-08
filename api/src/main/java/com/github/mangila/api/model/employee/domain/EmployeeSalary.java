@@ -9,6 +9,7 @@ public record EmployeeSalary(BigDecimal value) {
 
     public EmployeeSalary {
         Ensure.notNull(value, "Employee salary must not be null");
+        Ensure.min(1, value.intValue(), "Employee salary must be greater than 0");
     }
 
 }

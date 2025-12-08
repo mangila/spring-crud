@@ -14,10 +14,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Map;
 
 /**
  * <p>
@@ -87,7 +89,7 @@ public class EmployeeController {
         return new PagedModel<>(restFacade.findAllEmployeesByPage(pageable));
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createNewEmployee(
             @RequestBody
             @NotNull
@@ -103,9 +105,7 @@ public class EmployeeController {
                 .build();
     }
 
-    @PutMapping(
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<EmployeeDto> updateEmployee(
             @RequestBody
             @NotNull
@@ -125,5 +125,18 @@ public class EmployeeController {
         restFacade.softDeleteEmployeeById(employeeId);
         return ResponseEntity.noContent()
                 .build();
+    }
+
+    @PostMapping(value = "file/upload",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> fileUpload(@NotNull @RequestPart("file") MultipartFile file) {
+        String fileId = restFacade.fileUpload(file);
+        return ResponseEntity.ok(Map.of("fileId", fileId));
+    }
+
+    @GetMapping(value = "file/status/{fileId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> fileStatus(@NotNull @PathVariable String fileId) {
+        var entities = restFacade.fileStatus(fileId);
+        return ResponseEntity.ok(entities);
     }
 }
